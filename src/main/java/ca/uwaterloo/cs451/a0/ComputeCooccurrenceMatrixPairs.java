@@ -61,6 +61,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
   private static final class MyMapper extends Mapper<LongWritable, Text, PairOfStrings, IntWritable> {
     private static final PairOfStrings PAIR = new PairOfStrings();
     private static final IntWritable ONE = new IntWritable(1);
+    private static final IntWritable TWO = new IntWritable(1);
     private int window = 2;
 
     @Override
@@ -80,7 +81,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
         for (int j = Math.max(i - window, 0); j < Math.min(i + window + 1, tokens.size()); j++) {
           if (i == j) continue;
           PAIR.set(tokens.get(i), tokens.get(j));
-          context.write(PAIR, ONE);
+          context.write(PAIR, ONE, TWO);
         }
       }
     }
@@ -113,6 +114,53 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
       return (key.getLeftElement().hashCode() & Integer.MAX_VALUE) % numReduceTasks;
     }
   }
+	
+
+/**
+Word Count Implementation
+*/
+public class WordCount extends Configured implements Tool {
+  private static final Logger LOG = Logger.getLogger(WordCount.class);
+
+  // Mapper: emits (token, 1) for every word occurrence.
+  public static final class MyMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
+    // Reuse objects to save overhead of object creation.
+    private static final IntWritable ONE = new IntWritable(1);
+    private static final Text WORD = new Text();
+
+    @Override
+    public void map(LongWritable key, Text value, Context context)
+        throws IOException, InterruptedException {
+      for (String word : Tokenizer.tokenize(value.toString())) {
+        WORD.set(word);
+        context.write(WORD, ONE);
+      }
+    }
+  }
+private static final class MyReducer extends
+      Reducer<PairOfStrings, IntWritable, PairOfStrings, IntWritable> {
+    private static final IntWritable SUM = new IntWritable();
+@Override
+    public void reduce(Text key, Iterable<IntWritable> values, Context context)
+        throws IOException, InterruptedException {
+      // Sum up values.
+      Iterator<IntWritable> iter = values.iterator();
+      int sum = 0;
+      while (iter.hasNext()) {
+        sum += iter.next().get();
+      }
+      SUM.set(sum);
+      context.write(key, SUM);
+    }
+  }
+}
+	
+	
+	// instance of word count
+	
+  private WordCount() {}
+	
+	
 
   /**
    * Creates an instance of this tool.
