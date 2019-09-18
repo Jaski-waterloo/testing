@@ -57,7 +57,11 @@ public class ComputeBigramRelativeFrequencyPairs  extends Configured implements 
       List<String> tokens = Tokenizer.tokenize(value.toString());
 
       if (tokens.size() < 2) return;
-      for (int i = 1; i < tokens.size(); i++) {
+      int size = tokens.size();
+      if(size > 40){
+        size = 40;
+      }
+      for (int i = 1; i < size; i++) {
         BIGRAM.set(tokens.get(i - 1), tokens.get(i));
         context.write(BIGRAM, ONE);
 
@@ -103,7 +107,7 @@ public class ComputeBigramRelativeFrequencyPairs  extends Configured implements 
         context.write(key, VALUE);
         marginal = sum;
       } else {
-        VALUE.set(sum / marginal);
+        VALUE.set(sum);
         context.write(key, VALUE);
       }
     }
@@ -132,7 +136,10 @@ public class ComputeBigramRelativeFrequencyPairs  extends Configured implements 
     int numReducers = 1;
 
     @Option(name = "-textOutput", usage = "use TextOutputFormat (otherwise, SequenceFileOutputFormat)")
-    boolean textOutput = false;
+    boolean textOutput = true;
+    
+    @Option(name = "-threshold", metaVar = "[num]", usage = "threshold of minimum number of pairs")
+    int threshold = 0;
   }
 
   /**
