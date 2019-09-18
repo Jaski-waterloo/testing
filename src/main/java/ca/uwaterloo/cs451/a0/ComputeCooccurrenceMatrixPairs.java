@@ -129,7 +129,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     int window = 2;
     
     @Option(name = "-threshold", metaVar = "[num]", usage = "minimum threshold")
-    int threhold = 0;
+    int threshold = 0;
   }
 
   /**
