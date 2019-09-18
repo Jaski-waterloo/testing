@@ -67,14 +67,17 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     @Override
     public void setup(Context context) {
       window = context.getConfiguration().getInt("window", 2);
-//      threshold = context.getConfiguration().getInt("threshold,3);
+      threshold = context.getConfiguration().getInt("threshold",2);
     }
 
     @Override
     public void map(LongWritable key, Text value, Context context)
         throws IOException, InterruptedException {
       List<String> tokens = Tokenizer.tokenize(value.toString());
-
+	int size = tokens.size();
+	if(size > 40){
+		size = 40;
+	}
       for (int i = 0; i < tokens.size(); i++) {
         for (int j = Math.max(i - window, 0); j < Math.min(i + window + 1, tokens.size()); j++) {
           if (i == j) continue;
@@ -97,9 +100,10 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
       while (iter.hasNext()) {
         sum += iter.next().get();
       }
-
+	if(sum > threshold){
       SUM.set(sum);
       context.write(key, SUM);
+	}
     }
   }
 
@@ -164,6 +168,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     FileSystem.get(getConf()).delete(outputDir, true);
 
     job.getConfiguration().setInt("window", args.window);
+    job.getConfiguration.setInt("threshold", args.threshold);
 
     job.setNumReduceTasks(args.numReducers);
 
