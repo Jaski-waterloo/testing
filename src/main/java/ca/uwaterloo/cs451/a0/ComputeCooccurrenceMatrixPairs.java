@@ -62,10 +62,12 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     private static final PairOfStrings PAIR = new PairOfStrings();
     private static final IntWritable ONE = new IntWritable(1);
     private int window = 2;
+//    private int threshold = 0;
 
     @Override
     public void setup(Context context) {
       window = context.getConfiguration().getInt("window", 2);
+//      threshold = context.getConfiguration().getInt("threshold,3);
     }
 
     @Override
@@ -125,6 +127,9 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 
     @Option(name = "-window", metaVar = "[num]", usage = "cooccurrence window")
     int window = 2;
+    
+    @Option(name = "-threshold", metaVar = "[num]", usage = "minimum threshold")
+    int threhold = 0;
   }
 
   /**
@@ -148,6 +153,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     LOG.info(" - output path: " + args.output);
     LOG.info(" - window: " + args.window);
     LOG.info(" - number of reducers: " + args.numReducers);
+    LOG.info(" - minimum threshold: " + args.threshold);
 
     Job job = Job.getInstance(getConf());
     job.setJobName(ComputeCooccurrenceMatrixPairs.class.getSimpleName());
