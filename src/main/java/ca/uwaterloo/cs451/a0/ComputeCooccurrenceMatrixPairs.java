@@ -62,12 +62,10 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     private static final PairOfStrings PAIR = new PairOfStrings();
     private static final IntWritable ONE = new IntWritable(1);
     private int window = 2;
-//    private int threshold = 0;
 
     @Override
     public void setup(Context context) {
       window = context.getConfiguration().getInt("window", 2);
-      threshold = context.getConfiguration().getInt("threshold",2);
     }
 
     @Override
@@ -95,6 +93,8 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     @Override
     public void reduce(PairOfStrings key, Iterable<IntWritable> values, Context context)
         throws IOException, InterruptedException {
+	private int threshold = 0;
+	threshold = context.getConfiguration().getInt("threshold",3);
       Iterator<IntWritable> iter = values.iterator();
       int sum = 0;
       while (iter.hasNext()) {
@@ -168,7 +168,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     FileSystem.get(getConf()).delete(outputDir, true);
 
     job.getConfiguration().setInt("window", args.window);
-    job.getConfiguration.setInt("threshold", args.threshold);
+    job.getConfiguration().setInt("threshold", args.threshold);
 
     job.setNumReduceTasks(args.numReducers);
 
