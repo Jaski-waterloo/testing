@@ -38,6 +38,7 @@ import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.ParserProperties;
 import tl.lin.data.pair.PairOfStrings;
 import tl.lin.data.pair.PairOfInts;
+
 import io.bespin.java.util.Tokenizer;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
@@ -276,8 +277,8 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 	if(sum > threshold){
 		String x = key.getLeftElement();
 		String y = key.getRightElement();
-		xCount = giveCount(x);
-		yCount = giveCount(y);
+		int xCount = giveCount(x);
+		int yCount = giveCount(y);
 		pmi = (WordCount.total * sum) / (xCount * yCount);  //read from file to determine number of x and y
 		pmi = Math.log10(pmi);
       SUM.set(sum,pmi);
