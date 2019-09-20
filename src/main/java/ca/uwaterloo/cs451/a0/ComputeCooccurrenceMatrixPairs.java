@@ -193,8 +193,8 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 		String y = key.getRightElement();
 		int xCount = giveCount(x);
 		int yCount = giveCount(y);
-		pmi = ((total * sum) / (xCount * yCount))f;  //read from file to determine number of x and y
-		pmi = (Math.log10(pmi))f;
+		pmi = ((total * sum) / (xCount * yCount))%2f;  //read from file to determine number of x and y
+		pmi = (Math.log10(pmi))%2f;
       SUM.set(sum,pmi);
       context.write(key, SUM);
 	}
