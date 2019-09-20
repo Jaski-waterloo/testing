@@ -90,6 +90,7 @@ import java.util.List;
 public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {	
 	
   private static final Logger LOG = Logger.getLogger(ComputeCooccurrenceMatrixPairs.class);
+	public total = 0;
 	
 	
 	public static final class MyMapperWordCount extends Mapper<LongWritable, Text, Text, IntWritable> {
@@ -131,7 +132,6 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     private static final PairOfStrings PAIR = new PairOfStrings();
     private static final PairOfInts ONE = new PairOfInts(1,1);
     private int window = 2;
-    public static int total = 0;
 
     @Override
     public void setup(Context context) {
@@ -157,8 +157,8 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
   }
 
   private static final class MyReducer extends
-      Reducer<PairOfStrings, PairOfInts, PairOfStrings, PairOfInts> {
-    private static final PairOfInts SUM = new PairOfInts();
+      Reducer<PairOfStrings, PairOfFloats, PairOfStrings, PairOfFloats> {
+    private static final PairOfFloats SUM = new PairOfFloats();
 	  
 	  public int giveCount(String word)
 	  {
@@ -167,7 +167,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 		  while (sc.hasNextLine())
                 {
                         String temp = sc.nextLine();
-                        int i = 0;
+                  
                         String yo = "";
                 String[] arrOfStr = temp.split("\t");
 
@@ -177,10 +177,10 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 	  }
 
     @Override
-    public void reduce(PairOfStrings key, Iterable<PairOfInts> values, Context context)
+    public void reduce(PairOfStrings key, Iterable<PairOfFloats> values, Context context)
         throws IOException, InterruptedException {
 	int threshold = 0;
-	float pmi=1;
+	double pmi=1.0;
 	threshold = context.getConfiguration().getInt("threshold",3);
       Iterator<PairOfInts> iter = values.iterator();
       int sum = 0;
@@ -192,7 +192,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 		String y = key.getRightElement();
 		int xCount = giveCount(x);
 		int yCount = giveCount(y);
-		pmi = (WordCount.total * sum) / (xCount * yCount);  //read from file to determine number of x and y
+		pmi = (total * sum) / (xCount * yCount);  //read from file to determine number of x and y
 		pmi = Math.log10(pmi);
       SUM.set(sum,pmi);
       context.write(key, SUM);
@@ -266,10 +266,10 @@ Word Count Implementation
 	  
     Configuration conf = getConf();
     Job jobWordCount = Job.getInstance(conf);
-    jobWordCount.setJobName(WordCount.class.getSimpleName());
-    jobWordCount.setJarByClass(WordCount.class);
+    jobWordCount.setJobName(ComputeCooccurrenceMatrixPairs.class.getSimpleName());
+    jobWordCount.setJarByClass(ComputeCooccurrenceMatrixPairs.class); //=========================================
 
-    job.setNumReduceTasks(args.numReducers);
+    jobWordCount.setNumReduceTasks(args.numReducers);
 
     FileInputFormat.setInputPaths(jobWordCount, new Path(args.input));
     FileOutputFormat.setOutputPath(jobWordCount, new Path(args.output));
@@ -304,7 +304,7 @@ Word Count Implementation
     job.setJarByClass(ComputeCooccurrenceMatrixPairs.class);
 
     // Delete the output directory if it exists already.
-    Path outputDir = new Path(args.output);
+    outputDir = Path(args.output);
     FileSystem.get(getConf()).delete(outputDir, true);
 
     job.getConfiguration().setInt("window", args.window);
@@ -325,7 +325,7 @@ Word Count Implementation
     job.setReducerClass(MyReducer.class);
     job.setPartitionerClass(MyPartitioner.class);
 
-    long startTime = System.currentTimeMillis();
+    startTime = System.currentTimeMillis();
     job.waitForCompletion(true);
     System.out.println("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
 
