@@ -231,7 +231,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 		pmi = (Math.log10(pmi));
 		pmi_2f = (float)pmi;
 		
-      SUM.set(sum,pmi);
+      SUM.set(sum,pmi_2f);
       context.write(key, SUM);
 	}
     }
