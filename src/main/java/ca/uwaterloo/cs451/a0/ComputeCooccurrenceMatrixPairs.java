@@ -238,8 +238,8 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     @Override
     public void reduce(PairOfStrings key, Iterable<PairOfInts> values, Context context)
         throws IOException, InterruptedException {
-	public int threshold = 0;
-	    public int pmi=1;
+	int threshold = 0;
+	int pmi=1;
 	threshold = context.getConfiguration().getInt("threshold",3);
       Iterator<PairOfInts> iter = values.iterator();
       int sum = 0;
@@ -247,8 +247,8 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
         sum += iter.next().get();
       }
 	if(sum > threshold){
-		public String x = key.getLeftElement();
-		public String y = key.getRightElement();
+		String x = key.getLeftElement();
+		String y = key.getRightElement();
 		xCount = giveCount(x);
 		yCount = giveCount(y);
 		pmi = (WordCount.total * sum) / (xCount * yCount);  //read from file to determine number of x and y
