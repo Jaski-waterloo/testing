@@ -196,7 +196,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 	  
 	  public int giveCount(String word)
 	  {
-		  File file = new File("temp\part-r-00000");
+		  File file = new File("temp\\part-r-00000");
 		  Scanner sc = new Scanner(file);
 		  while (sc.hasNextLine())
                 {
