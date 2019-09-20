@@ -87,26 +87,12 @@ import java.util.List;
 
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
-public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
+public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {	
+	
+  private static final Logger LOG = Logger.getLogger(ComputeCooccurrenceMatrixPairs.class);
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	public class WordCount extends Configured implements Tool {
-  private static final Logger LOG = Logger.getLogger(WordCount.class);
-public static int total = 0;
-
-  // Mapper: emits (token, 1) for every word occurrence.
-  public static final class MyMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
+	public static final class MyMapperWordCount extends Mapper<LongWritable, Text, Text, IntWritable> {
     // Reuse objects to save overhead of object creation.
     private static final IntWritable ONE = new IntWritable(1);
     private static final Text WORD = new Text();
@@ -122,7 +108,7 @@ public static int total = 0;
   }
 
   // Reducer: sums up all the counts.
-  public static final class MyReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
+  public static final class MyReducerWordCount extends Reducer<Text, IntWritable, Text, IntWritable> {
     // Reuse objects.
     private static final IntWritable SUM = new IntWritable();
 
@@ -141,111 +127,11 @@ public static int total = 0;
     }
   }
 
-  /**
-   * Creates an instance of this tool.
-   */
-  private WordCount() {}
-
-  private static final class Args {
-    @Option(name = "-input", metaVar = "[path]", required = true, usage = "input path")
-    String input;
-
-    @Option(name = "-output", metaVar = "[path]", required = true, usage = "output path")
-    String output;
-
-    @Option(name = "-reducers", metaVar = "[num]", usage = "number of reducers")
-    int numReducers = 1;
-	  
-    @Option(name = "-window", metaVar = "[num]", usage = "cooccurrence window")
-    int window = 2;
-    
-    @Option(name = "-threshold", metaVar = "[num]", usage = "minimum threshold")
-    int threshold = 0;
-
-    
-  }
-
-  /**
-   * Runs this tool.
-   */
-  @Override
-  public int run(String[] argv) throws Exception {
-    final Args args = new Args();
-    CmdLineParser parser = new CmdLineParser(args, ParserProperties.defaults().withUsageWidth(100));
-
-    try {
-      parser.parseArgument(argv);
-    } catch (CmdLineException e) {
-      System.err.println(e.getMessage());
-      parser.printUsage(System.err);
-      return -1;
-    }
-
-    LOG.info("Tool: " + WordCount.class.getSimpleName());
-    LOG.info(" - input path: " + args.input);
-    LOG.info(" - output path: " + "temp");
-    LOG.info(" - number of reducers: " + args.numReducers);
-
-    // Configuration conf = getConf();
-    Job job = Job.getInstance(getConf());
-    job.setJobName(WordCount.class.getSimpleName());
-    job.setJarByClass(WordCount.class);
-
-    job.setNumReduceTasks(args.numReducers);
-
-    FileInputFormat.setInputPaths(job, new Path(args.input));
-    FileOutputFormat.setOutputPath(job, new Path("temp"));
-
-    job.setMapOutputKeyClass(Text.class);
-    job.setMapOutputValueClass(IntWritable.class);
-    job.setOutputKeyClass(Text.class);
-    job.setOutputValueClass(IntWritable.class);
-    job.setOutputFormatClass(TextOutputFormat.class);
-
-    job.setMapperClass(MyMapper.class);
-    job.setCombinerClass(MyReducer.class);
-    job.setReducerClass(MyReducer.class);
-
-    // Delete the output directory if it exists already.
-    Path outputDir = new Path("temp");
-    FileSystem.get(getConf()).delete(outputDir, true);
-
-    long startTime = System.currentTimeMillis();
-    job.waitForCompletion(true);
-    LOG.info("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
-
-    return 0;
-  }
-
-  /**
-   * Dispatches command-line arguments to the tool via the {@code ToolRunner}.
-   *
-   * @param args command-line arguments
-   * @throws Exception if tool encounters an exception
-   */
-//   public static void main(String[] args) throws Exception {
-//     ToolRunner.run(new WordCount(), args);
-//   }
-}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-  private static final Logger LOG = Logger.getLogger(ComputeCooccurrenceMatrixPairs.class);
-
   private static final class MyMapper extends Mapper<LongWritable, Text, PairOfStrings, PairOfInts> {
     private static final PairOfStrings PAIR = new PairOfStrings();
     private static final PairOfInts ONE = new PairOfInts(1,1);
     private int window = 2;
+    public static int total = 0;
 
     @Override
     public void setup(Context context) {
@@ -331,6 +217,7 @@ Word Count Implementation
   /**
    * Creates an instance of this tool.
    */
+    private WordCount() {}
   private ComputeCooccurrenceMatrixPairs() {}
 
   private static final class Args {
@@ -372,6 +259,46 @@ Word Count Implementation
     LOG.info(" - window: " + args.window);
     LOG.info(" - number of reducers: " + args.numReducers);
     LOG.info(" - minimum threshold: " + args.threshold);
+	  
+	  
+	  
+	  
+	  
+	  
+    Configuration conf = getConf();
+    Job jobWordCount = Job.getInstance(conf);
+    jobWordCount.setJobName(WordCount.class.getSimpleName());
+    jobWordCount.setJarByClass(WordCount.class);
+
+    job.setNumReduceTasks(args.numReducers);
+
+    FileInputFormat.setInputPaths(jobWordCount, new Path(args.input));
+    FileOutputFormat.setOutputPath(jobWordCount, new Path(args.output));
+
+    jobWordCount.setMapOutputKeyClass(Text.class);
+    jobWordCount.setMapOutputValueClass(IntWritable.class);
+    jobWordCount.setOutputKeyClass(Text.class);
+    jobWordCount.setOutputValueClass(IntWritable.class);
+    jobWordCount.setOutputFormatClass(TextOutputFormat.class);
+
+    jobWordCount.setMapperClass(MyMapperWordCount.class);
+    jobWordCount.setCombinerClass(MyReducerWordCount.class);
+    jobWordCount.setReducerClass(MyReducerWordCount.class);
+
+    // Delete the output directory if it exists already.
+    Path outputDir = new Path(args.output);
+    FileSystem.get(conf).delete(outputDir, true);
+
+    long startTime = System.currentTimeMillis();
+    jobWordCount.waitForCompletion(true);
+    LOG.info("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
+
+	  
+	  
+	  
+	  
+	  
+	  
 
     Job job = Job.getInstance(getConf());
     job.setJobName(ComputeCooccurrenceMatrixPairs.class.getSimpleName());
@@ -413,10 +340,7 @@ Word Count Implementation
    * @throws Exception if tool encounters an exception
    */
   public static void main(String[] args) throws Exception {
-	  ToolRunner.run(new WordCount(), args);
-	  System.out.println("wordcount done");
     ToolRunner.run(new ComputeCooccurrenceMatrixPairs(), args);
-	  	  System.out.println("Pairs done");
 
   }
 }
