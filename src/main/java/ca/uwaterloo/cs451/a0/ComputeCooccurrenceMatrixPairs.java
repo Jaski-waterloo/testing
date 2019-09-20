@@ -84,7 +84,24 @@ import java.util.List;
  *
  * @author Jimmy Lin
  */
-private class WordCount extends Configured implements Tool {
+
+//---------------------------------------------------------------------
+//---------------------------------------------------------------------
+public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	public class WordCount extends Configured implements Tool {
   private static final Logger LOG = Logger.getLogger(WordCount.class);
 public static int total = 0;
 
@@ -210,9 +227,19 @@ public static int total = 0;
 //     ToolRunner.run(new WordCount(), args);
 //   }
 }
-//---------------------------------------------------------------------
-//---------------------------------------------------------------------
-public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
   private static final Logger LOG = Logger.getLogger(ComputeCooccurrenceMatrixPairs.class);
 
   private static final class MyMapper extends Mapper<LongWritable, Text, PairOfStrings, PairOfInts> {
@@ -267,7 +294,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     public void reduce(PairOfStrings key, Iterable<PairOfInts> values, Context context)
         throws IOException, InterruptedException {
 	int threshold = 0;
-	int pmi=1;
+	float pmi=1;
 	threshold = context.getConfiguration().getInt("threshold",3);
       Iterator<PairOfInts> iter = values.iterator();
       int sum = 0;
