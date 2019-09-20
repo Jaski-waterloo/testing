@@ -186,7 +186,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
       Iterator<PairOfObjectDouble> iter = values.iterator();
       int sum = 0;
       while (iter.hasNext()) {
-        sum += iter.next().getLeftElement();
+        sum = sum +  iter.next().getLeftElement();
       }
 	if(sum > threshold){
 		String x = key.getLeftElement();
