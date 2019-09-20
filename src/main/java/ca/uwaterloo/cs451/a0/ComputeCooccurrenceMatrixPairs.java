@@ -61,6 +61,11 @@ import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.ParserProperties;
 
 
+import java.io.File;
+import java.util.Scanner;
+import java.lang.Math;
+
+
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
@@ -78,7 +83,7 @@ import java.util.List;
  *
  * @author Jimmy Lin
  */
-public class WordCount extends Configured implements Tool {
+private class WordCount extends Configured implements Tool {
   private static final Logger LOG = Logger.getLogger(WordCount.class);
 public static int total = 0;
 
@@ -179,13 +184,13 @@ public static int total = 0;
     job.setOutputValueClass(IntWritable.class);
     job.setOutputFormatClass(TextOutputFormat.class);
 
-    job.setMapperClass(args.imc ? MyMapperIMC.class : MyMapper.class);
+    job.setMapperClass(MyMapper.class);
     job.setCombinerClass(MyReducer.class);
     job.setReducerClass(MyReducer.class);
 
     // Delete the output directory if it exists already.
     Path outputDir = new Path("temp");
-    FileSystem.get(conf).delete(outputDir, true);
+    FileSystem.get(getConf()).delete(outputDir, true);
 
     long startTime = System.currentTimeMillis();
     job.waitForCompletion(true);
