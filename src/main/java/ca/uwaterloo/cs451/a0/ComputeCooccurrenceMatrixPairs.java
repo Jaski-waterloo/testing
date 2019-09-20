@@ -38,6 +38,7 @@ import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.ParserProperties;
 import tl.lin.data.pair.PairOfStrings;
 import tl.lin.data.pair.PairOfInts;
+import tl.lin.data.pair.PairOfFloats;
 
 import io.bespin.java.util.Tokenizer;
 import org.apache.hadoop.conf.Configuration;
@@ -285,7 +286,7 @@ Word Count Implementation
     jobWordCount.setReducerClass(MyReducerWordCount.class);
 
     // Delete the output directory if it exists already.
-    Path outputDir = new Path(args.output);
+    Path outputDir = new Path("temp");
     FileSystem.get(conf).delete(outputDir, true);
 
     long startTime = System.currentTimeMillis();
