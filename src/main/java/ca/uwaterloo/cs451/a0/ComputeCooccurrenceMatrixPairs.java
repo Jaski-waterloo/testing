@@ -131,7 +131,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 
   private static final class MyMapper extends Mapper<LongWritable, Text, PairOfStrings, PairOfObjectDouble> {
     private static final PairOfStrings PAIR = new PairOfStrings();
-    private static final PairOfObjectDouble ONE = new PairOfObjectDouble((int)1,1.0);
+    private static final PairOfObjectDouble ONE = new PairOfObjectDouble(1,1.0);
     private int window = 2;
 
     @Override
