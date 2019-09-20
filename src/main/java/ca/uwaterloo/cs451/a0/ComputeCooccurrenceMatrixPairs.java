@@ -218,6 +218,22 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
   private static final class MyReducer extends
       Reducer<PairOfStrings, PairOfInts, PairOfStrings, PairOfInts> {
     private static final PairOfInts SUM = new PairOfInts();
+	  
+	  public int giveCount(String word)
+	  {
+		  File file = new File("temp/part-r-00000");
+		  Scanner sc = new Scanner(file);
+		  while (sc.hasNextLine())
+                {
+                        String temp = sc.nextLine();
+                        int i = 0;
+                        String yo = "";
+                String[] arrOfStr = temp.split("\t");
+
+                if(arrOfStr[0].equals(word))
+			return(Integer.parseInt(arrOfStr[1]));
+        }
+	  }
 
     @Override
     public void reduce(PairOfStrings key, Iterable<PairOfInts> values, Context context)
@@ -233,7 +249,10 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 	if(sum > threshold){
 		private String x = key.getLeftElement();
 		private String y = key.getRightElement();
-		pmi = (total * sum) / //read from file to determine number of x and y
+		xCount = giveCount(x);
+		yCount = giveCount(y);
+		pmi = (WordCount.total * sum) / (xCount * yCount);  //read from file to determine number of x and y
+		pmi = Math.log10(pmi)
       SUM.set(sum,pmi);
       context.write(key, SUM);
 	}
@@ -339,6 +358,7 @@ Word Count Implementation
    * @throws Exception if tool encounters an exception
    */
   public static void main(String[] args) throws Exception {
+	  ToolRunner.run(new WordCount(), args);
     ToolRunner.run(new ComputeCooccurrenceMatrixPairs(), args);
   }
 }
