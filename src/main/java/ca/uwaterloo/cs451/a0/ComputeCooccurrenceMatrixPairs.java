@@ -131,7 +131,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 
   private static final class MyMapper extends Mapper<LongWritable, Text, PairOfStrings, PairOfObjectDouble> {
     private static final PairOfStrings PAIR = new PairOfStrings();
-    private static final PairOfDouble ONE = new PairOfObjectDouble(1.0,1.0);
+    private static final PairOfObjectDouble ONE = new PairOfObjectDouble(1.0,1.0);
     private int window = 2;
 
     @Override
@@ -183,7 +183,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 	int threshold = 0;
 	double pmi=1.0;
 	threshold = context.getConfiguration().getInt("threshold",3);
-      Iterator<PairOfObjectFloats> iter = values.iterator();
+      Iterator<PairOfObjectFloat> iter = values.iterator();
       int sum = 0;
       while (iter.hasNext()) {
         sum += iter.next().getLeftElement();
