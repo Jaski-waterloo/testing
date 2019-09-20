@@ -38,7 +38,7 @@ import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.ParserProperties;
 import tl.lin.data.pair.PairOfStrings;
 import tl.lin.data.pair.PairOfInts;
-import tl.lin.data.pair.PairOfObjectDouble;
+import tl.lin.data.pair.PairOfFloats;
 
 import io.bespin.java.util.Tokenizer;
 import org.apache.hadoop.conf.Configuration;
@@ -129,9 +129,9 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     }
   }
 
-  private static final class MyMapper extends Mapper<LongWritable, Text, PairOfStrings, PairOfObjectDouble> {
+  private static final class MyMapper extends Mapper<LongWritable, Text, PairOfStrings, PairOfFloats> {
     private static final PairOfStrings PAIR = new PairOfStrings();
-    private static final PairOfObjectDouble ONE = new PairOfObjectDouble(1,1.0);
+    private static final PairOfFloats ONE = new PairOfFloats(1.0,1.0);
     private int window = 2;
 
     @Override
@@ -158,8 +158,8 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
   }
 
   private static final class MyReducer extends
-      Reducer<PairOfStrings, PairOfObjectDouble, PairOfStrings, PairOfObjectDouble> {
-    private static final PairOfObjectDouble SUM = new PairOfObjectDouble();
+      Reducer<PairOfStrings, PairOfFloats, PairOfStrings, PairOfFloats> {
+    private static final PairOfFloats SUM = new PairOfFloats();
 	  
 	  public int giveCount(String word)
 	  {
@@ -178,12 +178,12 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 	  }
 
     @Override
-    public void reduce(PairOfStrings key, Iterable<PairOfObjectDouble> values, Context context)
+    public void reduce(PairOfStrings key, Iterable<PairOfFloats> values, Context context)
         throws IOException, InterruptedException {
 	int threshold = 0;
 	double pmi=1.0;
 	threshold = context.getConfiguration().getInt("threshold",3);
-      Iterator<PairOfObjectDouble> iter = values.iterator();
+      Iterator<PairOfFloats> iter = values.iterator();
       int sum = 0;
       while (iter.hasNext()) {
         sum = sum +  iter.next().getLeftElement();
