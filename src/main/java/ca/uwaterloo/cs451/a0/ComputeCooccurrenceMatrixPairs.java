@@ -181,21 +181,20 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     public void reduce(PairOfStrings key, Iterable<PairOfFloats> values, Context context)
         throws IOException, InterruptedException {
 	int threshold = 0;
-	double pmi=1.0;
+	float pmi=1.0;
 	threshold = context.getConfiguration().getInt("threshold",3);
       Iterator<PairOfFloats> iter = values.iterator();
       int sum = 0;
       while (iter.hasNext()) {
-        sum += iter.next().get();
+        sum += iter.next().getLeftElement();
       }
 	if(sum > threshold){
 		String x = key.getLeftElement();
 		String y = key.getRightElement();
 		int xCount = giveCount(x);
 		int yCount = giveCount(y);
-		pmi = (total * sum) / (xCount * yCount);  //read from file to determine number of x and y
-		pmi = Math.log10(pmi);
-		pmi = (float)pmi;
+		pmi = (float)(total * sum) / (xCount * yCount);  //read from file to determine number of x and y
+		pmi = (float)Math.log10(pmi);
       SUM.set(sum,pmi);
       context.write(key, SUM);
 	}
@@ -305,8 +304,8 @@ Word Count Implementation
     job.setJobName(ComputeCooccurrenceMatrixPairs.class.getSimpleName());
     job.setJarByClass(ComputeCooccurrenceMatrixPairs.class);
 
-    outputDir = Path(args.output);
-    FileSystem.get(getConf()).delete(outputDir, true);
+    Path outputDir1 = new Path(args.output);
+    FileSystem.get(getConf()).delete(outputDir1, true);
 
     job.getConfiguration().setInt("window", args.window);
     job.getConfiguration().setInt("threshold", args.threshold);
