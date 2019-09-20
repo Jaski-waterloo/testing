@@ -183,7 +183,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 	int threshold = 0;
 	double pmi=1.0;
 	threshold = context.getConfiguration().getInt("threshold",3);
-      Iterator<PairOfInts> iter = values.iterator();
+      Iterator<PairOfFloats> iter = values.iterator();
       int sum = 0;
       while (iter.hasNext()) {
         sum += iter.next().get();
@@ -195,6 +195,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 		int yCount = giveCount(y);
 		pmi = (total * sum) / (xCount * yCount);  //read from file to determine number of x and y
 		pmi = Math.log10(pmi);
+		pmi = (float)pmi;
       SUM.set(sum,pmi);
       context.write(key, SUM);
 	}
@@ -304,7 +305,6 @@ Word Count Implementation
     job.setJobName(ComputeCooccurrenceMatrixPairs.class.getSimpleName());
     job.setJarByClass(ComputeCooccurrenceMatrixPairs.class);
 
-    // Delete the output directory if it exists already.
     outputDir = Path(args.output);
     FileSystem.get(getConf()).delete(outputDir, true);
 
