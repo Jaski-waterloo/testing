@@ -359,6 +359,9 @@ Word Count Implementation
    */
   public static void main(String[] args) throws Exception {
 	  ToolRunner.run(new WordCount(), args);
+	  System.out.println("wordcount done");
     ToolRunner.run(new ComputeCooccurrenceMatrixPairs(), args);
+	  	  System.out.println("Pairs done");
+
   }
 }
