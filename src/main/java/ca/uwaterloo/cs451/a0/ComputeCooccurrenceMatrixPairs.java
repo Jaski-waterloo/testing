@@ -217,7 +217,6 @@ Word Count Implementation
   /**
    * Creates an instance of this tool.
    */
-    private WordCount() {}
   private ComputeCooccurrenceMatrixPairs() {}
 
   private static final class Args {
