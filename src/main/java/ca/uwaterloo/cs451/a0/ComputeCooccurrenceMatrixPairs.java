@@ -199,6 +199,10 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 		  try{
 			  File file = new File("temp/part-r-00000");
 		  }
+		  catch(Exception e)
+		  {
+			  System.out.println("LOL No File Found");
+		  }
 		  Scanner sc = new Scanner(file);
 		  while (sc.hasNextLine())
                 {
