@@ -183,7 +183,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 	int threshold = 0;
 	double pmi=1.0;
 	threshold = context.getConfiguration().getInt("threshold",3);
-      Iterator<PairOfObjectFloat> iter = values.iterator();
+      Iterator<PairOfObjectDouble> iter = values.iterator();
       int sum = 0;
       while (iter.hasNext()) {
         sum += iter.next().getLeftElement();
