@@ -184,7 +184,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 	double pmi=1.0;
 	threshold = context.getConfiguration().getInt("threshold",3);
       Iterator<PairOfFloats> iter = values.iterator();
-      int sum = 0;
+      float sum = 0;
       while (iter.hasNext()) {
         sum = sum +  iter.next().getLeftElement();
       }
@@ -193,8 +193,8 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 		String y = key.getRightElement();
 		int xCount = giveCount(x);
 		int yCount = giveCount(y);
-		pmi = (total * sum) / (xCount * yCount);  //read from file to determine number of x and y
-		pmi = Math.log10(pmi);
+		pmi = ((total * sum) / (xCount * yCount))f;  //read from file to determine number of x and y
+		pmi = (Math.log10(pmi))f;
       SUM.set(sum,pmi);
       context.write(key, SUM);
 	}
