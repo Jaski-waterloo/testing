@@ -38,7 +38,7 @@ import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.ParserProperties;
 import tl.lin.data.pair.PairOfStrings;
 import tl.lin.data.pair.PairOfInts;
-import tl.lin.data.pair.PairOfFloats;
+import tl.lin.data.pair.PairOfDouble;
 
 import io.bespin.java.util.Tokenizer;
 import org.apache.hadoop.conf.Configuration;
@@ -129,9 +129,9 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     }
   }
 
-  private static final class MyMapper extends Mapper<LongWritable, Text, PairOfStrings, PairOfFloats> {
+  private static final class MyMapper extends Mapper<LongWritable, Text, PairOfStrings, PairOfDouble> {
     private static final PairOfStrings PAIR = new PairOfStrings();
-    private static final PairOfFloats ONE = new PairOfFloats(1.0,1.0);
+    private static final PairOfDouble ONE = new PairOfDouble(1.0,1.0);
     private int window = 2;
 
     @Override
@@ -158,8 +158,8 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
   }
 
   private static final class MyReducer extends
-      Reducer<PairOfStrings, PairOfFloats, PairOfStrings, PairOfFloats> {
-    private static final PairOfFloats SUM = new PairOfFloats();
+      Reducer<PairOfStrings, PairOfDouble, PairOfStrings, PairOfDouble> {
+    private static final PairOfDouble SUM = new PairOfDouble();
 	  
 	  public int giveCount(String word)
 	  {
@@ -178,10 +178,10 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 	  }
 
     @Override
-    public void reduce(PairOfStrings key, Iterable<PairOfFloats> values, Context context)
+    public void reduce(PairOfStrings key, Iterable<PairOfDouble> values, Context context)
         throws IOException, InterruptedException {
 	int threshold = 0;
-	float pmi=1.0;
+	double pmi=1.0;
 	threshold = context.getConfiguration().getInt("threshold",3);
       Iterator<PairOfFloats> iter = values.iterator();
       int sum = 0;
@@ -193,8 +193,8 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 		String y = key.getRightElement();
 		int xCount = giveCount(x);
 		int yCount = giveCount(y);
-		pmi = (float)(total * sum) / (xCount * yCount);  //read from file to determine number of x and y
-		pmi = (float)Math.log10(pmi);
+		pmi = (total * sum) / (xCount * yCount);  //read from file to determine number of x and y
+		pmi = Math.log10(pmi);
       SUM.set(sum,pmi);
       context.write(key, SUM);
 	}
