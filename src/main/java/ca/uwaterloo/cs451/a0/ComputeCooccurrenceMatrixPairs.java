@@ -72,6 +72,39 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**
  * <p>
  * Implementation of the "pairs" algorithm for computing co-occurrence matrices from a large text
@@ -182,6 +215,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
         throws IOException, InterruptedException {
 	int threshold = 0;
 	double pmi=1.0;
+	float pmi_2f = 1.0;
 	threshold = context.getConfiguration().getInt("threshold",3);
       Iterator<PairOfFloats> iter = values.iterator();
       float sum = 0;
@@ -193,8 +227,10 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 		String y = key.getRightElement();
 		int xCount = giveCount(x);
 		int yCount = giveCount(y);
-		pmi = ((total * sum) / (xCount * yCount))%2f;  //read from file to determine number of x and y
-		pmi = (Math.log10(pmi))%2f;
+		pmi = ((total * sum) / (xCount * yCount));  //read from file to determine number of x and y
+		pmi = (Math.log10(pmi));
+		pmi_2f = (float)pmi;
+		
       SUM.set(sum,pmi);
       context.write(key, SUM);
 	}
