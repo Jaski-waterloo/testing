@@ -309,7 +309,7 @@ Word Count Implementation
     job.setReducerClass(MyReducer.class);
     job.setPartitionerClass(MyPartitioner.class);
 
-    startTime = System.currentTimeMillis();
+    long startTime = System.currentTimeMillis();
     job.waitForCompletion(true);
     System.out.println("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
 
