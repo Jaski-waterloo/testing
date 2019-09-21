@@ -87,7 +87,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
       }
     }
   }
-publiv static final class MyCounts
+public static final class MyCounts
 {
 	public String giveCount(String word) throws Exception
 	  {
