@@ -152,7 +152,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 	  private static final PairOfFloats PMI = new PairOfFloats(1,1);
 	  private static Map<String, Integer> total = new HashMap<String, Integer>();
 	  private static int totalSum = 0;
-	  	  private int threshold = 0;
+	  	  private static int threshold = 0;
 	   private static final IntWritable SUM = new IntWritable();
 
 
@@ -201,7 +201,6 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
       reader.close();
       
     }
-  }
 	  
 	  
 
@@ -229,6 +228,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
       		   context.write(key, PMI);
     }
   }
+  }
 
   private static final class MyPartitioner extends Partitioner<PairOfStrings, IntWritable> {
     @Override
@@ -236,7 +236,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
       return (key.getLeftElement().hashCode() & Integer.MAX_VALUE) % numReduceTasks;
     }
   }
-
+  
   /**
    * Creates an instance of this tool.
    */
