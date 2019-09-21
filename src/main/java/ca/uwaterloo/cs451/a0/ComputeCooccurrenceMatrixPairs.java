@@ -122,9 +122,15 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
       }
 	String x = key.getLeftElement();
 	    String y = key.getRightElement();
+	    try{
 	    int xCounts = Integer.parseInt(giveCount(x));
 	    int yCounts = Integer.parseInt(giveCount(y));
 	    System.out.println(xCounts + yCounts);
+	    }
+	    catch(Exception e)
+	    {
+		    System.out.println("Fuck Java");
+	    }
       SUM.set(sum);
       context.write(key, SUM);
     }
