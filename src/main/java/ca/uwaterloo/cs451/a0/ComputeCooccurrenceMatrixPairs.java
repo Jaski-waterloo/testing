@@ -125,12 +125,10 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     private static final PairOfStrings PAIR = new PairOfStrings();
     private static final IntWritable ONE = new IntWritable(1);
     private int window = 2;
-	  private int threshold = 0;
 
     @Override
     public void setup(Context context) {
       window = context.getConfiguration().getInt("window", 2);
-	    threshold = context.getConfiguration().getInt("threshold", 3);
     }
 
     @Override
@@ -154,6 +152,9 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 	  private static final PairOfFloats PMI = new PairOfFloats(1,1);
 	  private static Map<String, Integer> total = new HashMap<String, Integer>();
 	  private static int totalSum = 0;
+	  	  private int threshold = 0;
+	   private static final IntWritable SUM = new IntWritable();
+
 
 	  
 	  
@@ -161,6 +162,8 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     public void setup(Context context) throws IOException{
       //TODO Read from intermediate output of first job
       // and build in-memory map of terms to their individual totals
+	    	    threshold = context.getConfiguration().getInt("threshold", 3);
+
       Configuration conf = context.getConfiguration();
       FileSystem fs = FileSystem.get(conf);
       
@@ -212,8 +215,8 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
       }
 	    if(sum > threshold){
 		   SUM.set(sum);
-		    x = key.getLeftElement();
-		    y = key.getRightElement();
+		    String x = key.getLeftElement();
+		    String y = key.getRightElement();
 		    double probBoth = sum / totalSum;
         	    double probX = total.get(left) / totalSum;
         	    double probY = total.get(right) / totalSum;
