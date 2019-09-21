@@ -161,7 +161,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
       Reducer<PairOfStrings, PairOfFloats, PairOfStrings, PairOfFloats> {
     private static final PairOfFloats SUM = new PairOfFloats();
 	  
-	  public int giveCount(String word)
+	  public int giveCount(String word) throws FileNotFoundException
 	  {
 		  
 			  File file = new File("temp/part-r-00000");
