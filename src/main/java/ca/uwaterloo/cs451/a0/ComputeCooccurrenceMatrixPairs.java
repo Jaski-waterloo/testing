@@ -43,6 +43,10 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
+import java.io.File;
+import java.util.Scanner;
+import java.lang.Math;
+
 /**
  * <p>
  * Implementation of the "pairs" algorithm for computing co-occurrence matrices from a large text
