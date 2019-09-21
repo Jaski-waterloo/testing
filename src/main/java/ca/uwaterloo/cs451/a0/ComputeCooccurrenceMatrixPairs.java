@@ -89,7 +89,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
   }
 public static final class MyCounts
 {
-	public String giveCount(String word) throws Exception
+	public static String giveCount(String word) throws Exception
 	  {
 		  
 			  File file = new File("temp/part-r-00000");
