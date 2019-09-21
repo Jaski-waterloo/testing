@@ -87,31 +87,9 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
       }
     }
   }
-// public static final class MyCounts
-// {
-// 	public static String giveCount(String word) throws Exception
-// 	  {
-		  
-// 			  File file = new File("temp/part-r-00000");
-// 			  Scanner sc = new Scanner(file);
-// 		  while (sc.hasNextLine())
-//                 {
-//                         String temp = sc.nextLine();
-                  
-//                         String yo = "";
-//                 String[] arrOfStr = temp.split("\t");
-
-//                 if(arrOfStr[0].equals(word))
-// 			return(arrOfStr[1]);
-// 		  }
-// 		   return("No");
-// 	   }
-// }
-  private static final class MyReducer extends
-      Reducer<PairOfStrings, IntWritable, PairOfStrings, IntWritable> {
-    private static final IntWritable SUM = new IntWritable();
-	  private static int total = 2360;
-	     public String giveCount(String word) throws Exception
+public static final class MyCounts
+{
+	public static String giveCount(String word) throws Exception
 	  {
 		  
 			  File file = new File("temp/part-r-00000");
@@ -128,7 +106,11 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 		  }
 		   return("No");
 	   }
-
+}
+  private static final class MyReducer extends
+      Reducer<PairOfStrings, IntWritable, PairOfStrings, IntWritable> {
+    private static final IntWritable SUM = new IntWritable();
+	  private static int total = 2360;
     @Override
     public void reduce(PairOfStrings key, Iterable<IntWritable> values, Context context)
         throws IOException, InterruptedException {
@@ -140,8 +122,8 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 	String x = key.getLeftElement();
 	    String y = key.getRightElement();
 	    try{
-	    int xCounts = Integer.parseInt(giveCount(x));
-	    int yCounts = Integer.parseInt(giveCount(y));
+	    int xCounts = Integer.parseInt(MyCounts.giveCount(x));
+	    int yCounts = Integer.parseInt(Mycounts.giveCount(y));
 	    //System.out.println(xCounts + yCounts);
 	    }
 	    catch(Exception e)
