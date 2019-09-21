@@ -149,7 +149,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
   }
 
   private static final class MyReducer extends
-      Reducer<PairOfStrings, IntWritable, PairOfStrings, FloatWritable> {
+      Reducer<PairOfStrings, FloatWritable, PairOfStrings, FloatWritable> {
 //     private static final IntWritable SUM = new IntWritable();
 	  private static final FloatWritable PMI = new FloatWritable(1);
 	  private static Map<String, Integer> total = new HashMap<String, Integer>();
@@ -300,9 +300,9 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     FileOutputFormat.setOutputPath(job1, new Path(tempPath));
 
     job1.setMapOutputKeyClass(Text.class);
-    job1.setMapOutputValueClass(IntWritable.class);
+    job1.setMapOutputValueClass(FloatWritable.class);
     job1.setOutputKeyClass(Text.class);
-    job1.setOutputValueClass(IntWritable.class);
+    job1.setOutputValueClass(FloatWritable.class);
     job1.setOutputFormatClass(TextOutputFormat.class);
 
     job1.setMapperClass(MyMapperWordCount.class);
@@ -338,9 +338,9 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     FileOutputFormat.setOutputPath(job, new Path(args.output));
 
     job.setMapOutputKeyClass(PairOfStrings.class);
-    job.setMapOutputValueClass(IntWritable.class);
+    job.setMapOutputValueClass(FloatWritable.class);
     job.setOutputKeyClass(PairOfStrings.class);
-    job.setOutputValueClass(IntWritable.class);
+    job.setOutputValueClass(FloatWritable.class);
 
     job.setMapperClass(MyMapper.class);
     job.setCombinerClass(MyReducer.class);
