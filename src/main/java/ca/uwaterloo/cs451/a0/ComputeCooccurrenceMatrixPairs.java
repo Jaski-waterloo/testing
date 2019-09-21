@@ -205,7 +205,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     }
 	  
 	  
-@Override
+// @Override
     public void reduce(PairOfStrings key, Iterable<FloatWritable> values, Context context)
         throws IOException, InterruptedException {
       Iterator<FloatWritable> iter = values.iterator();
