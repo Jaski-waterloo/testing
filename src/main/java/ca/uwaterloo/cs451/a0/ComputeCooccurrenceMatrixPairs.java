@@ -65,7 +65,7 @@ import java.lang.Math;
 public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
   private static final Logger LOG = Logger.getLogger(ComputeCooccurrenceMatrixPairs.class);
 
-  private static final class MyMapper extends Mapper<LongWritable, Text, PairOfStrings, IntWritable> {
+  private static final class MyMapper extends Mapper<LongWritable, Text, PairOfStrings, PairOfFloats> {
     private static final PairOfStrings PAIR = new PairOfStrings();
     private static final PairOfFloats ONE = new PairOfFloats(1,1);
     private int window = 2;
@@ -113,7 +113,7 @@ public static final class MyCounts
     private static final PairOfFloats SUM = new PairOfFloats();
 	  private static int total = 2360;
 	  public static File file = new File("temp/part-r-00000");
-	  public static Scanner sc = newScanner(file);
+	  public static Scanner sc = new Scanner(file);
     @Override
     public void reduce(PairOfStrings key, Iterable<PairOfFloats> values, Context context)
         throws IOException, InterruptedException {
@@ -122,7 +122,7 @@ public static final class MyCounts
 	    double pmi=1;
 	    float floatpmi = 1;
       while (iter.hasNext()) {
-        sum += iter.next().get();
+        sum += iter.next().getLeftElement();
       }
 	String x = key.getLeftElement();
 	    String y = key.getRightElement();
