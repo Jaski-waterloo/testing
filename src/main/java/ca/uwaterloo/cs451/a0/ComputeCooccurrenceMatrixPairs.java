@@ -307,7 +307,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 
     // Delete the output directory if it exists already.
     
-    Path outputDir = new Path("temp");
+    Path outputDir = tempDir;
     FileSystem.get(conf).delete(tempDir, true);
 
     long startTime = System.currentTimeMillis();
