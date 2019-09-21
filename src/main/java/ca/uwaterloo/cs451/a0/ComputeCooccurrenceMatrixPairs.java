@@ -183,6 +183,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
       reader.close();
       
     }
+  }
 	  
 	  
 
