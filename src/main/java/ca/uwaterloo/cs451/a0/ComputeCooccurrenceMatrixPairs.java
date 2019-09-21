@@ -308,11 +308,11 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     // Delete the output directory if it exists already.
     
     Path outputDir = new Path("temp");
-    FileSystem.get(conf).delete("temp", true);
+    FileSystem.get(conf).delete(tempPath, true);
 
     long startTime = System.currentTimeMillis();
-    job.waitForCompletion(true);
-LOG.info("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
+    job1.waitForCompletion(true);
+    LOG.info("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
 	  
 	  
 	  
@@ -322,7 +322,7 @@ LOG.info("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 
     job.setJarByClass(ComputeCooccurrenceMatrixPairs.class);
 
     // Delete the output directory if it exists already.
-    Path outputDir = new Path(args.output);
+    Path outputDir = Path(args.output);
     FileSystem.get(getConf()).delete(outputDir, true);
 
     job.getConfiguration().setInt("window", args.window);
@@ -343,7 +343,7 @@ LOG.info("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 
     job.setReducerClass(MyReducer.class);
     job.setPartitionerClass(MyPartitioner.class);
 
-    long startTime = System.currentTimeMillis();
+    startTime = System.currentTimeMillis();
     job.waitForCompletion(true);
     System.out.println("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
 
