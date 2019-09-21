@@ -91,11 +91,10 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
   }
 public static final class MyCounts
 {
-	public static String giveCount(String word) throws Exception
+	public static String giveCount(String word, Scanner sc) throws Exception
 	  {
 		  
-			  static File file = new File("temp/part-r-00000");
-			  static Scanner sc = new Scanner(file);
+			  
 		  while (sc.hasNextLine())
                 {
                         String temp = sc.nextLine();
@@ -113,6 +112,8 @@ public static final class MyCounts
       Reducer<PairOfStrings, PairOfFloats, PairOfStrings, PairOfFloats> {
     private static final PairOfFloats SUM = new PairOfFloats();
 	  private static int total = 2360;
+	  public static File file = new File("temp/part-r-00000");
+	  public static Scanner sc = newScanner(file);
     @Override
     public void reduce(PairOfStrings key, Iterable<PairOfFloats> values, Context context)
         throws IOException, InterruptedException {
@@ -126,11 +127,11 @@ public static final class MyCounts
 	String x = key.getLeftElement();
 	    String y = key.getRightElement();
 	    try{
-	    int xCounts = Integer.parseInt(MyCounts.giveCount(x));
-	    int yCounts = Integer.parseInt(MyCounts.giveCount(y));
+	    int xCounts = Integer.parseInt(MyCounts.giveCount(x,sc));
+	    int yCounts = Integer.parseInt(MyCounts.giveCount(y,sc));
 	    //System.out.println(xCounts + yCounts);
 		    pmi = total * sum / (xCounts * yCounts);
-		    floatpmi = (float)pmi
+		    floatpmi = (float)pmi;
 	    }
 	    catch(Exception e)
 	    {
