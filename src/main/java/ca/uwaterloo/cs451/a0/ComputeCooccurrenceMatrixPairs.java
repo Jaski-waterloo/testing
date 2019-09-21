@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package ca.uwaterloo.cs451.a0;
 
 import io.bespin.java.util.Tokenizer;
@@ -37,44 +38,10 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.ParserProperties;
 import tl.lin.data.pair.PairOfStrings;
-import tl.lin.data.pair.PairOfInts;
-import tl.lin.data.pair.PairOfFloats;
-
-import io.bespin.java.util.Tokenizer;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.conf.Configured;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
-import org.apache.hadoop.util.Tool;
-import org.apache.hadoop.util.ToolRunner;
-import org.apache.log4j.Logger;
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
-import org.kohsuke.args4j.ParserProperties;
-
-
-import java.io.File;
-import java.util.Scanner;
-import java.lang.Math;
-
 
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
-
-
-
-
 
 /**
  * <p>
@@ -89,20 +56,12 @@ import java.util.List;
  *
  * @author Jimmy Lin
  */
-
-//---------------------------------------------------------------------
-//---------------------------------------------------------------------
-public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {	
-	
+public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
   private static final Logger LOG = Logger.getLogger(ComputeCooccurrenceMatrixPairs.class);
-	public static int total = 2360;
-	
-	
-	
 
-  private static final class MyMapper extends Mapper<LongWritable, Text, PairOfStrings, PairOfFloats> {
+  private static final class MyMapper extends Mapper<LongWritable, Text, PairOfStrings, IntWritable> {
     private static final PairOfStrings PAIR = new PairOfStrings();
-    private static final PairOfFloats ONE = new PairOfFloats(1,1);
+    private static final IntWritable ONE = new IntWritable(1);
     private int window = 2;
 
     @Override
@@ -114,10 +73,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     public void map(LongWritable key, Text value, Context context)
         throws IOException, InterruptedException {
       List<String> tokens = Tokenizer.tokenize(value.toString());
-	int size = tokens.size();
-	if(size > 40){
-		size = 40;
-	}
+
       for (int i = 0; i < tokens.size(); i++) {
         for (int j = Math.max(i - window, 0); j < Math.min(i + window + 1, tokens.size()); j++) {
           if (i == j) continue;
@@ -129,10 +85,11 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
   }
 
   private static final class MyReducer extends
-      Reducer<PairOfStrings, PairOfFloats, PairOfStrings, PairOfFloats> {
-    private static final PairOfFloats SUM = new PairOfFloats();
+      Reducer<PairOfStrings, IntWritable, PairOfStrings, IntWritable> {
+    private static final IntWritable SUM = new IntWritable();
 	  
-	  public int giveCount(String word) throws Exception
+	  
+	   public int giveCount(String word) throws Exception
 	  {
 		  
 			  File file = new File("temp/part-r-00000");
@@ -146,39 +103,18 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 
                 if(arrOfStr[0].equals(word))
 			return(Integer.parseInt(arrOfStr[1]));
-		  }
-// 		  catch(Exception e)
-// 		  {
-// 			  System.out.println("LOL No File Found");
-// 		  }
-		  
-		  return(0);
-	  }
 
     @Override
-    public void reduce(PairOfStrings key, Iterable<PairOfFloats> values, Context context)
-        throws Exception {
-	int threshold = 0;
-	double pmi=1.0;
-	float pmi_2f = 1;
-	threshold = context.getConfiguration().getInt("threshold",3);
-      Iterator<PairOfFloats> iter = values.iterator();
-      float sum = 0;
+    public void reduce(PairOfStrings key, Iterable<IntWritable> values, Context context)
+        throws IOException, InterruptedException {
+      Iterator<IntWritable> iter = values.iterator();
+      int sum = 0;
       while (iter.hasNext()) {
-        sum = sum +  iter.next().getLeftElement();
+        sum += iter.next().get();
       }
-	if(sum > threshold){
-		String x = key.getLeftElement();
-		String y = key.getRightElement();
-		int xCount = giveCount(x);
-		int yCount = giveCount(y);
-		pmi = ((total * sum) / (xCount * yCount));  //read from file to determine number of x and y
-		pmi = (Math.log10(pmi));
-		pmi_2f = (float)pmi;
-		
-      SUM.set(sum,pmi_2f);
+
+      SUM.set(sum);
       context.write(key, SUM);
-	}
     }
   }
 
@@ -188,13 +124,6 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
       return (key.getLeftElement().hashCode() & Integer.MAX_VALUE) % numReduceTasks;
     }
   }
-	
-
-/**
-Word Count Implementation
-*/
-
-	
 
   /**
    * Creates an instance of this tool.
@@ -213,9 +142,6 @@ Word Count Implementation
 
     @Option(name = "-window", metaVar = "[num]", usage = "cooccurrence window")
     int window = 2;
-    
-    @Option(name = "-threshold", metaVar = "[num]", usage = "minimum threshold")
-    int threshold = 0;
   }
 
   /**
@@ -234,35 +160,21 @@ Word Count Implementation
       return -1;
     }
 
-//     LOG.info("Tool: " + ComputeCooccurrenceMatrixPairs.class.getSimpleName());
-//     LOG.info(" - input path: " + args.input);
-//     LOG.info(" - output path: " + args.output);
-//     LOG.info(" - window: " + args.window);
-//     LOG.info(" - number of reducers: " + args.numReducers);
-//     LOG.info(" - minimum threshold: " + args.threshold);
-	  
-	  
-	  
-	  
-	  
-
-
-	  
-	  
-	  
-	  
-	  
-	  
+    LOG.info("Tool: " + ComputeCooccurrenceMatrixPairs.class.getSimpleName());
+    LOG.info(" - input path: " + args.input);
+    LOG.info(" - output path: " + args.output);
+    LOG.info(" - window: " + args.window);
+    LOG.info(" - number of reducers: " + args.numReducers);
 
     Job job = Job.getInstance(getConf());
     job.setJobName(ComputeCooccurrenceMatrixPairs.class.getSimpleName());
     job.setJarByClass(ComputeCooccurrenceMatrixPairs.class);
 
-    Path outputDir1 = new Path(args.output);
-    FileSystem.get(getConf()).delete(outputDir1, true);
+    // Delete the output directory if it exists already.
+    Path outputDir = new Path(args.output);
+    FileSystem.get(getConf()).delete(outputDir, true);
 
     job.getConfiguration().setInt("window", args.window);
-    job.getConfiguration().setInt("threshold", args.threshold);
 
     job.setNumReduceTasks(args.numReducers);
 
@@ -294,6 +206,5 @@ Word Count Implementation
    */
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new ComputeCooccurrenceMatrixPairs(), args);
-
   }
 }
