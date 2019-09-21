@@ -112,8 +112,13 @@ public static final class MyCounts
       Reducer<PairOfStrings, PairOfFloats, PairOfStrings, PairOfFloats> {
     private static final PairOfFloats SUM = new PairOfFloats();
 	  private static int total = 2360;
+	  try{
 	  public static File file = new File("temp/part-r-00000");
 	  public static Scanner sc = new Scanner(file);
+	  }
+	  catch(Exception e){
+		  System.out.println("Fuck You");
+	  }
     @Override
     public void reduce(PairOfStrings key, Iterable<PairOfFloats> values, Context context)
         throws IOException, InterruptedException {
