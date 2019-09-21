@@ -166,9 +166,10 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
       Configuration conf = context.getConfiguration();
       FileSystem fs = FileSystem.get(conf);
       
-      Path yoPath = new Path(conf.get("intermediatePath"));
+      Path filePath = new Path(conf.get("intermediatePath").resolve("part-r-0000");
 //       Path filePath = new Path("/temp/part-r-0000");
-	    Path filePath = yoPath.resolve("part-r-00000");
+	    
+//       Path filePath = yoPath.resolve("part-r-00000");
 
       if(!fs.exists(filePath)){
         throw new IOException("File Not Found: ");
