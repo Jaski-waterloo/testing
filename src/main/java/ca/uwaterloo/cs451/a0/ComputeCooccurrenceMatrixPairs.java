@@ -291,7 +291,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     job1.setNumReduceTasks(args.numReducers);
 	  String tempPath = "temp";
     Path tempDir = new Path(tempPath);
-    conf.set("intermediatePath", intermediatePath);
+    conf.set("intermediatePath", tempPath);
 
 
     FileInputFormat.setInputPaths(job1, new Path(args.input));
