@@ -136,7 +136,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
   private static final class MyReducer extends
       Reducer<PairOfStrings, IntWritable, PairOfStrings, IntWritable> {
     private static final IntWritable SUM = new IntWritable();
-	  privare static final PaorOfFloats PMI = new PairOfFloats(1,1);
+	  private static final PaorOfFloats PMI = new PairOfFloats(1,1);
 	  private static Map<String, Integer> total = new HashMap<String, Integer>();
 	  private static int totalSum = 0;
 
@@ -234,7 +234,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     @Option(name = "-window", metaVar = "[num]", usage = "cooccurrence window")
     int window = 2;
 	  
-    @Option(name = '-threshold", metaVar = "[num]", usage = "threshold limit")
+    @Option(name = "-threshold", metaVar = "[num]", usage = "threshold limit")
 	    int threshold = 0;
   }
 
