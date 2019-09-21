@@ -186,7 +186,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 
     @Override
     public void reduce(PairOfStrings key, Iterable<PairOfFloats> values, Context context)
-        throws IOException, InterruptedException, Exception {
+        throws IOException, InterruptedException, java.lang.Exception {
 	int threshold = 0;
 	double pmi=1.0;
 	float pmi_2f = 1;
