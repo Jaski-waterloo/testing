@@ -91,6 +91,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
   private static final class MyReducer extends
       Reducer<PairOfStrings, IntWritable, PairOfStrings, IntWritable> {
     private static final IntWritable SUM = new IntWritable();
+	  private static int total = 2360;
 	  
 	  
 	   public int giveCount(String word) throws Exception
@@ -119,7 +120,11 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
       while (iter.hasNext()) {
         sum += iter.next().get();
       }
-
+	String x = key.getLeftElement();
+	    String y = key.getRightElement();
+	    int xCounts = giveCount(x);
+	    int yCounts = giveCount(y);
+	    System.out.println(xCounts + yCounts);
       SUM.set(sum);
       context.write(key, SUM);
     }
