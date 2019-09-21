@@ -118,8 +118,10 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
       while (iter.hasNext()) {
         sum += iter.next().get();
       }
+	    if(sum > 10){
       SUM.set(sum);
       context.write(key, SUM);
+	    }
     }
 }
 
@@ -212,7 +214,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     public void reduce(PairOfStrings key, Iterable<FloatWritable> values, Context context)
         throws IOException, InterruptedException {
       Iterator<FloatWritable> iter = values.iterator();
-      int sum = 0;
+      float sum = 0;
       while (iter.hasNext()) {
         sum += iter.next().get();
       }
