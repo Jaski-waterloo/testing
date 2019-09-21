@@ -54,6 +54,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import java.lang.math;
+
 
 /**
  * <p>
@@ -203,7 +205,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
         	    double probX = total.get(left) / totalSum;
         	    double probY = total.get(right) / totalSum;
 
-        	    double pmi = Math.log(probBoth / (probX * probY));
+        	    double pmi = Math.log10(probBoth / (probX * probY));
 		    PMI.set(float(pmi),sum);
 
       		   context.write(key, PMI);
