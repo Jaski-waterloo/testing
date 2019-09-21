@@ -5,7 +5,7 @@ import java.util.Scanner;
 import java.lang.Math;
 
 
-public static final class findTotal
+public class findTotal
 {
 	public String giveCount(String word) throws Exception
 	  {
@@ -28,6 +28,6 @@ public static final class findTotal
 
 
  public static void main(String[] args) throws Exception {
-  System.out.println(Int.ParseInt(giveCounts("a")));
+  System.out.println(Integer.ParseInt(giveCount("a")));
 }
 }
