@@ -91,10 +91,12 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
   }
 public static final class MyCounts
 {
-	public static String giveCount(String word, Scanner sc) throws Exception
+	public static File file = new File();
+	public static Scanner sc = new Scanner();
+	public static String giveCount(String word) throws Exception
 	  {
-		   static File file = new File("temp/part-r-00000");
-	  	   static Scanner sc = new Scanner(file);
+		   file = File("temp/part-r-00000");
+	  	   sc = Scanner(file);
 			  
 		  while (sc.hasNextLine())
                 {
@@ -127,8 +129,8 @@ public static final class MyCounts
 	String x = key.getLeftElement();
 	    String y = key.getRightElement();
 	    try{
-	    int xCounts = Integer.parseInt(MyCounts.giveCount(x,sc));
-	    int yCounts = Integer.parseInt(MyCounts.giveCount(y,sc));
+	    int xCounts = Integer.parseInt(MyCounts.giveCount(x));
+	    int yCounts = Integer.parseInt(MyCounts.giveCount(y));
 	    //System.out.println(xCounts + yCounts);
 		    pmi = total * sum / (xCounts * yCounts);
 		    floatpmi = (float)pmi;
