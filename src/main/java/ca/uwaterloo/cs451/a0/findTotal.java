@@ -7,7 +7,7 @@ import java.lang.Math;
 
 public class findTotal
 {
-	public String giveCount(String word) throws Exception
+	public static String giveCount(String word) throws Exception
 	  {
 		  
 			  File file = new File("temp/part-r-00000");
