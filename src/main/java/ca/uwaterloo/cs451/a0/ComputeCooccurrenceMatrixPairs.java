@@ -153,7 +153,6 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 	  private static Map<String, Integer> total = new HashMap<String, Integer>();
 	  private static int totalSum = 0;
 	  	  private static int threshold = 0;
-	   private static final IntWritable SUM = new IntWritable();
 
 
 	  
@@ -213,12 +212,11 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
         sum += iter.next().get();
       }
 	    if(sum > threshold){
-		   SUM.set(sum);
 		    String x = key.getLeftElement();
 		    String y = key.getRightElement();
 		    double probBoth = sum / totalSum;
-        	    double probX = total.get(left) / totalSum;
-        	    double probY = total.get(right) / totalSum;
+        	    double probX = total.get(x) / totalSum;
+        	    double probY = total.get(y) / totalSum;
 
         	    double pmi = Math.log10(probBoth / (probX * probY));
 		    float fpmi = 1;
@@ -287,7 +285,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 	  
 	  Configuration conf = getConf();
     Job job1 = Job.getInstance(conf);
-    job1.setJobName(WordCount.class.getSimpleName() + "WordCount");
+    job1.setJobName(ComputeCooccurrenceMatrixPairs.class.getSimpleName() + "WordCount");
     job1.setJarByClass(ComputeCooccurrenceMatrixPairs.class);
 
     job1.setNumReduceTasks(args.numReducers);
@@ -317,7 +315,7 @@ LOG.info("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 
 	  
 
     Job job = Job.getInstance(getConf());
-    job.setJobName(ComputeCooccurrenceMatrixPairs.class.getSimpleName());
+    job.setJobName(ComputeCooccurrenceMatrixPairs.class.getSimpleName() + "final output");
     job.setJarByClass(ComputeCooccurrenceMatrixPairs.class);
 
     // Delete the output directory if it exists already.
