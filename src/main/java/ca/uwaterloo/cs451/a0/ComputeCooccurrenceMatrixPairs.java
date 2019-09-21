@@ -211,7 +211,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
       Iterator<FloatWritable> iter = values.iterator();
       float sum = 0;
       while (iter.hasNext()) {
-        sum += iter.next().getLeftElement();
+        sum += iter.next().get();
       }
 	    if(sum > threshold){
 		    String x = key.getLeftElement();
