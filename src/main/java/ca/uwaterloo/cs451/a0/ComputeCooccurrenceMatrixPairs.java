@@ -94,7 +94,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 	  private static int total = 2360;
 	  
 	  
-	   public int giveCount(String word) throws Exception
+	   public String giveCount(String word) throws Exception
 	  {
 		  
 			  File file = new File("temp/part-r-00000");
@@ -107,7 +107,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
                 String[] arrOfStr = temp.split("\t");
 
                 if(arrOfStr[0].equals(word))
-			return(Integer.parseInt(arrOfStr[1]));
+			return(arrOfStr[1]);
 		  }
 		   return(0);
 	   }
@@ -122,8 +122,8 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
       }
 	String x = key.getLeftElement();
 	    String y = key.getRightElement();
-	    int xCounts = giveCount(x);
-	    int yCounts = giveCount(y);
+	    int xCounts = Integer.parseInt(giveCount(x));
+	    int yCounts = Integer.parseInt(giveCount(y));
 	    System.out.println(xCounts + yCounts);
       SUM.set(sum);
       context.write(key, SUM);
