@@ -5,7 +5,7 @@ import java.util.Scanner;
 import java.lang.Math;
 
 
-publiv static final class findTotal
+public static final class findTotal
 {
 	public String giveCount(String word) throws Exception
 	  {
