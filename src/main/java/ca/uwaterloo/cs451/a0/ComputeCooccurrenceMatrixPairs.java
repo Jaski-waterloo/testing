@@ -147,7 +147,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
   }
 
   private static final class MyReducer extends
-      Reducer<PairOfStrings, IntWritable, PairOfStrings, IntWritable> {
+      Reducer<PairOfStrings, IntWritable, PairOfStrings, PairOfFloats> {
     private static final IntWritable SUM = new IntWritable();
 	  private static final PairOfFloats PMI = new PairOfFloats(1,1);
 	  private static Map<String, Integer> total = new HashMap<String, Integer>();
@@ -289,9 +289,11 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     job1.setJarByClass(ComputeCooccurrenceMatrixPairs.class);
 
     job1.setNumReduceTasks(args.numReducers);
+	  String tempPath = "temp";
+    Path tempDir = new Path(tempPath);
 
     FileInputFormat.setInputPaths(job1, new Path(args.input));
-    FileOutputFormat.setOutputPath(job1, new Path(args.output));
+    FileOutputFormat.setOutputPath(job1, new Path(tempPath));
 
     job1.setMapOutputKeyClass(Text.class);
     job1.setMapOutputValueClass(IntWritable.class);
@@ -304,6 +306,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     job1.setReducerClass(MyReducerWordCount.class);
 
     // Delete the output directory if it exists already.
+    
     Path outputDir = new Path("temp");
     FileSystem.get(conf).delete("temp", true);
 
