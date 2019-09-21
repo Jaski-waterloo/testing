@@ -109,7 +109,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
                 if(arrOfStr[0].equals(word))
 			return(arrOfStr[1]);
 		  }
-		   return("No);
+		   return("No");
 	   }
 
     @Override
