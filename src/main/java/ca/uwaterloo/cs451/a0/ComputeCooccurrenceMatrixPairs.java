@@ -304,7 +304,7 @@ LOG.info("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 
     FileSystem.get(getConf()).delete(outputDir, true);
 
     job.getConfiguration().setInt("window", args.window);
-	  job.getConfiguration().setInt("threshold, args.threshold);
+	  job.getConfiguration().setInt("threshold", args.threshold);
 
     job.setNumReduceTasks(args.numReducers);
 
