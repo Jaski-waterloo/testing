@@ -76,35 +76,6 @@ import java.util.List;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**
  * <p>
  * Implementation of the "pairs" algorithm for computing co-occurrence matrices from a large text
