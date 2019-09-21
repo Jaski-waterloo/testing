@@ -90,9 +90,9 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 	
 
   // Mapper: emits (token, 1) for every word occurrence.
-  public static final class MyMapperWordCount extends Mapper<LongWritable, Text, Text, IntWritable> {
+  public static final class MyMapperWordCount extends Mapper<LongWritable, Text, Text, FloatWritable> {
     // Reuse objects to save overhead of object creation.
-    private static final IntWritable ONE = new IntWritable(1);
+    private static final FloatWritable ONE = new FloatWritable(1);
     private static final Text WORD = new Text();
 
     @Override
@@ -105,16 +105,16 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     }
 }
 	
-	public static final class MyReducerWordCount extends Reducer<Text, IntWritable, Text, IntWritable> {
+	public static final class MyReducerWordCount extends Reducer<Text, FloatWritable, Text, FloatWritable> {
     // Reuse objects.
-    private static final IntWritable SUM = new IntWritable();
+    private static final FloatWritable SUM = new FloatWritable();
 
     @Override
-    public void reduce(Text key, Iterable<IntWritable> values, Context context)
+    public void reduce(Text key, Iterable<FloatWritable> values, Context context)
         throws IOException, InterruptedException {
       // Sum up values.
-      Iterator<IntWritable> iter = values.iterator();
-      int sum = 0;
+      Iterator<FloatWritable> iter = values.iterator();
+      float sum = 0;
       while (iter.hasNext()) {
         sum += iter.next().get();
       }
@@ -205,7 +205,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     }
 	  
 	  
-
+@Override
     public void reduce(PairOfStrings key, Iterable<FloatWritable> values, Context context)
         throws IOException, InterruptedException {
       Iterator<FloatWritable> iter = values.iterator();
