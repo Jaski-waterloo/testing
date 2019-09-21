@@ -138,7 +138,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
   private static final class MyReducer extends
       Reducer<PairOfStrings, IntWritable, PairOfStrings, IntWritable> {
     private static final IntWritable SUM = new IntWritable();
-	  private static final PaorOfFloats PMI = new PairOfFloats(1,1);
+	  private static final PairOfFloats PMI = new PairOfFloats(1,1);
 	  private static Map<String, Integer> total = new HashMap<String, Integer>();
 	  private static int totalSum = 0;
 
@@ -206,7 +206,8 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
         	    double probY = total.get(right) / totalSum;
 
         	    double pmi = Math.log10(probBoth / (probX * probY));
-		    PMI.set(float(pmi),sum);
+		    float fpmi = float(pmi)
+		    PMI.set(fpmi,sum);
 
       		   context.write(key, PMI);
     }
