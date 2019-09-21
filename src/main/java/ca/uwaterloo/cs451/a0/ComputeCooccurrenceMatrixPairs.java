@@ -149,7 +149,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 
   private static final class MyReducer extends
       Reducer<PairOfStrings, IntWritable, PairOfStrings, PairOfFloats> {
-    private static final IntWritable SUM = new IntWritable();
+//     private static final IntWritable SUM = new IntWritable();
 	  private static final PairOfFloats PMI = new PairOfFloats(1,1);
 	  private static Map<String, Integer> total = new HashMap<String, Integer>();
 	  private static int totalSum = 0;
@@ -206,9 +206,9 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 	  
 
     @Override
-    public void reduce(PairOfStrings key, Iterable<IntWritable> values, Context context)
+    public void reduce(PairOfStrings key, Iterable<PairOfFloats> values, Context context)
         throws IOException, InterruptedException {
-      Iterator<IntWritable> iter = values.iterator();
+      Iterator<PairOfFloats> iter = values.iterator();
       int sum = 0;
       while (iter.hasNext()) {
         sum += iter.next().get();
@@ -230,9 +230,9 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
   }
   }
 
-  private static final class MyPartitioner extends Partitioner<PairOfStrings, IntWritable> {
+  private static final class MyPartitioner extends Partitioner<PairOfStrings, PairOfFloats> {
     @Override
-    public int getPartition(PairOfStrings key, IntWritable value, int numReduceTasks) {
+    public int getPartition(PairOfStrings key, PairOfFloats value, int numReduceTasks) {
       return (key.getLeftElement().hashCode() & Integer.MAX_VALUE) % numReduceTasks;
     }
   }
