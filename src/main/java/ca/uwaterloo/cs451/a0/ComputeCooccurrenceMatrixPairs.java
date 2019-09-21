@@ -166,8 +166,8 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
       Configuration conf = context.getConfiguration();
       FileSystem fs = FileSystem.get(conf);
       
-//      Path inFile = new Path(conf.get("intermediatePath"));
-      Path filePath = new Path("temp/part-r-0000");
+      Path inFile = new Path(conf.get("intermediatePath"));
+//       Path filePath = new Path("/temp/part-r-0000");
 
       if(!fs.exists(filePath)){
         throw new IOException("File Not Found: ");
@@ -291,6 +291,8 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     job1.setNumReduceTasks(args.numReducers);
 	  String tempPath = "temp";
     Path tempDir = new Path(tempPath);
+    conf.set("intermediatePath", intermediatePath);
+
 
     FileInputFormat.setInputPaths(job1, new Path(args.input));
     FileOutputFormat.setOutputPath(job1, new Path(tempPath));
