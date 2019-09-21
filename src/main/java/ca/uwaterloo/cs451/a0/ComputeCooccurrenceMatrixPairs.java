@@ -308,7 +308,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     // Delete the output directory if it exists already.
     
     Path outputDir = new Path("temp");
-    FileSystem.get(conf).delete(tempPath, true);
+    FileSystem.get(conf).delete(tempDir, true);
 
     long startTime = System.currentTimeMillis();
     job1.waitForCompletion(true);
@@ -322,7 +322,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     job.setJarByClass(ComputeCooccurrenceMatrixPairs.class);
 
     // Delete the output directory if it exists already.
-    Path outputDir = Path(args.output);
+    outputDir = Path(args.output);
     FileSystem.get(getConf()).delete(outputDir, true);
 
     job.getConfiguration().setInt("window", args.window);
