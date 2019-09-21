@@ -124,7 +124,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 
   private static final class MyMapper extends Mapper<LongWritable, Text, PairOfStrings, PairOfFloats> {
     private static final PairOfStrings PAIR = new PairOfStrings();
-    private static final IntWritable ONE = new IntWritable(1);
+    private static final PairOfFloats ONE = new PairOfFloats(1,1);
     private int window = 2;
 
     @Override
