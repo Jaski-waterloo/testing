@@ -140,8 +140,8 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
         throws IOException, InterruptedException {
       List<String> tokens = Tokenizer.tokenize(value.toString());
 	    int size = tokens.size();
-// 	    if(size > 40)
-// 		    size = 40;
+	    if(size > 40)
+		    size = 40;
 
       for (int i = 0; i < size; i++) {
         for (int j = Math.max(i - window, 0); j < Math.min(i + window + 1, tokens.size()); j++) {
