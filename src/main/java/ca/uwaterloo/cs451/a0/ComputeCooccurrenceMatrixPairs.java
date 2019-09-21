@@ -1,4 +1,4 @@
-package io.bespin.java.mapreduce.cooccur;
+package ca.uwaterloo.cs451.a0;
 
 import io.bespin.java.util.Tokenizer;
 import org.apache.hadoop.conf.Configured;
@@ -322,8 +322,8 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     job.setJarByClass(ComputeCooccurrenceMatrixPairs.class);
 
     // Delete the output directory if it exists already.
-    outputDir = Path(args.output);
-    FileSystem.get(getConf()).delete(outputDir, true);
+    Path outputDir1 = new Path(args.output);
+    FileSystem.get(getConf()).delete(outputDir1, true);
 
     job.getConfiguration().setInt("window", args.window);
 	  job.getConfiguration().setInt("threshold", args.threshold);
