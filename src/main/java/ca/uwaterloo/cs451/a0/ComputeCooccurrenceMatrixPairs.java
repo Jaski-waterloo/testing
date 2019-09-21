@@ -94,8 +94,8 @@ public static final class MyCounts
 	public static String giveCount(String word) throws Exception
 	  {
 		  
-			  File file = new File("temp/part-r-00000");
-			  Scanner sc = new Scanner(file);
+			  static File file = new File("temp/part-r-00000");
+			  static Scanner sc = new Scanner(file);
 		  while (sc.hasNextLine())
                 {
                         String temp = sc.nextLine();
