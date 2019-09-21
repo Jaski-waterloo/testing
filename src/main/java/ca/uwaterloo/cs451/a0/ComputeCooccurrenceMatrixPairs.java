@@ -208,9 +208,9 @@ public static final class MyCounts
     FileOutputFormat.setOutputPath(job, new Path(args.output));
 
     job.setMapOutputKeyClass(PairOfStrings.class);
-    job.setMapOutputValueClass(IntWritable.class);
+    job.setMapOutputValueClass(PairOfFloats.class);
     job.setOutputKeyClass(PairOfStrings.class);
-    job.setOutputValueClass(IntWritable.class);
+    job.setOutputValueClass(PairOfFloats.class);
 
     job.setMapperClass(MyMapper.class);
     job.setCombinerClass(MyReducer.class);
