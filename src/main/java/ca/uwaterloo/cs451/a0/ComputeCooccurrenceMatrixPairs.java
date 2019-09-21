@@ -297,12 +297,12 @@ Word Count Implementation
       return -1;
     }
 
-    LOG.info("Tool: " + ComputeCooccurrenceMatrixPairs.class.getSimpleName());
-    LOG.info(" - input path: " + args.input);
-    LOG.info(" - output path: " + args.output);
-    LOG.info(" - window: " + args.window);
-    LOG.info(" - number of reducers: " + args.numReducers);
-    LOG.info(" - minimum threshold: " + args.threshold);
+//     LOG.info("Tool: " + ComputeCooccurrenceMatrixPairs.class.getSimpleName());
+//     LOG.info(" - input path: " + args.input);
+//     LOG.info(" - output path: " + args.output);
+//     LOG.info(" - window: " + args.window);
+//     LOG.info(" - number of reducers: " + args.numReducers);
+//     LOG.info(" - minimum threshold: " + args.threshold);
 	  
 	  
 	  
