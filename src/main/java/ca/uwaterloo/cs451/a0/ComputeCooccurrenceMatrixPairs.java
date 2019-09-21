@@ -87,14 +87,9 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
       }
     }
   }
-
-  private static final class MyReducer extends
-      Reducer<PairOfStrings, IntWritable, PairOfStrings, IntWritable> {
-    private static final IntWritable SUM = new IntWritable();
-	  private static int total = 2360;
-	  
-	  
-	   public String giveCount(String word) throws Exception
+publiv static final class MyCounts
+{
+	public String giveCount(String word) throws Exception
 	  {
 		  
 			  File file = new File("temp/part-r-00000");
@@ -111,6 +106,12 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 		  }
 		   return("No");
 	   }
+}
+  private static final class MyReducer extends
+      Reducer<PairOfStrings, IntWritable, PairOfStrings, IntWritable> {
+    private static final IntWritable SUM = new IntWritable();
+	  private static int total = 2360;
+	     
 
     @Override
     public void reduce(PairOfStrings key, Iterable<IntWritable> values, Context context)
@@ -123,8 +124,8 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 	String x = key.getLeftElement();
 	    String y = key.getRightElement();
 	    try{
-	    int xCounts = Integer.parseInt(giveCount(x));
-	    int yCounts = Integer.parseInt(giveCount(y));
+	    int xCounts = Integer.parseInt(MyCounts.giveCount(x));
+	    int yCounts = Integer.parseInt(MyCounts.giveCount(y));
 	    //System.out.println(xCounts + yCounts);
 	    }
 	    catch(Exception e)
