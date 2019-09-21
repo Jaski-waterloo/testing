@@ -123,7 +123,7 @@ public static final class MyCounts
 	    String y = key.getRightElement();
 	    try{
 	    int xCounts = Integer.parseInt(MyCounts.giveCount(x));
-	    int yCounts = Integer.parseInt(Mycounts.giveCount(y));
+	    int yCounts = Integer.parseInt(MyCounts.giveCount(y));
 	    //System.out.println(xCounts + yCounts);
 	    }
 	    catch(Exception e)
