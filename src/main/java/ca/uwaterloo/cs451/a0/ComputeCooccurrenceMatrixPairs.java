@@ -125,7 +125,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 	    try{
 	    int xCounts = Integer.parseInt(giveCount(x));
 	    int yCounts = Integer.parseInt(giveCount(y));
-	    System.out.println(xCounts + yCounts);
+	    //System.out.println(xCounts + yCounts);
 	    }
 	    catch(Exception e)
 	    {
