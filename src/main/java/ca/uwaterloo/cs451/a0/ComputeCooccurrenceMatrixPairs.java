@@ -207,7 +207,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 
         	    double pmi = Math.log10(probBoth / (probX * probY));
 		    float fpmi = 1;
-		    fpmi = float(pmi);
+		    fpmi = (float)pmi;
 		    PMI.set(fpmi,sum);
 
       		   context.write(key, PMI);
