@@ -90,9 +90,9 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 	
 
   // Mapper: emits (token, 1) for every word occurrence.
-  public static final class MyMapperWordCount extends Mapper<LongWritable, Text, Text, FloatWritable> {
+  public static final class MyMapperWordCount extends Mapper<LongWritable, Text, Text, IntWritable> {
     // Reuse objects to save overhead of object creation.
-    private static final FloatWritable ONE = new FloatWritable(1);
+    private static final IntWritable ONE = new IntWritable(1);
     private static final Text WORD = new Text();
 
     @Override
@@ -105,16 +105,16 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     }
 }
 	
-	public static final class MyReducerWordCount extends Reducer<Text, FloatWritable, Text, FloatWritable> {
+	public static final class MyReducerWordCount extends Reducer<Text, IntWritable, Text, IntWritable> {
     // Reuse objects.
-    private static final FloatWritable SUM = new FloatWritable();
+    private static final IntWritable SUM = new IntWritable();
 
     @Override
-    public void reduce(Text key, Iterable<FloatWritable> values, Context context)
+    public void reduce(Text key, Iterable<IntWritable> values, Context context)
         throws IOException, InterruptedException {
       // Sum up values.
-      Iterator<FloatWritable> iter = values.iterator();
-      float sum = 0;
+      Iterator<IntWritable> iter = values.iterator();
+      int sum = 0;
       while (iter.hasNext()) {
         sum += iter.next().get();
       }
@@ -303,9 +303,9 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     FileOutputFormat.setOutputPath(job1, new Path(tempPath));
 
     job1.setMapOutputKeyClass(Text.class);
-    job1.setMapOutputValueClass(FloatWritable.class);
+    job1.setMapOutputValueClass(IntWritable.class);
     job1.setOutputKeyClass(Text.class);
-    job1.setOutputValueClass(FloatWritable.class);
+    job1.setOutputValueClass(IntWritable.class);
     job1.setOutputFormatClass(TextOutputFormat.class);
 
     job1.setMapperClass(MyMapperWordCount.class);
