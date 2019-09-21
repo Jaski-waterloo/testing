@@ -91,12 +91,12 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
   }
 public static final class MyCounts
 {
-	public static File file = new File();
-	public static Scanner sc = new Scanner();
+// 	public static File file = new File();
+// 	public static Scanner sc = new Scanner();
 	public static String giveCount(String word) throws Exception
 	  {
-		   file = File("temp/part-r-00000");
-	  	   sc = Scanner(file);
+		   File file = new File("temp/part-r-00000");
+	  	   Scanner sc = new Scanner(file);
 			  
 		  while (sc.hasNextLine())
                 {
