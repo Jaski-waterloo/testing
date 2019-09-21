@@ -103,6 +103,8 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 
                 if(arrOfStr[0].equals(word))
 			return(Integer.parseInt(arrOfStr[1]));
+		  }
+	   }
 
     @Override
     public void reduce(PairOfStrings key, Iterable<IntWritable> values, Context context)
