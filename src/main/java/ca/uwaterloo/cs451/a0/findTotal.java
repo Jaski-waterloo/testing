@@ -1,4 +1,3 @@
-package ca.uwaterloo.cs451.a0;
 
 import java.io.File;
 import java.util.Scanner;
