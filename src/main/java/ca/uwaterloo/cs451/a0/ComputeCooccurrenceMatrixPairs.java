@@ -1,27 +1,10 @@
-/**
- * Bespin: reference implementations of "big data" algorithms
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-package ca.uwaterloo.cs451.a0;
+package io.bespin.java.mapreduce.cooccur;
 
 import io.bespin.java.util.Tokenizer;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-// import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -40,14 +23,37 @@ import org.kohsuke.args4j.ParserProperties;
 import tl.lin.data.pair.PairOfStrings;
 import tl.lin.data.pair.PairOfFloats;
 
-
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
-import java.io.File;
-import java.util.Scanner;
-import java.lang.Math;
+import io.bespin.java.util.Tokenizer;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.apache.hadoop.util.Tool;
+import org.apache.hadoop.util.ToolRunner;
+import org.apache.log4j.Logger;
+import org.kohsuke.args4j.CmdLineException;
+import org.kohsuke.args4j.CmdLineParser;
+import org.kohsuke.args4j.Option;
+import org.kohsuke.args4j.ParserProperties;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 
 /**
  * <p>
@@ -64,15 +70,52 @@ import java.lang.Math;
  */
 public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
   private static final Logger LOG = Logger.getLogger(ComputeCooccurrenceMatrixPairs.class);
+	
 
-  private static final class MyMapper extends Mapper<LongWritable, Text, PairOfStrings, PairOfFloats> {
+  // Mapper: emits (token, 1) for every word occurrence.
+  public static final class MyMapperWordCount extends Mapper<LongWritable, Text, Text, IntWritable> {
+    // Reuse objects to save overhead of object creation.
+    private static final IntWritable ONE = new IntWritable(1);
+    private static final Text WORD = new Text();
+
+    @Override
+    public void map(LongWritable key, Text value, Context context)
+        throws IOException, InterruptedException {
+      for (String word : Tokenizer.tokenize(value.toString())) {
+        WORD.set(word);
+        context.write(WORD, ONE);
+      }
+    }
+}
+	
+	public static final class MyReducerWordCount extends Reducer<Text, IntWritable, Text, IntWritable> {
+    // Reuse objects.
+    private static final IntWritable SUM = new IntWritable();
+
+    @Override
+    public void reduce(Text key, Iterable<IntWritable> values, Context context)
+        throws IOException, InterruptedException {
+      // Sum up values.
+      Iterator<IntWritable> iter = values.iterator();
+      int sum = 0;
+      while (iter.hasNext()) {
+        sum += iter.next().get();
+      }
+      SUM.set(sum);
+      context.write(key, SUM);
+    }
+}
+
+  private static final class MyMapper extends Mapper<LongWritable, Text, PairOfStrings, IntWritable> {
     private static final PairOfStrings PAIR = new PairOfStrings();
-    private static final PairOfFloats ONE = new PairOfFloats(1,1);
+    private static final IntWritable ONE = new IntWritable(1);
     private int window = 2;
+	  private int threshold = 0;
 
     @Override
     public void setup(Context context) {
       window = context.getConfiguration().getInt("window", 2);
+	    threshold = context.getConfiguration().getInt("threshold", 3);
     }
 
     @Override
@@ -89,64 +132,86 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
       }
     }
   }
-public static final class MyCounts
-{
-// 	public static File file = new File();
-// 	public static Scanner sc = new Scanner();
-	public static String giveCount(String word) throws Exception
-	  {
-		   File file = new File("temp/part-r-00000");
-	  	   Scanner sc = new Scanner(file);
-			  
-		  while (sc.hasNextLine())
-                {
-                        String temp = sc.nextLine();
-                  
-                        String yo = "";
-                String[] arrOfStr = temp.split("\t");
 
-                if(arrOfStr[0].equals(word))
-			return(arrOfStr[1]);
-		  }
-		   return("No");
-	   }
-}
   private static final class MyReducer extends
-      Reducer<PairOfStrings, PairOfFloats, PairOfStrings, PairOfFloats> {
-    private static final PairOfFloats SUM = new PairOfFloats();
-	  private static int total = 2360;
-	 
-    @Override
-    public void reduce(PairOfStrings key, Iterable<PairOfFloats> values, Context context)
-        throws IOException, InterruptedException {
-      Iterator<PairOfFloats> iter = values.iterator();
-      int sum = 0;
-	    double pmi=1;
-	    float floatpmi = 1;
-      while (iter.hasNext()) {
-        sum += iter.next().getLeftElement();
+      Reducer<PairOfStrings, IntWritable, PairOfStrings, IntWritable> {
+    private static final IntWritable SUM = new IntWritable();
+	  privare static final PaorOfFloats PMI = new PairOfFloats(1,1);
+	  private static Map<String, Integer> total = new HashMap<String, Integer>();
+	  private static int totalSum = 0;
+
+	  
+	  
+	  @Override
+    public void setup(Context context) throws IOException{
+      //TODO Read from intermediate output of first job
+      // and build in-memory map of terms to their individual totals
+      Configuration conf = context.getConfiguration();
+      FileSystem fs = FileSystem.get(conf);
+      
+//      Path inFile = new Path(conf.get("intermediatePath"));
+      Path filePath = new Path("temp/part-r-0000");
+
+      if(!fs.exists(filePath)){
+        throw new IOException("File Not Found: ");
       }
-	String x = key.getLeftElement();
-	    String y = key.getRightElement();
-	    try{
-	    int xCounts = Integer.parseInt(MyCounts.giveCount(x));
-	    int yCounts = Integer.parseInt(MyCounts.giveCount(y));
-	    //System.out.println(xCounts + yCounts);
-		    pmi = total * sum / (xCounts * yCounts);
-		    floatpmi = (float)pmi;
-	    }
-	    catch(Exception e)
-	    {
-		    System.out.println("Fuck Java");
-	    }
-      SUM.set(sum, floatpmi);
-      context.write(key, SUM);
+      
+      BufferedReader reader = null;
+      try{
+        FSDataInputStream fin = fs.open(filePath);
+        InputStreamReader inStream = new InputStreamReader(fin);
+        reader = new BufferedReader(inStream);
+        
+      } catch(FileNotFoundException e){
+        throw new IOException("Can not open file");
+      }
+      
+      
+      String line = reader.readLine();
+      while(line != null){
+        
+        String[] parts = line.split("\\s+");
+        if(parts.length != 2){
+          LOG.info("incorrect format");
+        } else {
+          total.put(parts[0], Integer.parseInt(parts[1]));
+		totalSum += Integer.parseInt(parts[1]);
+        }
+        line = reader.readLine();
+      }
+      
+      reader.close();
+      
+    }
+	  
+	  
+
+    @Override
+    public void reduce(PairOfStrings key, Iterable<IntWritable> values, Context context)
+        throws IOException, InterruptedException {
+      Iterator<IntWritable> iter = values.iterator();
+      int sum = 0;
+      while (iter.hasNext()) {
+        sum += iter.next().get();
+      }
+	    if(sum > threshold){
+		   SUM.set(sum);
+		    x = key.getLeftElement();
+		    y = key.getRightElement();
+		    double probBoth = sum / totalDocs;
+        	    double probX = total.get(left) / totalSum;
+        	    double probY = total.get(right) / totalSum;
+
+        	    double pmi = Math.log(probBoth / (probX * probY));
+		    PMI.set(float(pmi),sum)
+
+      		   context.write(key, PMI);
     }
   }
 
-  private static final class MyPartitioner extends Partitioner<PairOfStrings, PairOfFloats> {
+  private static final class MyPartitioner extends Partitioner<PairOfStrings, IntWritable> {
     @Override
-    public int getPartition(PairOfStrings key, PairOfFloats value, int numReduceTasks) {
+    public int getPartition(PairOfStrings key, IntWritable value, int numReduceTasks) {
       return (key.getLeftElement().hashCode() & Integer.MAX_VALUE) % numReduceTasks;
     }
   }
@@ -168,6 +233,9 @@ public static final class MyCounts
 
     @Option(name = "-window", metaVar = "[num]", usage = "cooccurrence window")
     int window = 2;
+	  
+    @Option(name = '-threshold", metaVar = "[num]", usage = "threshold limit")
+	    int threshold = 0;
   }
 
   /**
@@ -191,6 +259,41 @@ public static final class MyCounts
     LOG.info(" - output path: " + args.output);
     LOG.info(" - window: " + args.window);
     LOG.info(" - number of reducers: " + args.numReducers);
+	  LOG.info(" - threshold: " + args.threshold);
+	  
+	  
+	  
+	  
+	  Configuration conf = getConf();
+    Job job1 = Job.getInstance(conf);
+    job1.setJobName(WordCount.class.getSimpleName() + "WordCount");
+    job1.setJarByClass(ComputeCooccurrenceMatrixPairs.class);
+
+    job1.setNumReduceTasks(args.numReducers);
+
+    FileInputFormat.setInputPaths(job1, new Path(args.input));
+    FileOutputFormat.setOutputPath(job1, new Path(args.output));
+
+    job1.setMapOutputKeyClass(Text.class);
+    job1.setMapOutputValueClass(IntWritable.class);
+    job1.setOutputKeyClass(Text.class);
+    job1.setOutputValueClass(IntWritable.class);
+    job1.setOutputFormatClass(TextOutputFormat.class);
+
+    job1.setMapperClass(MyMapperWordCount.class);
+    job1.setCombinerClass(MyReducerWordCount.class);
+    job1.setReducerClass(MyReducerWordCount.class);
+
+    // Delete the output directory if it exists already.
+    Path outputDir = new Path("temp");
+    FileSystem.get(conf).delete("temp", true);
+
+    long startTime = System.currentTimeMillis();
+    job.waitForCompletion(true);
+LOG.info("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
+	  
+	  
+	  
 
     Job job = Job.getInstance(getConf());
     job.setJobName(ComputeCooccurrenceMatrixPairs.class.getSimpleName());
@@ -201,6 +304,7 @@ public static final class MyCounts
     FileSystem.get(getConf()).delete(outputDir, true);
 
     job.getConfiguration().setInt("window", args.window);
+	  job.getConfiguration().setInt("threshold, args.threshold);
 
     job.setNumReduceTasks(args.numReducers);
 
@@ -208,9 +312,9 @@ public static final class MyCounts
     FileOutputFormat.setOutputPath(job, new Path(args.output));
 
     job.setMapOutputKeyClass(PairOfStrings.class);
-    job.setMapOutputValueClass(PairOfFloats.class);
+    job.setMapOutputValueClass(IntWritable.class);
     job.setOutputKeyClass(PairOfStrings.class);
-    job.setOutputValueClass(PairOfFloats.class);
+    job.setOutputValueClass(IntWritable.class);
 
     job.setMapperClass(MyMapper.class);
     job.setCombinerClass(MyReducer.class);
