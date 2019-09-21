@@ -38,6 +38,8 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.ParserProperties;
 import tl.lin.data.pair.PairOfStrings;
+import tl.lin.data.pair.PairOfFloats;
+
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -65,7 +67,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 
   private static final class MyMapper extends Mapper<LongWritable, Text, PairOfStrings, IntWritable> {
     private static final PairOfStrings PAIR = new PairOfStrings();
-    private static final IntWritable ONE = new IntWritable(1);
+    private static final PairOfFloats ONE = new PairOfFloats(1,1);
     private int window = 2;
 
     @Override
@@ -108,14 +110,16 @@ public static final class MyCounts
 	   }
 }
   private static final class MyReducer extends
-      Reducer<PairOfStrings, IntWritable, PairOfStrings, IntWritable> {
-    private static final IntWritable SUM = new IntWritable();
+      Reducer<PairOfStrings, PairOfFloats, PairOfStrings, PairOfFloats> {
+    private static final PairOfFloats SUM = new PairOfFloats();
 	  private static int total = 2360;
     @Override
-    public void reduce(PairOfStrings key, Iterable<IntWritable> values, Context context)
+    public void reduce(PairOfStrings key, Iterable<PairOfFloats> values, Context context)
         throws IOException, InterruptedException {
-      Iterator<IntWritable> iter = values.iterator();
+      Iterator<PairOfFloats> iter = values.iterator();
       int sum = 0;
+	    double pmi=1;
+	    float floatpmi = 1;
       while (iter.hasNext()) {
         sum += iter.next().get();
       }
@@ -125,19 +129,21 @@ public static final class MyCounts
 	    int xCounts = Integer.parseInt(MyCounts.giveCount(x));
 	    int yCounts = Integer.parseInt(MyCounts.giveCount(y));
 	    //System.out.println(xCounts + yCounts);
+		    pmi = total * sum / (xCounts * yCounts);
+		    floatpmi = (float)pmi
 	    }
 	    catch(Exception e)
 	    {
 		    System.out.println("Fuck Java");
 	    }
-      SUM.set(sum);
+      SUM.set(sum, floatpmi);
       context.write(key, SUM);
     }
   }
 
-  private static final class MyPartitioner extends Partitioner<PairOfStrings, IntWritable> {
+  private static final class MyPartitioner extends Partitioner<PairOfStrings, PairOfFloats> {
     @Override
-    public int getPartition(PairOfStrings key, IntWritable value, int numReduceTasks) {
+    public int getPartition(PairOfStrings key, PairOfFloats value, int numReduceTasks) {
       return (key.getLeftElement().hashCode() & Integer.MAX_VALUE) % numReduceTasks;
     }
   }
