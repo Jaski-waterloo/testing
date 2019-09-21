@@ -28,6 +28,6 @@ public class findTotal
 
 
  public static void main(String[] args) throws Exception {
-  System.out.println(Integer.ParseInt(giveCount("a")));
+  System.out.println(Integer.parseInt(giveCount("a")));
 }
 }
