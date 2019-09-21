@@ -219,14 +219,14 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 	    if(sum > threshold){
 		    String x = key.getLeftElement();
 		    String y = key.getRightElement();
-		    double probBoth = sum / totalSum;
-        	    double probX = total.get(x) / totalSum;
-        	    double probY = total.get(y) / totalSum;
+		    double Both = sum;
+        	    double X = total.get(x);
+        	    double Y = total.get(y);
 
-        	    double pmi = Math.log10(probBoth / (probX * probY));
+        	    double pmi = Math.log10((Both * totalSum) / (X * Y));
 		    float fpmi = 1;
 		    fpmi = (float)pmi;
-		    PMI.set(totalSum);
+		    PMI.set(fpmi);
 
       		   context.write(key, PMI);
     }
