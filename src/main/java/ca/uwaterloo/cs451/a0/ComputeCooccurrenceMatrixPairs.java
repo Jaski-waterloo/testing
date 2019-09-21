@@ -205,13 +205,12 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 	  
 	  
 
-    @Override
     public void reduce(PairOfStrings key, Iterable<PairOfFloats> values, Context context)
         throws IOException, InterruptedException {
       Iterator<PairOfFloats> iter = values.iterator();
       int sum = 0;
       while (iter.hasNext()) {
-        sum += iter.next().get();
+        sum += iter.next().getLeftElement();
       }
 	    if(sum > threshold){
 		    String x = key.getLeftElement();
