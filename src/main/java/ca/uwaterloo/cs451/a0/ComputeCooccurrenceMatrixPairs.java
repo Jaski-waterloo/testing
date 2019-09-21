@@ -33,7 +33,7 @@ import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.FloatWritable;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -123,9 +123,9 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     }
 }
 
-  private static final class MyMapper extends Mapper<LongWritable, Text, PairOfStrings, FloatWritable> {
+  private static final class MyMapper extends Mapper<LongWritable, Text, PairOfStrings, DoubleWritable> {
     private static final PairOfStrings PAIR = new PairOfStrings();
-    private static final FloatWritable ONE = new FloatWritable(1);
+    private static final DoubleWritable ONE = new DoubleWritable(1);
     private int window = 2;
 
     @Override
@@ -152,9 +152,9 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
   }
 
   private static final class MyReducer extends
-      Reducer<PairOfStrings, FloatWritable, PairOfStrings, FloatWritable> {
+      Reducer<PairOfStrings, DoubleWritable, PairOfStrings, DoubleWritable> {
 //     private static final IntWritable SUM = new IntWritable();
-	  private static final FloatWritable PMI = new FloatWritable(1);
+	  private static final DoubleWritable PMI = new DoubleWritable(1);
 	  private static Map<String, Integer> total = new HashMap<String, Integer>();
 	  private static int totalSum = 0;
 	  	  private static int threshold = 0;
@@ -209,9 +209,9 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 	  
 	  
 // @Override
-    public void reduce(PairOfStrings key, Iterable<FloatWritable> values, Context context)
+    public void reduce(PairOfStrings key, Iterable<DoubleWritable> values, Context context)
         throws IOException, InterruptedException {
-      Iterator<FloatWritable> iter = values.iterator();
+      Iterator<DoubleWritable> iter = values.iterator();
       float sum = 0;
 	    float fpmi = 1;
       while (iter.hasNext()) {
@@ -234,9 +234,9 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
   }
   }
 
-  private static final class MyPartitioner extends Partitioner<PairOfStrings, FloatWritable> {
+  private static final class MyPartitioner extends Partitioner<PairOfStrings, DoubleWritable> {
     @Override
-    public int getPartition(PairOfStrings key, FloatWritable value, int numReduceTasks) {
+    public int getPartition(PairOfStrings key, DoubleWritable value, int numReduceTasks) {
       return (key.getLeftElement().hashCode() & Integer.MAX_VALUE) % numReduceTasks;
     }
   }
@@ -342,9 +342,9 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
     FileOutputFormat.setOutputPath(job, new Path(args.output));
 
     job.setMapOutputKeyClass(PairOfStrings.class);
-    job.setMapOutputValueClass(FloatWritable.class);
+    job.setMapOutputValueClass(DoubleWritable.class);
     job.setOutputKeyClass(PairOfStrings.class);
-    job.setOutputValueClass(FloatWritable.class);
+    job.setOutputValueClass(DoubleWritable.class);
 
     job.setMapperClass(MyMapper.class);
     job.setCombinerClass(MyReducer.class);
