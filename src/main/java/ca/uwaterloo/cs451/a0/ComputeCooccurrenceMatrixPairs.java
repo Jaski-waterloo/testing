@@ -220,13 +220,13 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 		    String x = key.getLeftElement();
 		    String y = key.getRightElement();
 		    double Both = sum;
-        	    double X = total.get(x);
-        	    double Y = total.get(y);
+        	    int X = total.get(x);
+        	    int Y = total.get(y);
 
         	    double pmi = Math.log10((Both * totalSum) / (X * Y));
 		    float fpmi = 1;
 		    fpmi = (float)pmi;
-		    PMI.set(fpmi);
+		    PMI.set(X);
 
       		   context.write(key, PMI);
     }
