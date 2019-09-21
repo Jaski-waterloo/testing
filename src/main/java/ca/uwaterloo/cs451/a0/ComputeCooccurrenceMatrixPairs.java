@@ -124,43 +124,10 @@ import java.util.List;
 public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {	
 	
   private static final Logger LOG = Logger.getLogger(ComputeCooccurrenceMatrixPairs.class);
-	public static int total = 0;
+	public static int total = 2360;
 	
 	
-	public static final class MyMapperWordCount extends Mapper<LongWritable, Text, Text, IntWritable> {
-    // Reuse objects to save overhead of object creation.
-    private static final IntWritable ONE = new IntWritable(1);
-    private static final Text WORD = new Text();
-
-    @Override
-    public void map(LongWritable key, Text value, Context context)
-        throws IOException, InterruptedException {
-      for (String word : Tokenizer.tokenize(value.toString())) {
-        WORD.set(word);
-        context.write(WORD, ONE);
-      }
-    }
-  }
-
-  // Reducer: sums up all the counts.
-  public static final class MyReducerWordCount extends Reducer<Text, IntWritable, Text, IntWritable> {
-    // Reuse objects.
-    private static final IntWritable SUM = new IntWritable();
-
-    @Override
-    public void reduce(Text key, Iterable<IntWritable> values, Context context)
-        throws IOException, InterruptedException {
-      // Sum up values.
-      Iterator<IntWritable> iter = values.iterator();
-      int sum = 0;
-      while (iter.hasNext()) {
-        sum += iter.next().get();
-      }
-	    total += sum;
-      SUM.set(sum);
-      context.write(key, SUM);
-    }
-  }
+	
 
   private static final class MyMapper extends Mapper<LongWritable, Text, PairOfStrings, PairOfFloats> {
     private static final PairOfStrings PAIR = new PairOfStrings();
@@ -308,34 +275,7 @@ Word Count Implementation
 	  
 	  
 	  
-	  
-    Configuration conf = getConf();
-    Job jobWordCount = Job.getInstance(conf);
-    jobWordCount.setJobName(ComputeCooccurrenceMatrixPairs.class.getSimpleName());
-    jobWordCount.setJarByClass(ComputeCooccurrenceMatrixPairs.class); //=========================================
 
-    jobWordCount.setNumReduceTasks(args.numReducers);
-
-    FileInputFormat.setInputPaths(jobWordCount, new Path(args.input));
-    FileOutputFormat.setOutputPath(jobWordCount, new Path(args.output));
-
-    jobWordCount.setMapOutputKeyClass(Text.class);
-    jobWordCount.setMapOutputValueClass(IntWritable.class);
-    jobWordCount.setOutputKeyClass(Text.class);
-    jobWordCount.setOutputValueClass(IntWritable.class);
-    jobWordCount.setOutputFormatClass(TextOutputFormat.class);
-
-    jobWordCount.setMapperClass(MyMapperWordCount.class);
-    jobWordCount.setCombinerClass(MyReducerWordCount.class);
-    jobWordCount.setReducerClass(MyReducerWordCount.class);
-
-    // Delete the output directory if it exists already.
-    Path outputDir = new Path("temp");
-    FileSystem.get(conf).delete(outputDir, true);
-
-    long startTime = System.currentTimeMillis();
-    jobWordCount.waitForCompletion(true);
-    LOG.info("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
 
 	  
 	  
