@@ -80,7 +80,7 @@ public class PairsPMI extends Configured implements Tool {
       for (String word : Tokenizer.tokenize(value.toString())) {
 	      hash_set.add(word);
       }
-	    for(word : hash_set){
+	    for(String word : hash_set){
         WORD.set(word);
         context.write(WORD, ONE);
       }
