@@ -1,29 +1,9 @@
 package ca.uwaterloo.cs451.a0;
 
-import io.bespin.java.util.Tokenizer;
-import org.apache.hadoop.conf.Configured;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Partitioner;
-import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.util.Tool;
-import org.apache.hadoop.util.ToolRunner;
-import org.apache.log4j.Logger;
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
-import org.kohsuke.args4j.ParserProperties;
 import tl.lin.data.pair.PairOfStrings;
 import tl.lin.data.pair.PairOfFloats;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -65,10 +45,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.nio.file.*; 
 
 
@@ -212,7 +190,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 		return(log);
 	}
 	  
-// @Override
+   @Override
     public void reduce(PairOfStrings key, Iterable<DoubleWritable> values, Context context)
         throws IOException, InterruptedException {
       Iterator<DoubleWritable> iter = values.iterator();
@@ -230,7 +208,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 
 //         	    pmi = ((Both * totalSum) / (X * Y));
 // 		    pmi = getLog(pmi);
-		    pmi = (double)Math.log(10);
+		    pmi = (double)log(10);
 		    
 		    PMI.set(pmi);
 		    key.set(x,y);
