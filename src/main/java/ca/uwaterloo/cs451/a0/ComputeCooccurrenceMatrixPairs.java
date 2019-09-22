@@ -227,7 +227,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
         	    pmi = Math.log((Both * totalSum) / (X * Y));
 		    
 		    PMI.set(Math.log(10));
-		    key.set(x,y)
+		    key.set(x,y);
 
       		   context.write(key, PMI);
     }
