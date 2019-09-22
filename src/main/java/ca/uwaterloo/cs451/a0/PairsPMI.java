@@ -79,9 +79,9 @@ public class PairsPMI extends Configured implements Tool {
         throws IOException, InterruptedException {
 	Set<String> hash_Set = new HashSet<String>();
       for (String word : Tokenizer.tokenize(value.toString())) {
-	      hash_set.add(word);
+	      hash_Set.add(word);
       }
-	    for(String word : hash_set){
+	    for(String word : hash_Set){
         WORD.set(word);
         context.write(WORD, ONE);
       }
