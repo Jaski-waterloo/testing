@@ -213,7 +213,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
         throws IOException, InterruptedException {
       Iterator<DoubleWritable> iter = values.iterator();
       float sum = 0;
-	    float fpmi = 1;
+	    double pmi = 1;
       while (iter.hasNext()) {
         sum += iter.next().get();
       }
@@ -224,9 +224,9 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
         	    int X = total.get(x);
         	    int Y = total.get(y);
 
-        	    double pmi = Math.log10((Both * totalSum) / (X * Y));
+        	    pmi = Math.log10((Both * totalSum) / (X * Y));
 		    
-		    PMI.set(X);
+		    PMI.set(pmi);
 
       		   context.write(key, PMI);
     }
