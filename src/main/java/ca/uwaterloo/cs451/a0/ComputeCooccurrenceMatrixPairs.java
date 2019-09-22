@@ -207,6 +207,9 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
       
     }
 	  
+	public double getLog(double num){
+		double log = Math.log(num)/Math.log(10);
+		return(log);
 	  
 // @Override
     public void reduce(PairOfStrings key, Iterable<DoubleWritable> values, Context context)
@@ -225,8 +228,9 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
         	    int Y = total.get(y);
 
         	    pmi = Math.log((Both * totalSum) / (X * Y));
+		    pmi = getLog(pmi);
 		    
-		    PMI.set((Both * totalSum) / (X * Y));
+		    PMI.set(pmi);
 		    key.set(x,y);
 
       		   context.write(key, PMI);
