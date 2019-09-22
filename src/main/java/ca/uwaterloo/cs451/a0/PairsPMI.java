@@ -76,7 +76,11 @@ public class PairsPMI extends Configured implements Tool {
     @Override
     public void map(LongWritable key, Text value, Context context)
         throws IOException, InterruptedException {
+	Set<String> hash_Set = new HashSet<String>();
       for (String word : Tokenizer.tokenize(value.toString())) {
+	      hash_set.add(word);
+      }
+	    for(word : hash_set){
         WORD.set(word);
         context.write(WORD, ONE);
       }
