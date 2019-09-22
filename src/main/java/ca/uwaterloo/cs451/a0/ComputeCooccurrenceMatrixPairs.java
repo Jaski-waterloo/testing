@@ -210,6 +210,7 @@ public class ComputeCooccurrenceMatrixPairs extends Configured implements Tool {
 	public double getLog(double num){
 		double log = Math.log(num)/Math.log(10);
 		return(log);
+	}
 	  
 // @Override
     public void reduce(PairOfStrings key, Iterable<DoubleWritable> values, Context context)
