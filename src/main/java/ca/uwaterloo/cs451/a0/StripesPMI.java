@@ -205,7 +205,7 @@ public class StripesPMI extends Configured implements Tool {
           float pmi = (float) Math.log10((double)(sum * totalSum) / (double)(total.get(left) * total.get(currentKey)));
           PairOfFloatInt PMI_COUNT = new PairOfFloatInt();
           PMI_COUNT.set(pmi, sum);
-          finalMap.put(right, PMI_COUNT);
+          finalMap.put(currentKey, PMI_COUNT);
         }
       }
       if (finalMap.size() > 0) {
@@ -287,7 +287,7 @@ public class StripesPMI extends Configured implements Tool {
 //     job.getConfiguration().set("mapreduce.reduce.java.opts", "-Xmx3072m");
 
     // Delete the output directory if it exists already.
-    Path outputDir = new Path(sideDataPath);
+    Path outputDir = new Path(tempPath);
     FileSystem.get(conf).delete(outputDir, true);
 
     long startTime = System.currentTimeMillis();
@@ -296,8 +296,8 @@ public class StripesPMI extends Configured implements Tool {
 
 
     // Second Job
-    long count = job.getCounters().findCounter(MyMapper.MyCounter.LINE_COUNTER).getValue();
-    conf.setLong("counter", count);
+//     long count = job.getCounters().findCounter(MyMapper.MyCounter.LINE_COUNTER).getValue();
+//     conf.setLong("counter", count);
     Job secondJob = Job.getInstance(conf);
     secondJob.setJobName(StripesPMI.class.getSimpleName());
     secondJob.setJarByClass(StripesPMI.class);
