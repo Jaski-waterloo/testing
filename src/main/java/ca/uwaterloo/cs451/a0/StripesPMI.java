@@ -230,6 +230,7 @@ public class StripesPMI extends Configured implements Tool {
       context.write(key, FinalMap);
     }
   }
+  }
 
   /**
    * Creates an instance of this tool.
