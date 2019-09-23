@@ -108,7 +108,20 @@ public class StripesPMI extends Configured implements Tool {
     // Reuse objects.
     private static final IntWritable SUM = new IntWritable();
 
-   
+    @Override
+    public void reduce(Text key, Iterable<IntWritable> values, Context context)
+        throws IOException, InterruptedException {
+      // Sum up values.
+      Iterator<IntWritable> iter = values.iterator();
+      int sum = 0;
+      while (iter.hasNext()) {
+        sum += iter.next().get();
+      }
+      SUM.set(sum);
+      context.write(key, SUM);
+    }
+}
+  
 
   private static final class MyMapper extends Mapper<LongWritable, Text, Text, HMapStIW> {
     private static final HMapStIW MAP = new HMapStIW();
