@@ -88,7 +88,7 @@ public class PairsPMI extends Configured implements Tool {
 	    }
       }
     }
-}
+
 	
 	public static final class MyReducerWordCount extends Reducer<Text, IntWritable, Text, IntWritable> {
     // Reuse objects.
