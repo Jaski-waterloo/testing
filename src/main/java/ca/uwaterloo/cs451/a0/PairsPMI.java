@@ -195,7 +195,7 @@ public class PairsPMI extends Configured implements Tool {
 		return(log);
 	}
 	  
-   @Override
+   // @Override
     public void reduce(PairOfStrings key, Iterable<PairOfFloats> values, Context context)
         throws IOException, InterruptedException {
       Iterator<PairOfFloats> iter = values.iterator();
