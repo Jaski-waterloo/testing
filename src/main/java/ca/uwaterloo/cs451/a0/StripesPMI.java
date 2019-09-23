@@ -327,7 +327,7 @@ public class StripesPMI extends Configured implements Tool {
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(HMapStIW.class);
     job.setOutputKeyClass(Text.class);
-    job.setOutputValueClass(HashMapWritable<Text, PairOfFloats>.class);
+    job.setOutputValueClass(HashMapWritable.class);
 
     job.setMapperClass(MyMapper.class);
     job.setCombinerClass(MyReducer.class);
