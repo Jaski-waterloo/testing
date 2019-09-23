@@ -211,9 +211,9 @@ public class PairsPMI extends Configured implements Tool {
         	    int X = total.get(x);
         	    int Y = total.get(y);
 
-//         	    pmi = ((Both * totalSum) / (X * Y));
+        	    pmi = ((Both * totalSum) / (X * Y));
 // 		    pmi = getLog(pmi);
-		    pmi = (double)Math.log(10);
+		    pmi = (double)Math.log10(pmi);
 		    System.out.println(pmi);
 		    
 		    PMI.set(pmi);
