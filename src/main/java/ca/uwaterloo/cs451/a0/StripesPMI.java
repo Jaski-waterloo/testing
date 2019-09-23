@@ -135,7 +135,7 @@ public class StripesPMI extends Configured implements Tool {
     }
 
 //     @Override
-    public void map(LongWritable key, String value, Context context)
+    public void map(LongWritable key, Text value, Context context)
         throws IOException, InterruptedException {
       List<String> tokens = Tokenizer.tokenize(value.toString());
 
@@ -143,7 +143,6 @@ public class StripesPMI extends Configured implements Tool {
         MAP.clear();
         for (int j = Math.max(i - window, 0); j < Math.min(i + window + 1, tokens.size()); j++) {
           if (i == j) continue;
-          
           MAP.increment(tokens.get(j));
         }
 
@@ -331,7 +330,7 @@ public class StripesPMI extends Configured implements Tool {
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(HMapStIW.class);
     job.setOutputKeyClass(Text.class);
-    job.setOutputValueClass(HashMapWritable.class);
+    job.setOutputValueClass(HashMap<String, PairOfFloats>.class);
 
     job.setMapperClass(MyMapper.class);
     job.setCombinerClass(MyReducer.class);
