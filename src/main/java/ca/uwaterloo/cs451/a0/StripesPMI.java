@@ -219,10 +219,11 @@ public class StripesPMI extends Configured implements Tool {
       }
     for(String curKey : map.keySet()){
         if (map.get(curKey) < 10) continue;
+	     String X = key.toString();
 
         double probPair = (double)map.get(curKey) / (double)totalLines;
-        double probLeft = (double)wordCount.get(leftTerm) / (double)totalLines;
-        double probRight = (double)wordCount.get(curKey) / (double)totalLines;
+        double probLeft = (double)total.get(X) / (double)totalSum;
+        double probRight = (double)total.get(curKey) / (double)totalSum;
 
         double pmi = Math.log10((double)probPair / ((double)probLeft * (double)probRight));
         float fpmi = (float)pmi;
