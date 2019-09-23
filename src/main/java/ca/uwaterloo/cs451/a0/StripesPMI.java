@@ -41,42 +41,30 @@ import java.io.InputStreamReader;
 
 
 public class StripesPMI extends Configured implements Tool {
-  private static final Logger LOG = Logger.getLogger(StripesPMI.class);
-  private static final int WORD_LIMIT = 40;
+ private static final Logger LOG = Logger.getLogger(PairsPMI.class);
+	
 
-  public static final class MyMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
+  // Mapper: emits (token, 1) for every word occurrence.
+  public static final class MyMapperWordCount extends Mapper<LongWritable, Text, Text, IntWritable> {
     // Reuse objects to save overhead of object creation.
     private static final IntWritable ONE = new IntWritable(1);
     private static final Text WORD = new Text();
 
-    public enum MyCounter { LINE_COUNTER };
-
     @Override
     public void map(LongWritable key, Text value, Context context)
         throws IOException, InterruptedException {
-      int numWords = 0;
-      Set<String> set = new HashSet<String>();
+	Set<String> hash_Set = new HashSet<String>();
       for (String word : Tokenizer.tokenize(value.toString())) {
-        set.add(word);
-        numWords++;
-        if (numWords >= WORD_LIMIT) break;
+	      hash_Set.add(word);
       }
-
-      String[] words = new String[set.size()];
-      words = set.toArray(words);
-
-      for (int i = 0; i < words.length; i++) {
-        WORD.set(words[i]);
+	    for(String word : hash_Set){
+        WORD.set(word);
         context.write(WORD, ONE);
       }
-
-      Counter counter = context.getCounter(MyCounter.LINE_COUNTER);
-      counter.increment(1L);
     }
-  }
-
-  // Reducer: sums up all the counts.
-  public static final class MyReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
+}
+	
+	public static final class MyReducerWordCount extends Reducer<Text, IntWritable, Text, IntWritable> {
     // Reuse objects.
     private static final IntWritable SUM = new IntWritable();
 
@@ -89,13 +77,13 @@ public class StripesPMI extends Configured implements Tool {
       while (iter.hasNext()) {
         sum += iter.next().get();
       }
-
       SUM.set(sum);
       context.write(key, SUM);
     }
-  }
+}
 
-  public static final class MySecondMapper extends Mapper<LongWritable, Text, Text, HMapStIW> {
+
+  public static final class MyMapper extends Mapper<LongWritable, Text, Text, HMapStIW> {
     private static final HMapStIW MAP = new HMapStIW();
     private static final Text KEY = new Text();
 
@@ -126,7 +114,7 @@ public class StripesPMI extends Configured implements Tool {
     }
   }
 
-  public static final class MySecondCombiner extends Reducer<Text, HMapStIW, Text, HMapStIW> {
+  public static final class MyCombiner extends Reducer<Text, HMapStIW, Text, HMapStIW> {
 
     @Override
     public void reduce(Text key, Iterable<HMapStIW> values, Context context)
@@ -142,34 +130,57 @@ public class StripesPMI extends Configured implements Tool {
     }
   }
 
-  public static final class MySecondReducer extends Reducer<Text, HMapStIW, Text, HashMapWritable> {
+  public static final class MyReducer extends Reducer<Text, HMapStIW, Text, HashMapWritable> {
     private static final Text KEY = new Text();
-    private static final HashMapWritable MAP = new HashMapWritable();
+    private static final HashMapWritable finalMap = new HashMapWritable();
+    private static int totalSum = 0;
+    private static inst threshold = 0;
     
-    private static final Map<String, Integer> wordCount = new HashMap<String, Integer>();
-    private static long numLines;
+    private static final Map<String, Integer> total = new HashMap<String, Integer>();
 
     @Override
-    public void setup(Context context) throws IOException, InterruptedException {
-      Configuration conf = context.getConfiguration();
-      numLines = conf.getLong("counter", 0L);
+    public void setup(Context context) throws IOException{
+      //TODO Read from intermediate output of first job
+      // and build in-memory map of terms to their individual totals
+	    	    threshold = context.getConfiguration().getInt("threshold", 3);
 
+      Configuration conf = context.getConfiguration();
       FileSystem fs = FileSystem.get(conf);
-      FileStatus[] status = fs.globStatus(new Path("tmp/part-r-*"));
-      for (FileStatus file : status) {
-        FSDataInputStream is = fs.open(file.getPath());
-        InputStreamReader isr = new InputStreamReader(is, "UTF-8");
-        BufferedReader br = new BufferedReader(isr);
-        String line = br.readLine();
-        while (line != null) {
-          String[] data = line.split("\\s+");
-          if (data.length == 2) {
-            wordCount.put(data[0], Integer.parseInt(data[1]));
-          }
-          line = br.readLine();
-        }
-        br.close();
+      
+      String yoPath = conf.get("intermediatePath");
+      Path filePath = new Path(yoPath + "/part-r-00000");
+	    
+
+      if(!fs.exists(filePath)){
+        throw new IOException("File Not Found: ");
       }
+      
+      BufferedReader reader = null;
+      try{
+        FSDataInputStream fin = fs.open(filePath);
+        InputStreamReader inStream = new InputStreamReader(fin);
+        reader = new BufferedReader(inStream);
+        
+      } catch(FileNotFoundException e){
+        throw new IOException("Can not open file");
+      }
+      
+      
+      String line = reader.readLine();
+      while(line != null){
+        
+        String[] parts = line.split("\\s+");
+        if(parts.length != 2){
+          LOG.info("incorrect format");
+        } else {
+          total.put(parts[0], Integer.parseInt(parts[1]));
+		totalSum += Integer.parseInt(parts[1]);
+        }
+        line = reader.readLine();
+      }
+      
+      reader.close();
+      
     }
 
     @Override
@@ -188,10 +199,10 @@ public class StripesPMI extends Configured implements Tool {
       String left = key.toString();
       KEY.set(left);
       MAP.clear();
-      for (String right : map.keySet()) {
-        if (map.get(right) >= threshold) {
-          int sum = map.get(right);
-          float pmi = (float) Math.log10((double)(sum * numLines) / (double)(wordCount.get(left) * wordCount.get(right)));
+      for (String currentKey : map.keySet()) {
+        if (map.get(currentKey) > threshold) {
+          int sum = map.get(currentKey);
+          float pmi = (float) Math.log10((double)(sum * numLines) / (double)(total.get(left) * total.get(currentKey)));
           PairOfFloatInt PMI_COUNT = new PairOfFloatInt();
           PMI_COUNT.set(pmi, sum);
           MAP.put(right, PMI_COUNT);
@@ -230,7 +241,7 @@ public class StripesPMI extends Configured implements Tool {
     final Args args = new Args();
     CmdLineParser parser = new CmdLineParser(args, ParserProperties.defaults().withUsageWidth(100));
 
-    String sideDataPath = "tmp/";
+    String sideDataPath = "temp";
 
     try {
       parser.parseArgument(argv);
@@ -247,10 +258,11 @@ public class StripesPMI extends Configured implements Tool {
     LOG.info(" - threshold: " + args.threshold);
 
     Configuration conf = getConf();
-    conf.set("sideDataPath", sideDataPath);
-    conf.set("threshold", Integer.toString(args.threshold));
+        Path tempDir = new Path(tempPath);
+
+    conf.set("intermediatePath", tempPath);
     Job job = Job.getInstance(conf);
-    job.setJobName(StripesPMI.class.getSimpleName());
+    job.setJobName(StripesPMI.class.getSimpleName() + "Word Count");
     job.setJarByClass(StripesPMI.class);
 
     job.setNumReduceTasks(args.numReducers);
@@ -264,9 +276,9 @@ public class StripesPMI extends Configured implements Tool {
     job.setOutputValueClass(IntWritable.class);
     job.setOutputFormatClass(TextOutputFormat.class);
 
-    job.setMapperClass(MyMapper.class);
-    job.setCombinerClass(MyReducer.class);
-    job.setReducerClass(MyReducer.class);
+    job.setMapperClass(MyMapperWordCount.class);
+    job.setCombinerClass(MyReducerWordCount.class);
+    job.setReducerClass(MyReducerWordCount.class);
 
 //     job.getConfiguration().setInt("mapred.max.split.size", 1024 * 1024 * 32);
 //     job.getConfiguration().set("mapreduce.map.memory.mb", "3072");
@@ -301,9 +313,9 @@ public class StripesPMI extends Configured implements Tool {
     secondJob.setOutputValueClass(HashMapWritable.class);
     secondJob.setOutputFormatClass(TextOutputFormat.class);
 
-    secondJob.setMapperClass(MySecondMapper.class);
-    secondJob.setCombinerClass(MySecondCombiner.class);
-    secondJob.setReducerClass(MySecondReducer.class);
+    secondJob.setMapperClass(MyMapper.class);
+    secondJob.setCombinerClass(MyCombiner.class);
+    secondJob.setReducerClass(MyReducer.class);
 
 //     secondJob.getConfiguration().setInt("mapred.max.split.size", 1024 * 1024 * 32);
 //     secondJob.getConfiguration().set("mapreduce.map.memory.mb", "3072");
