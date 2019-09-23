@@ -200,7 +200,7 @@ public class StripesPMI extends Configured implements Tool {
       KEY.set(left);
       finalMap.clear();
       for (String currentKey : map.keySet()) {
-        if (map.get(currentKey) > threshold) {
+        if (map.get(currentKey) > 10) {
           int sum = map.get(currentKey);
           float pmi = (float) Math.log10((double)(sum * totalSum) / (double)(total.get(left) * total.get(currentKey)));
           PairOfFloatInt PMI_COUNT = new PairOfFloatInt();
