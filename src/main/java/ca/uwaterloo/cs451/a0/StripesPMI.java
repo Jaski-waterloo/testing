@@ -1,40 +1,25 @@
-/**
- * Bespin: reference implementations of "big data" algorithms
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-package ca.uwaterloo.cs451.a0;
-
-import org.apache.hadoop.mapreduce.Partitioner;
-import tl.lin.data.pair.PairOfStrings;
-import tl.lin.data.pair.PairOfFloats;
+package ca.uwaterloo.cs.bigdata2017w.assignment1;
 
 import io.bespin.java.util.Tokenizer;
-import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.SequenceFile.Reader;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
-import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.log4j.Logger;
@@ -42,315 +27,302 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.ParserProperties;
+import tl.lin.data.pair.PairOfFloats;
+import tl.lin.data.pair.PairOfFloatInt;
+import tl.lin.data.pair.PairOfStrings;
+import tl.lin.data.map.HMapStFW;
 import tl.lin.data.map.HMapStIW;
-import tl.lin.data.map.HashMapWritable;
 
-
+import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
-import java.lang.Math;
-import java.io.*;
-
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.nio.file.*; 
-
-/**
- * <p>
- * Implementation of the "pairs" algorithm for computing co-occurrence matrices from a large text
- * collection. This algorithm is described in Chapter 3 of "Data-Intensive Text Processing with 
- * MapReduce" by Lin &amp; Dyer, as well as the following paper:
- * </p>
- *
- * <blockquote>Jimmy Lin. <b>Scalable Language Processing Algorithms for the Masses: A Case Study in
- * Computing Word Co-occurrence Matrices with MapReduce.</b> <i>Proceedings of the 2008 Conference
- * on Empirical Methods in Natural Language Processing (EMNLP 2008)</i>, pages 419-428.</blockquote>
- *
- * @author Jimmy Lin
- */
- 
- 
 public class StripesPMI extends Configured implements Tool {
-  private static final Logger LOG = Logger.getLogger(StripesPMI.class);
-  
-  
-  // Mapper: emits (token, 1) for every word occurrence.
-  public static final class MyMapperWordCount extends Mapper<LongWritable, Text, Text, IntWritable> {
-    // Reuse objects to save overhead of object creation.
-    private static final IntWritable ONE = new IntWritable(1);
-    private static final Text WORD = new Text();
+	private static final Logger LOG = Logger.getLogger(StripesPMI.class);
 
-    @Override
-    public void map(LongWritable key, Text value, Context context)
-        throws IOException, InterruptedException {
-	Set<String> hash_Set = new HashSet<String>();
-      for (String word : Tokenizer.tokenize(value.toString())) {
-	      hash_Set.add(word);
-      }
-	    for(String word : hash_Set){
-        WORD.set(word);
-        context.write(WORD, ONE);
-      }
-    }
-  }
-	
-	public static final class MyReducerWordCount extends Reducer<Text, IntWritable, Text, IntWritable> {
-    // Reuse objects.
-    private static final IntWritable SUM = new IntWritable();
+	public static final class PreMapper extends Mapper<LongWritable, Text, Text, LongWritable> {
+		private static final LongWritable ONE = new LongWritable(1);
+		private static final Text PMIKEY = new Text();
 
-    @Override
-    public void reduce(Text key, Iterable<IntWritable> values, Context context)
-        throws IOException, InterruptedException {
-      // Sum up values.
-      Iterator<IntWritable> iter = values.iterator();
-      int sum = 0;
-      while (iter.hasNext()) {
-        sum += iter.next().get();
-      }
-      SUM.set(sum);
-      context.write(key, SUM);
-    }
-}
-  
+		@Override
+		public void map(LongWritable key, Text value, Context context)
+		throws IOException, InterruptedException {
+		HashMap<Text, Boolean> hash = new HashMap<Text, Boolean>();
+		List<String> tokens = Tokenizer.tokenize(value.toString());
 
-  private static final class MyMapper extends Mapper<LongWritable, Text, Text, HMapStIW> {
-    private static final HMapStIW MAP = new HMapStIW();
-    private static final Text KEY = new Text();
+		for (int i = 0; i < tokens.size() && i < 40; i++) {
+			PMIKEY.set(tokens.get(i));
+			if (!hash.containsKey(PMIKEY)) {
+				context.write(PMIKEY, ONE);
+				hash.put(PMIKEY, true);
+			}
+		}
 
-    private int window = 2;
+		// count lines
+		PMIKEY.set("*");
+		context.write(PMIKEY, ONE);
+		}
+	}
 
-    @Override
-    public void setup(Context context) {
-      window = context.getConfiguration().getInt("window", 2);
-    }
+	public static final class MyMapper extends Mapper<LongWritable, Text, Text, HMapStIW> {
+		private static final Text PMIKEY = new Text();
 
-//     @Override
-    public void map(LongWritable key, Text value, Context context)
-        throws IOException, InterruptedException {
-      List<String> tokens = Tokenizer.tokenize(value.toString());
+		@Override
+		public void map(LongWritable key, Text value, Context context)
+		throws IOException, InterruptedException {
+		HashMap<String, HMapStIW> stripes = new HashMap<String, HMapStIW>();
+		List<String> tokens = Tokenizer.tokenize(value.toString());
 
-      for (int i = 0; i < tokens.size(); i++) {
-        MAP.clear();
-        for (int j = Math.max(i - window, 0); j < Math.min(i + window + 1, tokens.size()); j++) {
-          if (i == j) continue;
-          MAP.increment(tokens.get(j));
-        }
+		for (int i = 0; i < tokens.size() && i < 40; i++) {
+			HashMap<String, Boolean> found = new HashMap<String, Boolean>();
+			String w1 = tokens.get(i);
+			for (int j = 0; j < tokens.size() && j < 40; j++) {
+				String w2 = tokens.get(j);
+				// co-occurring pair
+				if (i != j && !w1.equals(w2)) {
+					if (!found.containsKey(w2)) {
+						if (stripes.containsKey(w1)) {
+							HMapStIW stripe = stripes.get(w1);
+							if (stripe.containsKey(w2)) {
+								stripe.put(w2, stripe.get(w2) + 1);
+							} else {
+								stripe.put(w2, 1);
+							}
+							stripes.put(w1, stripe);
+						} else {
+							HMapStIW stripe = new HMapStIW();
+							stripe.put(w2, 1);
+							stripes.put(w1, stripe);
+						}
+					}
+				}
+				found.put(w2, true);
+			}
+			found.put(w1, true);
+		}
 
-        KEY.set(tokens.get(i));
-        context.write(KEY, MAP);
-      }
-    }
-  }
-  
+		for (String t : stripes.keySet()) {
+			PMIKEY.set(t);
+			context.write(PMIKEY, stripes.get(t));
+		}
+		}
+	}
 
-  private static final class MyReducer extends Reducer<Text, HMapStIW, Text, HashMap<String, PairOfFloats>> {
-  
-  private static final PairOfFloats PMI = new PairOfFloats(1,1);
-	  private static Map<String, Integer> total = new HashMap<String, Integer>();
-	  private static int totalSum = 0;
+	public static final class PreCombiner extends Reducer<Text, LongWritable, Text, LongWritable> {
+		private static final LongWritable COUNT = new LongWritable();
 
-	  	  private static int threshold = 0;
-  
-  @Override
-    public void setup(Context context) throws IOException{
-      //TODO Read from intermediate output of first job
-      // and build in-memory map of terms to their individual totals
-	    	    threshold = context.getConfiguration().getInt("threshold", 3);
+		@Override
+		public void reduce(Text key, Iterable<LongWritable> values, Context context)
+		throws IOException, InterruptedException {
+		int sum = 0;
+		Iterator<LongWritable> iter = values.iterator();
+		while(iter.hasNext()) {
+			sum += iter.next().get();
+		}
+		COUNT.set(sum);
+		context.write(key, COUNT);
+		}
+	}
 
-      Configuration conf = context.getConfiguration();
-      FileSystem fs = FileSystem.get(conf);
-      
-      String yoPath = conf.get("intermediatePath");
-      Path filePath = new Path(yoPath + "/part-r-00000");
-	    
+	public static final class MyCombiner extends Reducer<Text, HMapStIW, Text, HMapStIW> {
+		@Override
+		public void reduce(Text key, Iterable<HMapStIW> values, Context context)
+		throws IOException, InterruptedException {
+		HMapStIW stripe = new HMapStIW();
+		Iterator<HMapStIW> iter = values.iterator();
+		while (iter.hasNext()) {
+			stripe.plus(iter.next());
+		}
+		context.write(key, stripe);
+		}
+	}
 
-      if(!fs.exists(filePath)){
-        throw new IOException("File Not Found: ");
-      }
-      
-      BufferedReader reader = null;
-      try{
-        FSDataInputStream fin = fs.open(filePath);
-        InputStreamReader inStream = new InputStreamReader(fin);
-        reader = new BufferedReader(inStream);
-        
-      } catch(FileNotFoundException e){
-        throw new IOException("Can not open file");
-      }
-      
-      
-      String line = reader.readLine();
-      while(line != null){
-        
-        String[] parts = line.split("\\s+");
-        if(parts.length != 2){
-          LOG.info("incorrect format");
-        } else {
-          total.put(parts[0], Integer.parseInt(parts[1]));
-		totalSum += Integer.parseInt(parts[1]);
-        }
-        line = reader.readLine();
-      }
-      
-      reader.close();
-      
-    }
-  
-//     @Override
-    public void reduce(Text key, Iterable<HMapStIW> values, Context context)
-        throws IOException, InterruptedException {
-	    HashMap<String, PairOfFloats> finalMap = new HashMap<String, PairOfFloats>();
-      Iterator<HMapStIW> iter = values.iterator();
-      HMapStIW map = new HMapStIW();
-      float sum = 0;
-      double pmi = 1;
-      while (iter.hasNext()) {
-      map.plus(iter.next());
-      }
-    for(String curKey : map.keySet()){
-        if (map.get(curKey) < 10) continue;
-	     String X = key.toString();
+	public static final class PreReducer extends Reducer<Text, LongWritable, Text, LongWritable> {
+		private static final LongWritable COUNT = new LongWritable();
 
-        double probPair = (double)map.get(curKey) / (double)totalSum;
-        double probLeft = (double)total.get(X) / (double)totalSum;
-        double probRight = (double)total.get(curKey) / (double)totalSum;
-
-        pmi = Math.log10((double)probPair / ((double)probLeft * (double)probRight));
-        float fpmi = (float)pmi;
-        float count = map.get(curKey);
-        PMI.set(count, fpmi);
-        finalMap.put(curKey,PMI);
-
-      context.write(key, finalMap);
-    }
-  }
-  }
-
-  /**
-   * Creates an instance of this tool.
-   */
-  private StripesPMI() {}
-
-  private static final class Args {
-    @Option(name = "-input", metaVar = "[path]", required = true, usage = "input path")
-    String input;
-
-    @Option(name = "-output", metaVar = "[path]", required = true, usage = "output path")
-    String output;
-
-    @Option(name = "-reducers", metaVar = "[num]", usage = "number of reducers")
-    int numReducers = 1;
-
-    @Option(name = "-window", metaVar = "[num]", usage = "cooccurrence window")
-    int window = 2;
-  }
-
-  /**
-   * Runs this tool.
-   */
-  public int run(String[] argv) throws Exception {
-    Args args = new Args();
-    CmdLineParser parser = new CmdLineParser(args, ParserProperties.defaults().withUsageWidth(100));
-
-    try {
-      parser.parseArgument(argv);
-    } catch (CmdLineException e) {
-      System.err.println(e.getMessage());
-      parser.printUsage(System.err);
-      return -1;
-    }
-
-    LOG.info("Tool: " + StripesPMI.class.getSimpleName());
-    LOG.info(" - input path: " + args.input);
-    LOG.info(" - output path: " + args.output);
-    LOG.info(" - window: " + args.window);
-    LOG.info(" - number of reducers: " + args.numReducers);
-    
-    
-    Configuration conf = getConf();
-    Job job1 = Job.getInstance(conf);
-    job1.setJobName(StripesPMI.class.getSimpleName() + "WordCount");
-    job1.setJarByClass(StripesPMI.class);
-
-    job1.setNumReduceTasks(args.numReducers);
-	  String tempPath = "temp";
-    Path tempDir = new Path(tempPath);
-    conf.set("intermediatePath", tempPath);
+		@Override
+		public void reduce(Text key, Iterable<LongWritable> values, Context context)
+		throws IOException, InterruptedException {
+		int sum = 0;
+		Iterator<LongWritable> iter = values.iterator();
+		while(iter.hasNext()) {
+			sum += iter.next().get();
+		}
+		COUNT.set(sum);
+		context.write(key, COUNT);
+		}
+	}
 
 
-    FileInputFormat.setInputPaths(job1, new Path(args.input));
-    FileOutputFormat.setOutputPath(job1, new Path(tempPath));
+	public static final class MyReducer extends Reducer<Text, HMapStIW, Text, HashMap<String, PairOfFloatInt>> {
+		private static HashMap<String, Integer> counts = new HashMap<String, Integer>();
+		private int lines = 0;
+		private int threshold = 10;
 
-    job1.setMapOutputKeyClass(Text.class);
-    job1.setMapOutputValueClass(IntWritable.class);
-    job1.setOutputKeyClass(Text.class);
-    job1.setOutputValueClass(IntWritable.class);
-    job1.setOutputFormatClass(TextOutputFormat.class);
+		@Override
+		public void setup(Context context) throws IOException {
+			threshold = context.getConfiguration().getInt("threshold", 10);
+			Path path = new Path("stripesbin");
+			FileSystem fs = FileSystem.get(context.getConfiguration());
+			FileStatus[] fileList = fs.listStatus(path);
+			for (FileStatus file : fileList) {
+				if (!file.isDir() && file.getPath().toString().contains("stripesbin/part-r-")) {
+					Path fp = file.getPath();
+					SequenceFile.Reader reader = new SequenceFile.Reader(context.getConfiguration(), SequenceFile.Reader.file(fp));
 
-    job1.setMapperClass(MyMapperWordCount.class);
-    job1.setCombinerClass(MyReducerWordCount.class);
-    job1.setReducerClass(MyReducerWordCount.class);
+					Text key = new Text();
+					LongWritable value = new LongWritable();
+					while (reader.next(key, value)) {
+						if (key.toString().equals("*")) {
+							lines = Integer.parseInt(value.toString());
+						} else {
+							counts.put(key.toString(), Integer.parseInt(value.toString()));
+						}
+					}
 
-    // Delete the output directory if it exists already.
-    
-    Path outputDir = tempDir;
-    FileSystem.get(conf).delete(tempDir, true);
+					reader.close();
+				}
+			}
+		}
 
-    long startTime = System.currentTimeMillis();
-    long totalTime = System.currentTimeMillis();
-    job1.waitForCompletion(true);
-    LOG.info("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
-    
+		@Override
+		public void reduce(Text key, Iterable<HMapStIW> values, Context context)
+		throws IOException, InterruptedException {
+		HashMap<String, PairOfFloatInt> stripes = new HashMap<String, PairOfFloatInt>();
+		HMapStIW stripe = new HMapStIW();
+		Iterator<HMapStIW> iter = values.iterator();
+		while (iter.hasNext()) {
+			stripe.plus(iter.next());
+		}
 
-    Job job = Job.getInstance(getConf());
-    job.setJobName(StripesPMI.class.getSimpleName() + "Final Output");
-    job.setJarByClass(StripesPMI.class);
+		for (String word : stripe.keySet()) {
+			int count = stripe.get(word);
+			if (count >= threshold) {
+				float d1 = counts.get(key.toString());
+				float d2 = counts.get(word);
+				float numerator = stripe.get(word) * lines;
+				float pmi = (float)(Math.log10(numerator / (d1 * d2)));
+				PairOfFloatInt pmiValue = new PairOfFloatInt(pmi, count);
+				stripes.put(word, pmiValue);
+			}
+		}
+		if (!stripes.isEmpty()) {
+			context.write(key, stripes);
+		}
+		}
+	}
 
-    // Delete the output directory if it exists already.
-    Path outputDir1 = new Path(args.output);
-    FileSystem.get(getConf()).delete(outputDir1, true);
+	private StripesPMI() {}
 
-    job.getConfiguration().setInt("window", args.window);
+	private static final class Args {
+		@Option(name = "-input", metaVar = "[path]", required = true, usage = "input path")
+			String input;
 
-    job.setNumReduceTasks(args.numReducers);
+		@Option(name = "-output", metaVar = "[path]", required = true, usage = "output path")
+			String output;
 
-    FileInputFormat.setInputPaths(job, new Path(args.input));
-    FileOutputFormat.setOutputPath(job, new Path(args.output));
+		@Option(name = "-reducers", metaVar = "[num]", usage = "number of reducers")
+			int numReducers = 1;
 
-    job.setMapOutputKeyClass(Text.class);
-    job.setMapOutputValueClass(HMapStIW.class);
-    job.setOutputKeyClass(Text.class);
-    job.setOutputValueClass(HashMap.class);
+		@Option(name = "-threshold", metaVar = "[num]", usage = "do not show below threshold")
+			int threshold = 10;
+	}
 
-    job.setMapperClass(MyMapper.class);
-    job.setCombinerClass(MyReducer.class);
-    job.setReducerClass(MyReducer.class);
+	@Override
+	public int run(String[] argv) throws Exception {
+		final Args args = new Args();
+		CmdLineParser parser = new CmdLineParser(args, ParserProperties.defaults().withUsageWidth(100));
 
-    startTime = System.currentTimeMillis();
-    job.waitForCompletion(true);
-    System.out.println("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
-     System.out.println("Total Time " + (System.currentTimeMillis() - totalTime) / 1000.0 + " seconds");
+		try {
+			parser.parseArgument(argv);
+		} catch (CmdLineException e) {
+			System.err.println(e.getMessage());
+			parser.printUsage(System.err);
+			return -1;
+		}
 
-    return 0;
-  }
+		LOG.info("Tool: " + StripesPMI.class.getSimpleName());
+		LOG.info(" - input path: " + args.input);
+		LOG.info(" - output path: " + args.output);
+		LOG.info(" - number of reducers: " + args.numReducers);
+		LOG.info(" - threshold: " + args.threshold);
 
-  /**
-   * Dispatches command-line arguments to the tool via the {@code ToolRunner}.
-   *
-   * @param args command-line arguments
-   * @throws Exception if tool encounters an exception
-   */
-  public static void main(String[] args) throws Exception {
-    ToolRunner.run(new StripesPMI(), args);
-  }
+		Configuration conf = getConf();
+		Job job = Job.getInstance(conf);
+		job.setJobName(StripesPMI.class.getSimpleName());
+		job.setJarByClass(StripesPMI.class);
+
+		job.setNumReduceTasks(args.numReducers);
+
+		FileInputFormat.setInputPaths(job, new Path(args.input));
+		FileOutputFormat.setOutputPath(job, new Path("stripesbin"));
+
+		job.setMapOutputKeyClass(Text.class);
+		job.setMapOutputValueClass(LongWritable.class);
+		job.setOutputKeyClass(Text.class);
+		job.setOutputValueClass(LongWritable.class);
+		job.setOutputFormatClass(SequenceFileOutputFormat.class);
+
+		job.setMapperClass(PreMapper.class);
+		job.setCombinerClass(PreCombiner.class);
+		job.setReducerClass(PreReducer.class);
+
+// 		job.getConfiguration().setInt("mapred.max.split.size", 1024 * 1024 * 32);
+// 		job.getConfiguration().set("mapreduce.map.memory.mb", "3072");
+// 		job.getConfiguration().set("mapreduce.map.java.opts", "-Xmx3072m");
+// 		job.getConfiguration().set("mapreduce.reduce.memory.mb", "3072");
+// 		job.getConfiguration().set("mapreduce.reduce.java.opts", "-Xmx3072m");
+
+		// Delete the output directory if it exists already.
+		Path outputDir = new Path("stripesbin");
+		FileSystem.get(conf).delete(outputDir, true);
+
+		long startTime = System.currentTimeMillis();
+		job.waitForCompletion(true);
+		LOG.info("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
+
+		Job postJob = Job.getInstance(conf);
+		postJob.setJobName(StripesPMI.class.getSimpleName());
+		postJob.setJarByClass(StripesPMI.class);
+
+		postJob.getConfiguration().setInt("threshold", args.threshold);
+		postJob.setNumReduceTasks(args.numReducers);
+
+		FileInputFormat.setInputPaths(postJob, new Path(args.input));
+		FileOutputFormat.setOutputPath(postJob, new Path(args.output));
+
+		postJob.setMapOutputKeyClass(Text.class);
+		postJob.setMapOutputValueClass(HMapStIW.class);
+		postJob.setOutputKeyClass(Text.class);
+		postJob.setOutputValueClass(HashMap.class);
+		postJob.setOutputFormatClass(TextOutputFormat.class);
+
+		postJob.setMapperClass(MyMapper.class);
+		postJob.setCombinerClass(MyCombiner.class);
+		postJob.setReducerClass(MyReducer.class);
+
+// 		postJob.getConfiguration().setInt("mapred.max.split.size", 1024 * 1024 * 32);
+// 		postJob.getConfiguration().set("mapreduce.map.memory.mb", "3072");
+// 		postJob.getConfiguration().set("mapreduce.map.java.opts", "-Xmx3072m");
+// 		postJob.getConfiguration().set("mapreduce.reduce.memory.mb", "3072");
+// 		postJob.getConfiguration().set("mapreduce.reduce.java.opts", "-Xmx3072m");
+
+		Path postOutputDir = new Path(args.output);
+		FileSystem.get(conf).delete(postOutputDir, true);
+
+		postJob.waitForCompletion(true);
+		LOG.info("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
+
+		return 0;
+	}
+
+	/**
+	 * Dispatches command-line arguments to the tool via the {@code ToolRunner}.
+	 */
+	public static void main(String[] args) throws Exception {
+		ToolRunner.run(new StripesPMI(), args);
+	}
 }
