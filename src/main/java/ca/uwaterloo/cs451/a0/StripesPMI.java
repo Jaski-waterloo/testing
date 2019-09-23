@@ -158,7 +158,6 @@ public class StripesPMI extends Configured implements Tool {
   private static final PairOfFloats PMI = new PairOfFloats(1,1);
 	  private static Map<String, Integer> total = new HashMap<String, Integer>();
 	  private static int totalSum = 0;
-	  private static Map<Text, PairOfFloats> finalMap = HashMap<Text, PairOfFloats>();
 
 	  	  private static int threshold = 0;
   
@@ -210,6 +209,7 @@ public class StripesPMI extends Configured implements Tool {
     @Override
     public void reduce(Text key, Iterable<HMapStIW> values, Context context)
         throws IOException, InterruptedException {
+	    HashMap<String, PairOfFloats> finalMap = new HashMap<String, PairOfFloats>();
       Iterator<HMapStIW> iter = values.iterator();
       HMapStIW map = new HMapStIW();
       float sum = 0;
