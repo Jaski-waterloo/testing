@@ -215,8 +215,8 @@ public class PairsPMI extends Configured implements Tool {
 // 		    pmi = getLog(pmi);
 		    pmi = (double)Math.log10(pmi);
 		    System.out.println(pmi);
-		    
-		    PMI.set(sum, pmi);
+		    float fpmi = (float)pmi;
+		    PMI.set(sum, fpmi);
 		    key.set(x,y);
 
       		   context.write(key, PMI);
