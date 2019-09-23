@@ -157,7 +157,7 @@ public class StripesPMI extends Configured implements Tool {
   private static final PairOfFloats PMI = new PairOfFloats(1,1);
 	  private static Map<String, Integer> total = new HashMap<String, Integer>();
 	  private static int totalSum = 0;
-	      private static HashMapWritable<Text, PairOfFloats> FinalMap = HashMapWritable<Text, PairOfFloats>();
+	  private static HashMapWritable<Text, PairOfFloats> finalMap = HashMapWritable<Text, PairOfFloats>();
 
 	  	  private static int threshold = 0;
   
@@ -227,9 +227,9 @@ public class StripesPMI extends Configured implements Tool {
         float fpmi = (float)pmi;
         
         PMI.set(map.get(curKey), fpmi);
-        FinalMap.put(curKey,PMI);
+        finalMap.put(curKey,PMI);
 
-      context.write(key, FinalMap);
+      context.write(key, finalMap);
     }
   }
   }
