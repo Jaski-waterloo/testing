@@ -158,6 +158,7 @@ public class StripesPMI extends Configured implements Tool {
   
   private static final PairOfFloats PMI = new PairOfFloats(1,1);
 	  private static HashMapWritable finalMap = HashMapWritable();
+	  private static HashMap<String, IntWritable> total = new HashMap<String, IntWritable>();
 	  private static int totalSum = 0;
 
 	  	  private static int threshold = 0;
@@ -332,7 +333,7 @@ public class StripesPMI extends Configured implements Tool {
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(HMapStIW.class);
     job.setOutputKeyClass(Text.class);
-    job.setOutputValueClass(HashMap.class);
+    job.setOutputValueClass(HashMapWritable.class);
 
     job.setMapperClass(MyMapper.class);
     job.setCombinerClass(MyReducer.class);
