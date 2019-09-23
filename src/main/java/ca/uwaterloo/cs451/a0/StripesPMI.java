@@ -95,7 +95,7 @@ public class StripesPMI extends Configured implements Tool {
       for (String word : Tokenizer.tokenize(value.toString())) {
         set.add(word);
         numWords++;
-        if (numWords >= WORD_LIMIT) break;
+        if (numWords >= 40) break;
       }
 
       String[] words = new String[set.size()];
@@ -134,7 +134,7 @@ public class StripesPMI extends Configured implements Tool {
     private static final Text KEY = new Text();
     private static final HashMapWritable finalMap = new HashMapWritable();
     private static int totalSum = 0;
-    private static inst threshold = 0;
+    private static int threshold = 0;
     
     private static final Map<String, Integer> total = new HashMap<String, Integer>();
 
@@ -161,7 +161,7 @@ public class StripesPMI extends Configured implements Tool {
         InputStreamReader inStream = new InputStreamReader(fin);
         reader = new BufferedReader(inStream);
         
-      } catch(FileNotFoundException e){
+      } catch(Exception e){
         throw new IOException("Can not open file");
       }
       
@@ -198,18 +198,18 @@ public class StripesPMI extends Configured implements Tool {
 
       String left = key.toString();
       KEY.set(left);
-      MAP.clear();
+      finalMap.clear();
       for (String currentKey : map.keySet()) {
         if (map.get(currentKey) > threshold) {
           int sum = map.get(currentKey);
-          float pmi = (float) Math.log10((double)(sum * numLines) / (double)(total.get(left) * total.get(currentKey)));
+          float pmi = (float) Math.log10((double)(sum * totalSum) / (double)(total.get(left) * total.get(currentKey)));
           PairOfFloatInt PMI_COUNT = new PairOfFloatInt();
           PMI_COUNT.set(pmi, sum);
-          MAP.put(right, PMI_COUNT);
+          finalMap.put(right, PMI_COUNT);
         }
       }
-      if (MAP.size() > 0) {
-        context.write(KEY, MAP);
+      if (finalMap.size() > 0) {
+        context.write(KEY, finalMap);
       }
     }
   }
@@ -241,7 +241,7 @@ public class StripesPMI extends Configured implements Tool {
     final Args args = new Args();
     CmdLineParser parser = new CmdLineParser(args, ParserProperties.defaults().withUsageWidth(100));
 
-    String sideDataPath = "temp";
+    String tempPath = "temp";
 
     try {
       parser.parseArgument(argv);
