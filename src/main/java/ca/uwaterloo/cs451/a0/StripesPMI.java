@@ -330,7 +330,7 @@ public class StripesPMI extends Configured implements Tool {
     FileOutputFormat.setOutputPath(job, new Path(args.output));
 
     job.setMapOutputKeyClass(Text.class);
-    job.setMapOutputValueClass(HashMap.class);
+    job.setMapOutputValueClass(HMapStIW.class);
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(HashMap.class);
 
