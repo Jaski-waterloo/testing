@@ -78,7 +78,11 @@ public class PairsPMI extends Configured implements Tool {
       for (String word : Tokenizer.tokenize(value.toString())) {
 	      hash_Set.add(word);
       }
+	    int i = 0;
 	    for(String word : hash_Set){
+		    i += 1;
+		    if(i < 40)
+			    break;
         WORD.set(word);
         context.write(WORD, ONE);
       }
@@ -116,10 +120,18 @@ public class PairsPMI extends Configured implements Tool {
     @Override
     public void map(LongWritable key, Text value, Context context)
         throws IOException, InterruptedException {
-      List<String> tokens = Tokenizer.tokenize(value.toString());
+	    Set<String> hash_Set = new HashSet<String>();
+	    for (String word : Tokenizer.tokenize(value.toString())) {
+	      hash_Set.add(word);
+      }
 	    int size = tokens.size();
 	    if(size > 40)
 		    size = 40;
+	    String Values = "";
+	for(String word : hash_Set)
+		Values = Values + " " + word;
+		
+	List<String> tokens = Tokenizer.tokenize(Values);
 
       for (int i = 0; i < size; i++) {
         for (int j = Math.max(i - window, 0); j < Math.min(i + window + 1, tokens.size()); j++) {
