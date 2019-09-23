@@ -154,7 +154,7 @@ public class StripesPMI extends Configured implements Tool {
   }
   
 
-  private static final class MyReducer extends Reducer<Text, HMapStIW, Text, HashMap<Text, PairOfFloats>> {
+  private static final class MyReducer extends Reducer<Text, HMapStIW, Text, HashMap<String, PairOfFloats>> {
   
   private static final PairOfFloats PMI = new PairOfFloats(1,1);
 	  private static Map<String, Integer> total = new HashMap<String, Integer>();
@@ -210,7 +210,7 @@ public class StripesPMI extends Configured implements Tool {
 //     @Override
     public void reduce(Text key, Iterable<HMapStIW> values, Context context)
         throws IOException, InterruptedException {
-	    HashMap<Text, PairOfFloats> finalMap = new HashMap<Text, PairOfFloats>();
+	    HashMap<String, PairOfFloats> finalMap = new HashMap<String, PairOfFloats>();
       Iterator<HMapStIW> iter = values.iterator();
       HMapStIW map = new HMapStIW();
       float sum = 0;
@@ -228,8 +228,8 @@ public class StripesPMI extends Configured implements Tool {
 
         pmi = Math.log10((double)probPair / ((double)probLeft * (double)probRight));
         float fpmi = (float)pmi;
-        
-        PMI.set(map.get(curKey), fpmi);
+        float count = map.get(curKey);
+        PMI.set(count, fpmi);
         finalMap.put(curKey,PMI);
 
       context.write(key, finalMap);
