@@ -227,7 +227,7 @@ public class PairsPMI extends Configured implements Tool {
   private static final class MyPartitioner extends Partitioner<PairOfStrings, PairOfFloats> {
     @Override
     public int getPartition(PairOfStrings key, PairOfFloats value, int numReduceTasks) {
-	    numReduceTasks = 1;
+	    
       return (key.getLeftElement().hashCode() & Integer.MAX_VALUE) % numReduceTasks;
     }
   }
@@ -285,7 +285,7 @@ public class PairsPMI extends Configured implements Tool {
     job1.setJobName(PairsPMI.class.getSimpleName() + "WordCount");
     job1.setJarByClass(PairsPMI.class);
 
-    job1.setNumReduceTasks(args.numReducers);
+    job1.setNumReduceTasks(1);
 	  String tempPath = "temp";
     Path tempDir = new Path(tempPath);
     conf.set("intermediatePath", tempPath);
