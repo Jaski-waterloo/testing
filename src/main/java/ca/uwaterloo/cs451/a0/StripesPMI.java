@@ -125,7 +125,7 @@ public class StripesPMI extends Configured implements Tool {
 
   private static final class MyMapper extends Mapper<LongWritable, Text, Text, HMapStIW> {
     private static final HMapStIW MAP = new HMapStIW();
-    private static final PairOfStrings KEY = new PairOfStrings();
+    private static final Text KEY = new Text();
 
     private int window = 2;
 
@@ -134,7 +134,7 @@ public class StripesPMI extends Configured implements Tool {
       window = context.getConfiguration().getInt("window", 2);
     }
 
-    @Override
+//     @Override
     public void map(LongWritable key, String value, Context context)
         throws IOException, InterruptedException {
       List<String> tokens = Tokenizer.tokenize(value.toString());
@@ -148,7 +148,7 @@ public class StripesPMI extends Configured implements Tool {
         }
 
         KEY.set(tokens.get(i));
-        context.write(KEY.toString(), MAP);
+        context.write(KEY, MAP);
       }
     }
   }
@@ -226,7 +226,7 @@ public class StripesPMI extends Configured implements Tool {
         double probLeft = (double)total.get(X) / (double)totalSum;
         double probRight = (double)total.get(curKey) / (double)totalSum;
 
-        double pmi = Math.log10((double)probPair / ((double)probLeft * (double)probRight));
+        pmi = Math.log10((double)probPair / ((double)probLeft * (double)probRight));
         float fpmi = (float)pmi;
         
         PMI.set(map.get(curKey), fpmi);
