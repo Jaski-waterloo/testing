@@ -158,7 +158,7 @@ public class StripesPMI extends Configured implements Tool {
   
   private static final PairOfFloats PMI = new PairOfFloats(1,1);
 	  private static HashMapWritable finalMap = HashMapWritable();
-	  private static HashMap<String, IntWritable> total = new HashMap<String, IntWritable>();
+	  private static HashMap<String, Integer> total = new HashMap<String, Integer>();
 	  private static int totalSum = 0;
 
 	  	  private static int threshold = 0;
@@ -218,6 +218,7 @@ public class StripesPMI extends Configured implements Tool {
       while (iter.hasNext()) {
       map.plus(iter.next());
       }
+	    finalMap.clear();
     for(String curKey : map.keySet()){
         if (map.get(curKey) < 10) continue;
 	     String X = key.toString();
