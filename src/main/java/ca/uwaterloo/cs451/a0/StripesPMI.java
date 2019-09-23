@@ -148,7 +148,7 @@ public class StripesPMI extends Configured implements Tool {
         }
 
         KEY.set(tokens.get(i));
-        context.write(KEY, MAP);
+        context.write(KEY.toString(), MAP);
       }
     }
   }
@@ -207,7 +207,7 @@ public class StripesPMI extends Configured implements Tool {
       
     }
   
-    @Override
+//     @Override
     public void reduce(Text key, Iterable<HMapStIW> values, Context context)
         throws IOException, InterruptedException {
 	    HashMap<String, PairOfFloats> finalMap = new HashMap<String, PairOfFloats>();
@@ -232,7 +232,7 @@ public class StripesPMI extends Configured implements Tool {
         PMI.set(map.get(curKey), fpmi);
         finalMap.put(curKey,PMI);
 
-      context.write(key, finalMap);
+      context.write(key.toString(), finalMap);
     }
   }
   }
@@ -318,7 +318,7 @@ public class StripesPMI extends Configured implements Tool {
     job.setJarByClass(StripesPMI.class);
 
     // Delete the output directory if it exists already.
-    Path outputDir = new Path(args.output);
+    outputDir = Path(args.output);
     FileSystem.get(getConf()).delete(outputDir, true);
 
     job.getConfiguration().setInt("window", args.window);
@@ -337,7 +337,7 @@ public class StripesPMI extends Configured implements Tool {
     job.setCombinerClass(MyReducer.class);
     job.setReducerClass(MyReducer.class);
 
-    long startTime = System.currentTimeMillis();
+    startTime = System.currentTimeMillis();
     job.waitForCompletion(true);
     System.out.println("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
      System.out.println("Total Time " + (System.currentTimeMillis() - totalTime) / 1000.0 + " seconds");
