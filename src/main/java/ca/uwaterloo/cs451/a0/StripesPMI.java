@@ -1,4 +1,4 @@
-package  ca.uwaterloo.cs451.a0.StripesPMI;
+package  ca.uwaterloo.cs451.a0;
 
 import io.bespin.java.util.Tokenizer;
 import org.apache.hadoop.conf.Configuration;
