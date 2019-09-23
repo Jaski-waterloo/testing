@@ -43,6 +43,7 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.ParserProperties;
 import tl.lin.data.map.HMapStIW;
+import tl.lin.data.map.HMapStFW;
 import tl.lin.data.map.HashMapWritable;
 
 
@@ -153,7 +154,7 @@ public class StripesPMI extends Configured implements Tool {
   }
   
 
-  private static final class MyReducer extends Reducer<Text, HMapStIW, Text, HashMap> {
+  private static final class MyReducer extends Reducer<Text, HMapStIW, Text, HMapStFW> {
   
   private static final PairOfFloats PMI = new PairOfFloats(1,1);
 	  private static Map<String, Integer> total = new HashMap<String, Integer>();
