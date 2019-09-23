@@ -154,7 +154,7 @@ public class StripesPMI extends Configured implements Tool {
   }
   
 
-  private static final class MyReducer extends Reducer<Text, HMapStIW, Text, HMapStFW> {
+  private static final class MyReducer extends Reducer<Text, HMapStIW, Text, HashMap<String,PairOfFloats>> {
   
   private static final PairOfFloats PMI = new PairOfFloats(1,1);
 	  private static Map<String, Integer> total = new HashMap<String, Integer>();
@@ -232,8 +232,9 @@ public class StripesPMI extends Configured implements Tool {
         PMI.set(count, fpmi);
         finalMap.put(curKey,PMI);
 
-      context.write(key, finalMap);
+      
     }
+	    context.write(key, finalMap);
   }
   }
 
