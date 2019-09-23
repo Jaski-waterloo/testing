@@ -214,7 +214,7 @@ public class PairsPMI extends Configured implements Tool {
         	    pmi = ((Both * totalSum) / (X * Y));
 // 		    pmi = getLog(pmi);
 		    pmi = (double)Math.log10(pmi);
-		    System.out.println(pmi);
+// 		    System.out.println(pmi);
 		    float fpmi = (float)pmi;
 		    PMI.set(sum, fpmi);
 		    key.set(x,y);
