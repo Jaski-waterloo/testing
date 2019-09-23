@@ -130,12 +130,13 @@ public class PairsPMI extends Configured implements Tool {
 		    i += 1;
       }
 	   
-	    String Values = "";
+	    String[] tokens = new String[40];
+	    int size = 0;
 	for(String word : hash_Set)
-		Values = Values + " " + word;
-		
-	List<String> tokens = Tokenizer.tokenize(Values);
-	     int size = tokens.size();
+	{
+		tokens[size] = word;
+		size += 1;
+	}
 
       for (int i = 0; i < size; i++) {
         for (int j = Math.max(i - window, 0); j < Math.min(i + window + 1, tokens.size()); j++) {
