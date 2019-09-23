@@ -1,4 +1,4 @@
-package ca.uwaterloo.cs.bigdata2017w.assignment1;
+package  ca.uwaterloo.cs451.a0.StripesPMI;
 
 import io.bespin.java.util.Tokenizer;
 import org.apache.hadoop.conf.Configuration;
