@@ -154,8 +154,8 @@ public class PairsPMI extends Configured implements Tool {
       Configuration conf = context.getConfiguration();
       FileSystem fs = FileSystem.get(conf);
       
-//       Path yoPath = new Path(conf.get("intermediatePath"));
-      Path filePath = new Path("/u3/j6bhatia/cs651/testing/testing/temp/part-r-00000");
+      String yoPath = conf.get("intermediatePath");
+      Path filePath = new Path(yoPath + "/part-r-00000");
 	    
 
       if(!fs.exists(filePath)){
