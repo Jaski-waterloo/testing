@@ -102,6 +102,7 @@ public class StripesPMI extends Configured implements Tool {
         context.write(WORD, ONE);
       }
     }
+  }
 	
 	public static final class MyReducerWordCount extends Reducer<Text, IntWritable, Text, IntWritable> {
     // Reuse objects.
@@ -134,7 +135,7 @@ public class StripesPMI extends Configured implements Tool {
     }
 
     @Override
-    public void map(LongWritable key, Text value, Context context)
+    public void map(LongWritable key, String value, Context context)
         throws IOException, InterruptedException {
       List<String> tokens = Tokenizer.tokenize(value.toString());
 
@@ -151,9 +152,9 @@ public class StripesPMI extends Configured implements Tool {
       }
     }
   }
-  }
+  
 
-  private static final class MyReducer extends Reducer<Text, HMapStIW, Text, HashMap<Text, PairOfFloats>> {
+  private static final class MyReducer extends Reducer<String, HMapStIW, String, HashMap<Text, PairOfFloats>> {
   
   private static final PairOfFloats PMI = new PairOfFloats(1,1);
 	  private static Map<String, Integer> total = new HashMap<String, Integer>();
@@ -221,7 +222,7 @@ public class StripesPMI extends Configured implements Tool {
         if (map.get(curKey) < 10) continue;
 	     String X = key.toString();
 
-        double probPair = (double)map.get(curKey) / (double)totalLines;
+        double probPair = (double)map.get(curKey) / (double)totalSum;
         double probLeft = (double)total.get(X) / (double)totalSum;
         double probRight = (double)total.get(curKey) / (double)totalSum;
 
