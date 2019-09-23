@@ -309,6 +309,7 @@ public class PairsPMI extends Configured implements Tool {
     FileSystem.get(conf).delete(tempDir, true);
 
     long startTime = System.currentTimeMillis();
+    long totalTime = System.currentTimeMillis();
     job1.waitForCompletion(true);
     LOG.info("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
 	  
@@ -344,6 +345,8 @@ public class PairsPMI extends Configured implements Tool {
     startTime = System.currentTimeMillis();
     job.waitForCompletion(true);
     System.out.println("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
+ 
+    System.out.println("Total Time " + (System.currentTimeMillis() - totalTime) / 1000.0 + " seconds");
 
     return 0;
   }
