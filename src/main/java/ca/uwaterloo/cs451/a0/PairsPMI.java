@@ -204,8 +204,8 @@ public class PairsPMI extends Configured implements Tool {
 	    if(sum > threshold){
 		    String x = key.getLeftElement();
 		    String y = key.getRightElement();
-		    if(x.equals(y))
-			    continue;
+		    if(!x.equals(y))
+		    {
 		    double Both = sum;
         	    int X = total.get(x);
         	    int Y = total.get(y);
@@ -219,6 +219,7 @@ public class PairsPMI extends Configured implements Tool {
 		    key.set(x,y);
 
       		   context.write(key, PMI);
+		    }
     }
   }
   }
