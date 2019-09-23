@@ -172,13 +172,13 @@ public class PairsPMI extends Configured implements Tool {
       
       String line = reader.readLine();
       while(line != null){
+	      totalSum += 1;
         
         String[] parts = line.split("\\s+");
         if(parts.length != 2){
           LOG.info("incorrect format");
         } else {
           total.put(parts[0], Integer.parseInt(parts[1]));
-		totalSum += Integer.parseInt(parts[1]);
         }
         line = reader.readLine();
       }
