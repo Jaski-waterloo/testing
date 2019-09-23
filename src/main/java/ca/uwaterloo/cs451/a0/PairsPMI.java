@@ -135,7 +135,7 @@ public class PairsPMI extends Configured implements Tool {
   }
 
   private static final class MyReducer extends
-      Reducer<PairOfStrings, DoubleWritable, PairOfStrings, PairOfFloats> {
+      Reducer<PairOfStrings, PairOfFloats, PairOfStrings, PairOfFloats> {
 //     private static final IntWritable SUM = new IntWritable();
 	  private static final PairOfFloats PMI = new PairOfFloats(1,1);
 	  private static Map<String, Integer> total = new HashMap<String, Integer>();
