@@ -153,7 +153,7 @@ public class StripesPMI extends Configured implements Tool {
   }
   
 
-  private static final class MyReducer extends Reducer<Text, HMapStIW, Text, HashMap<String, PairOfFloats>> {
+  private static final class MyReducer extends Reducer<Text, HMapStIW, Text, HashMap> {
   
   private static final PairOfFloats PMI = new PairOfFloats(1,1);
 	  private static Map<String, Integer> total = new HashMap<String, Integer>();
