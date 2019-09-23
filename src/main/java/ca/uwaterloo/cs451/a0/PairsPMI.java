@@ -135,9 +135,9 @@ public class PairsPMI extends Configured implements Tool {
   }
 
   private static final class MyReducer extends
-      Reducer<PairOfStrings, DoubleWritable, PairOfStrings, DoubleWritable> {
+      Reducer<PairOfStrings, DoubleWritable, PairOfStrings, PairOfFloats> {
 //     private static final IntWritable SUM = new IntWritable();
-	  private static final DoubleWritable PMI = new DoubleWritable(1);
+	  private static final PairOfFloats PMI = new PairOfFloats(1,1);
 	  private static Map<String, Integer> total = new HashMap<String, Integer>();
 	  private static int totalSum = 0;
 	  	  private static int threshold = 0;
@@ -216,7 +216,7 @@ public class PairsPMI extends Configured implements Tool {
 		    pmi = (double)Math.log10(pmi);
 		    System.out.println(pmi);
 		    
-		    PMI.set(pmi);
+		    PMI.set(sum, pmi);
 		    key.set(x,y);
 
       		   context.write(key, PMI);
@@ -335,7 +335,7 @@ public class PairsPMI extends Configured implements Tool {
     job.setMapOutputKeyClass(PairOfStrings.class);
     job.setMapOutputValueClass(DoubleWritable.class);
     job.setOutputKeyClass(PairOfStrings.class);
-    job.setOutputValueClass(DoubleWritable.class);
+    job.setOutputValueClass(PairOfFloats.class);
 
     job.setMapperClass(MyMapper.class);
     job.setCombinerClass(MyReducer.class);
