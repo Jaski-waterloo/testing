@@ -318,8 +318,8 @@ public class StripesPMI extends Configured implements Tool {
     job.setJarByClass(StripesPMI.class);
 
     // Delete the output directory if it exists already.
-    outputDir = Path(args.output);
-    FileSystem.get(getConf()).delete(outputDir, true);
+    Path outputDir1 = new Path(args.output);
+    FileSystem.get(getConf()).delete(outputDir1, true);
 
     job.getConfiguration().setInt("window", args.window);
 
