@@ -4,9 +4,6 @@ import org.apache.hadoop.mapreduce.Partitioner;
 import tl.lin.data.pair.PairOfStrings;
 import tl.lin.data.pair.PairOfFloats;
 
-import java.util.Iterator;
-import java.util.List;
-
 import io.bespin.java.util.Tokenizer;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
