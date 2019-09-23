@@ -1,4 +1,4 @@
-package ca.uwaterloo.cs451.a0;
+package ca.uwaterloo.cs451.a1;
 
 import org.apache.hadoop.mapreduce.Partitioner;
 import tl.lin.data.pair.PairOfStrings;
