@@ -106,9 +106,9 @@ public class PairsPMI extends Configured implements Tool {
     }
 }
 
-  private static final class MyMapper extends Mapper<LongWritable, Text, PairOfStrings, DoubleWritable> {
+  private static final class MyMapper extends Mapper<LongWritable, Text, PairOfStrings, PairOfFloats> {
     private static final PairOfStrings PAIR = new PairOfStrings();
-    private static final DoubleWritable ONE = new DoubleWritable(1);
+    private static final PairOfFloats ONE = new PairOfFloats(1,1);
     private int window = 2;
 
     @Override
@@ -196,13 +196,13 @@ public class PairsPMI extends Configured implements Tool {
 	}
 	  
    @Override
-    public void reduce(PairOfStrings key, Iterable<DoubleWritable> values, Context context)
+    public void reduce(PairOfStrings key, Iterable<PairOfFloats> values, Context context)
         throws IOException, InterruptedException {
-      Iterator<DoubleWritable> iter = values.iterator();
+      Iterator<PairOfFloats> iter = values.iterator();
       float sum = 0;
 	    double pmi = 1;
       while (iter.hasNext()) {
-        sum += iter.next().get();
+        sum += iter.next().getLeftElement();
       }
 	    if(sum > threshold){
 		    String x = key.getLeftElement();
@@ -333,7 +333,7 @@ public class PairsPMI extends Configured implements Tool {
     FileOutputFormat.setOutputPath(job, new Path(args.output));
 
     job.setMapOutputKeyClass(PairOfStrings.class);
-    job.setMapOutputValueClass(DoubleWritable.class);
+    job.setMapOutputValueClass(PairOfFloats.class);
     job.setOutputKeyClass(PairOfStrings.class);
     job.setOutputValueClass(PairOfFloats.class);
 
