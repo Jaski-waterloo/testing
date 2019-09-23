@@ -82,9 +82,10 @@ public class PairsPMI extends Configured implements Tool {
 	      hash_Set.add(word);
 	      i += 1;
       }
-	    
+	    for(word : hash_Set){
         WORD.set(word);
         context.write(WORD, ONE);
+	    }
       }
     }
 }
