@@ -150,6 +150,7 @@ public class StripesPMI extends Configured implements Tool {
       }
     }
   }
+  }
 
   private static final class MyReducer extends Reducer<Text, HMapStIW, Text, HashMapWritable<Text, PairOfFloats>> {
   
