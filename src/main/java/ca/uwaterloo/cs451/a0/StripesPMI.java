@@ -101,7 +101,6 @@ public class StripesPMI extends Configured implements Tool {
         context.write(WORD, ONE);
       }
     }
-}
 	
 	public static final class MyReducerWordCount extends Reducer<Text, IntWritable, Text, IntWritable> {
     // Reuse objects.
