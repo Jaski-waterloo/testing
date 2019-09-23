@@ -153,12 +153,12 @@ public class StripesPMI extends Configured implements Tool {
   }
   }
 
-  private static final class MyReducer extends Reducer<Text, HMapStIW, Text, HashMapWritable<Text, PairOfFloats>> {
+  private static final class MyReducer extends Reducer<Text, HMapStIW, Text, HashMap<Text, PairOfFloats>> {
   
   private static final PairOfFloats PMI = new PairOfFloats(1,1);
 	  private static Map<String, Integer> total = new HashMap<String, Integer>();
 	  private static int totalSum = 0;
-	  private static HashMapWritable<Text, PairOfFloats> finalMap = HashMapWritable();;
+	  private static Map<Text, PairOfFloats> finalMap = HashMap<Text, PairOfFloats>();
 
 	  	  private static int threshold = 0;
   
@@ -270,7 +270,7 @@ public class StripesPMI extends Configured implements Tool {
       return -1;
     }
 
-    LOG.info("Tool: " + ComputeCooccurrenceMatrixPairs.class.getSimpleName());
+    LOG.info("Tool: " + StripesPMI.class.getSimpleName());
     LOG.info(" - input path: " + args.input);
     LOG.info(" - output path: " + args.output);
     LOG.info(" - window: " + args.window);
@@ -279,8 +279,8 @@ public class StripesPMI extends Configured implements Tool {
     
     Configuration conf = getConf();
     Job job1 = Job.getInstance(conf);
-    job1.setJobName(PairsPMI.class.getSimpleName() + "WordCount");
-    job1.setJarByClass(PairsPMI.class);
+    job1.setJobName(StripesPMI.class.getSimpleName() + "WordCount");
+    job1.setJarByClass(StripesPMI.class);
 
     job1.setNumReduceTasks(args.numReducers);
 	  String tempPath = "temp";
@@ -313,7 +313,7 @@ public class StripesPMI extends Configured implements Tool {
     
 
     Job job = Job.getInstance(getConf());
-    job.setJobName(StripesPMI.class.getSimpleName());
+    job.setJobName(StripesPMI.class.getSimpleName() + "Final Output");
     job.setJarByClass(StripesPMI.class);
 
     // Delete the output directory if it exists already.
