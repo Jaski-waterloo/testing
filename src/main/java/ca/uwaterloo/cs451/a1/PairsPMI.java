@@ -1,4 +1,4 @@
-package ca.uwaterloo.cs451.a1;
+package ca.uwaterloo.cs.bigdata2017w.assignment1;
 
 import io.bespin.java.util.Tokenizer;
 import org.apache.hadoop.conf.Configuration;
@@ -28,54 +28,53 @@ import org.kohsuke.args4j.ParserProperties;
 import tl.lin.data.pair.PairOfStrings;
 import tl.lin.data.pair.PairOfFloatInt;
 
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Iterator;
 import java.util.Map;
-
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 
 public class PairsPMI extends Configured implements Tool {
   private static final Logger LOG = Logger.getLogger(PairsPMI.class);
-public static long numLines = 0;
+  private static final int WORD_LIMIT = 40;
 
-  public static final class MyMapperWordCount extends Mapper<LongWritable, Text, Text, IntWritable> {
+  public static final class MyMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
     // Reuse objects to save overhead of object creation.
     private static final IntWritable ONE = new IntWritable(1);
     private static final Text WORD = new Text();
 
+    public enum MyCounter { LINE_COUNTER };
 
     @Override
     public void map(LongWritable key, Text value, Context context)
         throws IOException, InterruptedException {
-      int num = 0;
-      Set<String> uniqueWords = new HashSet<String>();
+      int numWords = 0;
+      Set<String> set = new HashSet<String>();
       for (String word : Tokenizer.tokenize(value.toString())) {
-        uniqueWords.add(word);
-        num++;
-        if (num >= 40) break;
+        set.add(word);
+        numWords++;
+        if (numWords >= WORD_LIMIT) break;
       }
 
-      	String[] words = new String[uniqueWords.size()];
-      		words = uniqueWords.toArray(words);
+      String[] words = new String[set.size()];
+      words = set.toArray(words);
 
       for (int i = 0; i < words.length; i++) {
-        	WORD.set(words[i]);
+        WORD.set(words[i]);
         context.write(WORD, ONE);
       }
-	     numLines++;
 
+      Counter counter = context.getCounter(MyCounter.LINE_COUNTER);
+      counter.increment(1L);
     }
   }
 
   // Reducer: sums up all the counts.
-  public static final class MyReducerWordCount extends Reducer<Text, IntWritable, Text, IntWritable> {
+  public static final class MyReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
     // Reuse objects.
     private static final IntWritable SUM = new IntWritable();
 
@@ -94,41 +93,36 @@ public static long numLines = 0;
     }
   }
 
-  public static final class MyMapper extends Mapper<LongWritable, Text, PairOfStrings, IntWritable> {
+  public static final class MySecondMapper extends Mapper<LongWritable, Text, PairOfStrings, IntWritable> {
     private static final IntWritable ONE = new IntWritable(1);
     private static final PairOfStrings PAIR = new PairOfStrings();
-	   private int window = 2;
 
     @Override
-    public void setup(Context context) {
-      window = context.getConfiguration().getInt("window", 2);
-}
-	  
-	  @Override
     public void map(LongWritable key, Text value, Context context)
         throws IOException, InterruptedException {
-      int num = 0;
-      Set<String> uniqueWords = new HashSet<String>();
+      int numWords = 0;
+      Set<String> set = new HashSet<String>();
       for (String word : Tokenizer.tokenize(value.toString())) {
-        uniqueWords.add(word);
-        num++;
-        if (num >= 40) break;
+        set.add(word);
+        numWords++;
+        if (numWords >= WORD_LIMIT) break;
       }
 
-      String[] tokens = new String[uniqueWords.size()];
-      tokens = uniqueWords.toArray(tokens);
+      String[] words = new String[set.size()];
+      words = set.toArray(words);
 
-      for (int i = 0; i < tokens.length; i++) {
-        for (int j = Math.max(i - window, 0); j < Math.min(i + window + 1, tokens.length); j++) {
-          if (i == j) continue;
-          PAIR.set(tokens[i], tokens[j]);
+      for (int i = 0; i < words.length; i++) {
+        for (int j = i + 1; j < words.length; j++) {
+          PAIR.set(words[i], words[j]);
+          context.write(PAIR, ONE);
+          PAIR.set(words[j], words[i]);
           context.write(PAIR, ONE);
         }
       }
-}
+    }
   }
 
-  public static final class MyCombiner extends Reducer<PairOfStrings, IntWritable, PairOfStrings, IntWritable> {
+  public static final class MySecondCombiner extends Reducer<PairOfStrings, IntWritable, PairOfStrings, IntWritable> {
     private static final IntWritable SUM = new IntWritable();
 
     @Override
@@ -144,19 +138,21 @@ public static long numLines = 0;
     }
   }
 
-  public static final class MyReducer extends Reducer<PairOfStrings, IntWritable, PairOfStrings, PairOfFloatInt> {
-
+  public static final class MySecondReducer extends Reducer<PairOfStrings, IntWritable, PairOfStrings, PairOfFloatInt> {
+    // private static final DoubleWritable PMI = new DoubleWritable();
+    // private static final DoubleWritable SUM = new DoubleWritable();
     private static final PairOfFloatInt PMI = new PairOfFloatInt();
     private static final Map<String, Integer> wordCount = new HashMap<String, Integer>();
 
+    private static long numLines;
 
     @Override
     public void setup(Context context) throws IOException, InterruptedException {
       Configuration conf = context.getConfiguration();
-//        numLines = conf.getLong("counter", 0L);
+      numLines = conf.getLong("counter", 0L);
 
       FileSystem fs = FileSystem.get(conf);
-      FileStatus[] status = fs.globStatus(new Path("temp/part-r-*"));
+      FileStatus[] status = fs.globStatus(new Path("tmp/part-r-*"));
       for (FileStatus file : status) {
         FSDataInputStream is = fs.open(file.getPath());
         InputStreamReader isr = new InputStreamReader(is, "UTF-8");
@@ -222,7 +218,7 @@ public static long numLines = 0;
     final Args args = new Args();
     CmdLineParser parser = new CmdLineParser(args, ParserProperties.defaults().withUsageWidth(100));
 
-    String tempPath = "temp/";
+    String sideDataPath = "tmp/";
 
     try {
       parser.parseArgument(argv);
@@ -239,7 +235,7 @@ public static long numLines = 0;
     LOG.info(" - threshold: " + args.threshold);
 
     Configuration conf = getConf();
-    conf.set("tempPath", tempPath);
+    conf.set("sideDataPath", sideDataPath);
     conf.set("threshold", Integer.toString(args.threshold));
     Job job = Job.getInstance(conf);
     job.setJobName(PairsPMI.class.getSimpleName());
@@ -248,7 +244,7 @@ public static long numLines = 0;
     job.setNumReduceTasks(args.numReducers);
 
     FileInputFormat.setInputPaths(job, new Path(args.input));
-    FileOutputFormat.setOutputPath(job, new Path(tempPath));
+    FileOutputFormat.setOutputPath(job, new Path(sideDataPath));
 
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(IntWritable.class);
@@ -256,9 +252,9 @@ public static long numLines = 0;
     job.setOutputValueClass(IntWritable.class);
     job.setOutputFormatClass(TextOutputFormat.class);
 
-    job.setMapperClass(MyMapperWordCount.class);
-    job.setCombinerClass(MyReducerWordCount.class);
-    job.setReducerClass(MyReducerWordCount.class);
+    job.setMapperClass(MyMapper.class);
+    job.setCombinerClass(MyReducer.class);
+    job.setReducerClass(MyReducer.class);
 
 //     job.getConfiguration().setInt("mapred.max.split.size", 1024 * 1024 * 32);
 //     job.getConfiguration().set("mapreduce.map.memory.mb", "3072");
@@ -267,16 +263,17 @@ public static long numLines = 0;
 //     job.getConfiguration().set("mapreduce.reduce.java.opts", "-Xmx3072m");
 
     // Delete the output directory if it exists already.
-    Path outputDir = new Path(tempPath);
+    Path outputDir = new Path(sideDataPath);
     FileSystem.get(conf).delete(outputDir, true);
 
     long startTime = System.currentTimeMillis();
-	      long totalTime = System.currentTimeMillis();
-
     job.waitForCompletion(true);
     LOG.info("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
 
 
+    // Second Job
+    long count = job.getCounters().findCounter(MyMapper.MyCounter.LINE_COUNTER).getValue();
+    conf.setLong("counter", count);
     Job secondJob = Job.getInstance(conf);
     secondJob.setJobName(PairsPMI.class.getSimpleName());
     secondJob.setJarByClass(PairsPMI.class);
@@ -298,9 +295,9 @@ public static long numLines = 0;
 //     secondJob.getConfiguration().set("mapreduce.reduce.memory.mb", "3072");
 //     secondJob.getConfiguration().set("mapreduce.reduce.java.opts", "-Xmx3072m");
 
-    secondJob.setMapperClass(MyMapper.class);
-    secondJob.setCombinerClass(MyCombiner.class);
-    secondJob.setReducerClass(MyReducer.class);
+    secondJob.setMapperClass(MySecondMapper.class);
+    secondJob.setCombinerClass(MySecondCombiner.class);
+    secondJob.setReducerClass(MySecondReducer.class);
 
     // Delete the output directory if it exists already.
     outputDir = new Path(args.output);
@@ -309,8 +306,6 @@ public static long numLines = 0;
     startTime = System.currentTimeMillis();
     secondJob.waitForCompletion(true);
     LOG.info("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
-	      LOG.info("Total Time is " + (System.currentTimeMillis() - totalTime) / 1000.0 + " seconds");
-
 
     return 0;
   }
