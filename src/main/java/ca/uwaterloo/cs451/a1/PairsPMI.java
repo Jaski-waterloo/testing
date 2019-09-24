@@ -275,7 +275,7 @@ public class PairsPMI extends Configured implements Tool {
 
 
 //     long count = job.getCounters().findCounter(MyMapper.MyCounter.LINE_COUNTER).getValue();
-    conf.setLong("counter", count);
+//     conf.setLong("counter", count);
     Job secondJob = Job.getInstance(conf);
     secondJob.setJobName(PairsPMI.class.getSimpleName());
     secondJob.setJarByClass(PairsPMI.class);
