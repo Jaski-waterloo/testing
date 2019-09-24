@@ -232,7 +232,7 @@ public class PairsPMI extends Configured implements Tool {
 		    pmi = (double)Math.log10(pmi);
 // 		    System.out.println(pmi);
 		    float fpmi = (float)pmi;
-		    PMI.set(sum, fpmi);
+		    PMI.set(fpmi, sum);
 		    key.set(x,y);
 
       		   context.write(key, PMI);
