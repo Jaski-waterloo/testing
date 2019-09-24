@@ -149,7 +149,7 @@ public class PairsPMI extends Configured implements Tool {
     private static final PairOfFloatInt PMI = new PairOfFloatInt();
     private static final Map<String, Integer> wordCount = new HashMap<String, Integer>();
 
-    private static long numLines = 0;
+    private static long numLines;
 
     @Override
     public void setup(Context context) throws IOException, InterruptedException {
@@ -164,7 +164,6 @@ public class PairsPMI extends Configured implements Tool {
         BufferedReader br = new BufferedReader(isr);
         String line = br.readLine();
         while (line != null) {
-		numLines++;
           String[] data = line.split("\\s+");
           if (data.length == 2) {
             wordCount.put(data[0], Integer.parseInt(data[1]));
