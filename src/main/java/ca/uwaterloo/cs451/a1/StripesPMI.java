@@ -153,7 +153,7 @@ public class StripesPMI extends Configured implements Tool {
       FileSystem fs = FileSystem.get(conf);
       
       String yoPath = conf.get("intermediatePath");
-      Path filePath = new Path(yoPath + "/part-r-00000");
+      Path filePath = new Path(yoPath + "/part-r-*");
 	    
 
       if(!fs.exists(filePath)){
