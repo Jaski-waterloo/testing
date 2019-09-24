@@ -43,8 +43,7 @@ import java.io.InputStreamReader;
 
 public class PairsPMI extends Configured implements Tool {
   private static final Logger LOG = Logger.getLogger(PairsPMI.class);
-	    public enum MyCounter { LINE_COUNTER };
-
+public static long numLines = 0;
 
   public static final class MyMapperWordCount extends Mapper<LongWritable, Text, Text, IntWritable> {
     // Reuse objects to save overhead of object creation.
@@ -70,8 +69,7 @@ public class PairsPMI extends Configured implements Tool {
         	WORD.set(words[i]);
         context.write(WORD, ONE);
       }
-	     Counter counter = context.getCounter(MyCounter.LINE_COUNTER);
-      counter.increment(1L);
+	     numLines++;
 
     }
   }
@@ -151,15 +149,14 @@ public class PairsPMI extends Configured implements Tool {
     private static final PairOfFloatInt PMI = new PairOfFloatInt();
     private static final Map<String, Integer> wordCount = new HashMap<String, Integer>();
 
-    private static long numLines;
 
     @Override
     public void setup(Context context) throws IOException, InterruptedException {
       Configuration conf = context.getConfiguration();
-       numLines = conf.getLong("counter", 0L);
+//        numLines = conf.getLong("counter", 0L);
 
       FileSystem fs = FileSystem.get(conf);
-      FileStatus[] status = fs.globStatus(new Path("temp/part-r-0000*"));
+      FileStatus[] status = fs.globStatus(new Path("temp/part-r-*"));
       for (FileStatus file : status) {
         FSDataInputStream is = fs.open(file.getPath());
         InputStreamReader isr = new InputStreamReader(is, "UTF-8");
@@ -280,8 +277,6 @@ public class PairsPMI extends Configured implements Tool {
     LOG.info("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
 
 
-    long count = job.getCounters().findCounter(MyMapper.MyCounter.LINE_COUNTER).getValue();
-    conf.setLong("counter", count);
     Job secondJob = Job.getInstance(conf);
     secondJob.setJobName(PairsPMI.class.getSimpleName());
     secondJob.setJarByClass(PairsPMI.class);
