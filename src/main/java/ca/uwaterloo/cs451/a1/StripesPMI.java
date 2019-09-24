@@ -49,6 +49,8 @@ public class StripesPMI extends Configured implements Tool {
     // Reuse objects to save overhead of object creation.
     private static final IntWritable ONE = new IntWritable(1);
     private static final Text WORD = new Text();
+	      public enum MyCounter { LINE_COUNTER };
+
 
     @Override
     public void map(LongWritable key, Text value, Context context)
@@ -86,6 +88,9 @@ public class StripesPMI extends Configured implements Tool {
   public static final class MyMapper extends Mapper<LongWritable, Text, Text, HMapStIW> {
     private static final HMapStIW MAP = new HMapStIW();
     private static final Text KEY = new Text();
+	  
+	      public enum MyCounter { LINE_COUNTER };
+
 
     @Override
     public void map(LongWritable key, Text value, Context context)
