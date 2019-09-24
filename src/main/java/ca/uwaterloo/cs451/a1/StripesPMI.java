@@ -299,7 +299,7 @@ public class StripesPMI extends Configured implements Tool {
 //     long count = job.getCounters().findCounter(MyMapper.MyCounter.LINE_COUNTER).getValue();
 //     conf.setLong("counter", count);
     Job secondJob = Job.getInstance(conf);
-    secondJob.setJobName(StripesPMI.class.getSimpleName());
+    secondJob.setJobName(StripesPMI.class.getSimpleName() + "StripesPMI");
     secondJob.setJarByClass(StripesPMI.class);
 
     secondJob.setNumReduceTasks(1);
