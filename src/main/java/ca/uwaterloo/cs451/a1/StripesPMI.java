@@ -265,7 +265,7 @@ public class StripesPMI extends Configured implements Tool {
     job.setJobName(StripesPMI.class.getSimpleName() + "Word Count");
     job.setJarByClass(StripesPMI.class);
 
-    job.setNumReduceTasks(args.numReducers);
+    job.setNumReduceTasks(1);
 
     FileInputFormat.setInputPaths(job, new Path(args.input));
     FileOutputFormat.setOutputPath(job, new Path(tempPath));
@@ -302,7 +302,7 @@ public class StripesPMI extends Configured implements Tool {
     secondJob.setJobName(StripesPMI.class.getSimpleName());
     secondJob.setJarByClass(StripesPMI.class);
 
-    secondJob.setNumReduceTasks(args.numReducers);
+    secondJob.setNumReduceTasks(1);
 
     FileInputFormat.setInputPaths(secondJob, new Path(args.input));
     FileOutputFormat.setOutputPath(secondJob, new Path(args.output));
