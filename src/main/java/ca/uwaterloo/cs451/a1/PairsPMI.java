@@ -128,7 +128,7 @@ public class PairsPMI extends Configured implements Tool {
 }
   }
 
-  public static final class MySecondCombiner extends Reducer<PairOfStrings, IntWritable, PairOfStrings, IntWritable> {
+  public static final class MyCombiner extends Reducer<PairOfStrings, IntWritable, PairOfStrings, IntWritable> {
     private static final IntWritable SUM = new IntWritable();
 
     @Override
@@ -144,7 +144,7 @@ public class PairsPMI extends Configured implements Tool {
     }
   }
 
-  public static final class MySecondReducer extends Reducer<PairOfStrings, IntWritable, PairOfStrings, PairOfFloatInt> {
+  public static final class MyReducer extends Reducer<PairOfStrings, IntWritable, PairOfStrings, PairOfFloatInt> {
 
     private static final PairOfFloatInt PMI = new PairOfFloatInt();
     private static final Map<String, Integer> allWords = new HashMap<String, Integer>();
@@ -157,7 +157,7 @@ public class PairsPMI extends Configured implements Tool {
       partLines = conf.getLong("counter", 0L);
 
       FileSystem fs = FileSystem.get(conf);
-      FileStatus[] status = fs.globStatus(new Path("tmp/part-r-*"));
+      FileStatus[] status = fs.globStatus(new Path("temp/part-r-*"));
       for (FileStatus file : status) {
         FSDataInputStream is = fs.open(file.getPath());
         InputStreamReader isr = new InputStreamReader(is, "UTF-8");
