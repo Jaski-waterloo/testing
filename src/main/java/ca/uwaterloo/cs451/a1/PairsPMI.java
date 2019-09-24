@@ -1,4 +1,4 @@
-package ca.uwaterloo.cs.bigdata2017w.assignment1;
+package ca.uwaterloo.cs451.a1;
 
 import io.bespin.java.util.Tokenizer;
 import org.apache.hadoop.conf.Configuration;
@@ -104,18 +104,17 @@ public class PairsPMI extends Configured implements Tool {
         if (num >= 40) break;
       }
 
-      String[] words = new String[set.size()];
-      words = set.toArray(words);
+      String[] tokens = new String[set.size()];
+      tokens = set.toArray(words);
 
-      for (int i = 0; i < words.length; i++) {
-        for (int j = i + 1; j < words.length; j++) {
-          PAIR.set(words[i], words[j]);
-          context.write(PAIR, ONE);
-          PAIR.set(words[j], words[i]);
+      for (int i = 0; i < tokens.length; i++) {
+        for (int j = Math.max(i - window, 0); j < Math.min(i + window + 1, tokens.length); j++) {
+          if (i == j) continue;
+          PAIR.set(tokens[i], tokens[j]);
           context.write(PAIR, ONE);
         }
       }
-    }
+}
   }
 
   public static final class MyCombiner extends Reducer<PairOfStrings, IntWritable, PairOfStrings, IntWritable> {
