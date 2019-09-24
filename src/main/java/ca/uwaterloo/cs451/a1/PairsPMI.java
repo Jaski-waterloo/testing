@@ -111,7 +111,7 @@ public class PairsPMI extends Configured implements Tool {
       }
 
       String[] tokens = new String[uniqueWords.size()];
-      tokens = set.toArray(tokens);
+      tokens = uniqueWords.toArray(tokens);
 
       for (int i = 0; i < tokens.length; i++) {
         for (int j = Math.max(i - window, 0); j < Math.min(i + window + 1, tokens.length); j++) {
@@ -144,7 +144,7 @@ public class PairsPMI extends Configured implements Tool {
     private static final PairOfFloatInt PMI = new PairOfFloatInt();
     private static final Map<String, Integer> wordCount = new HashMap<String, Integer>();
 
-    private static long numLines;
+    private static long numLines = 0;
 
     @Override
     public void setup(Context context) throws IOException, InterruptedException {
@@ -159,6 +159,7 @@ public class PairsPMI extends Configured implements Tool {
         BufferedReader br = new BufferedReader(isr);
         String line = br.readLine();
         while (line != null) {
+		numLines++;
           String[] data = line.split("\\s+");
           if (data.length == 2) {
             wordCount.put(data[0], Integer.parseInt(data[1]));
@@ -263,7 +264,7 @@ public class PairsPMI extends Configured implements Tool {
 //     job.getConfiguration().set("mapreduce.reduce.java.opts", "-Xmx3072m");
 
     // Delete the output directory if it exists already.
-    Path outputDir = new Path(sideDataPath);
+    Path outputDir = new Path(tempPath);
     FileSystem.get(conf).delete(outputDir, true);
 
     long startTime = System.currentTimeMillis();
@@ -273,7 +274,7 @@ public class PairsPMI extends Configured implements Tool {
     LOG.info("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
 
 
-    long count = job.getCounters().findCounter(MyMapper.MyCounter.LINE_COUNTER).getValue();
+//     long count = job.getCounters().findCounter(MyMapper.MyCounter.LINE_COUNTER).getValue();
     conf.setLong("counter", count);
     Job secondJob = Job.getInstance(conf);
     secondJob.setJobName(PairsPMI.class.getSimpleName());
