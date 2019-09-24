@@ -138,7 +138,7 @@ public class PairsPMI extends Configured implements Tool {
 		size += 1;
 	}
 
-      for (int i = 0; i < size; i++) {
+      for (i = 0; i < size; i++) {
         for (int j = Math.max(i - window, 0); j < Math.min(i + window + 1, size); j++) {
           if (i == j) continue;
           PAIR.set(tokens[i], tokens[j]);
