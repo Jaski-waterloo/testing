@@ -167,7 +167,7 @@ public class PairsPMI extends Configured implements Tool {
         InputStreamReader inStream = new InputStreamReader(fin);
         reader = new BufferedReader(inStream);
         
-      } catch(FileNotFoundException e){
+      } catch(Exception e){
         throw new IOException("Can not open file");
       }
       
