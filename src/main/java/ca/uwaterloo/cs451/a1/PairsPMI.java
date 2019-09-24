@@ -72,6 +72,7 @@ public class PairsPMI extends Configured implements Tool {
     }
   }
 
+
   // Reducer: sums up all the counts.
   public static final class MyReducerWordCount extends Reducer<Text, IntWritable, Text, IntWritable> {
     // Reuse objects.
@@ -185,6 +186,7 @@ public class PairsPMI extends Configured implements Tool {
       }
       
       reader.close();
+    }
       
 
 
