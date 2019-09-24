@@ -83,7 +83,7 @@ public class PairsPMI extends Configured implements Tool {
 	      i += 1;
       }
 	    for(String word : hash_Set){
-        WORD.set((Text)word);
+        WORD.set(word);
         context.write(WORD, ONE);
 	    }
       }
