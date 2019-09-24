@@ -1,4 +1,4 @@
-package ca.uwaterloo.cs451.a1;
+package ca.uwaterloo.cs.bigdata2017w.assignment1;
 
 import io.bespin.java.util.Tokenizer;
 import org.apache.hadoop.conf.Configuration;
@@ -46,7 +46,6 @@ public class PairsPMI extends Configured implements Tool {
     private static final IntWritable ONE = new IntWritable(1);
     private static final Text WORD = new Text();
 
-//     public enum MyCounter { LINE_COUNTER };
 
     @Override
     public void map(LongWritable key, Text value, Context context)
@@ -54,24 +53,21 @@ public class PairsPMI extends Configured implements Tool {
       int num = 0;
       Set<String> uniqueWords = new HashSet<String>();
       for (String word : Tokenizer.tokenize(value.toString())) {
-        uniqueWords.add(word);
+        set.add(word);
         num++;
         if (num >= 40) break;
       }
 
-      String[] words = new String[uniqueWords.size()];
-      words = uniqueWords.toArray(words);
+      	String[] words = new String[uniqueWords.size()];
+      		words = uniqueWords.toArray(words);
 
       for (int i = 0; i < words.length; i++) {
-        WORD.set(words[i]);
+        	WORD.set(words[i]);
         context.write(WORD, ONE);
       }
 
-//       Counter counter = context.getCounter(MyCounter.LINE_COUNTER);
-//       counter.increment(1L);
     }
   }
-
 
   // Reducer: sums up all the counts.
   public static final class MyReducerWordCount extends Reducer<Text, IntWritable, Text, IntWritable> {
@@ -96,7 +92,6 @@ public class PairsPMI extends Configured implements Tool {
   public static final class MyMapper extends Mapper<LongWritable, Text, PairOfStrings, IntWritable> {
     private static final IntWritable ONE = new IntWritable(1);
     private static final PairOfStrings PAIR = new PairOfStrings();
-     private int window = 2;
 
     @Override
     public void map(LongWritable key, Text value, Context context)
@@ -109,17 +104,18 @@ public class PairsPMI extends Configured implements Tool {
         if (num >= 40) break;
       }
 
-      String[] words = new String[uniqueWords.size()];
-      words = uniqueWords.toArray(words);
+      String[] words = new String[set.size()];
+      words = set.toArray(words);
 
       for (int i = 0; i < words.length; i++) {
-        for (int j = Math.max(i - window, 0); j < Math.min(i + window + 1, words.length); j++) {
-          if (i == j) continue;
+        for (int j = i + 1; j < words.length; j++) {
           PAIR.set(words[i], words[j]);
+          context.write(PAIR, ONE);
+          PAIR.set(words[j], words[i]);
           context.write(PAIR, ONE);
         }
       }
-}
+    }
   }
 
   public static final class MyCombiner extends Reducer<PairOfStrings, IntWritable, PairOfStrings, IntWritable> {
@@ -139,55 +135,35 @@ public class PairsPMI extends Configured implements Tool {
   }
 
   public static final class MyReducer extends Reducer<PairOfStrings, IntWritable, PairOfStrings, PairOfFloatInt> {
+    // private static final DoubleWritable PMI = new DoubleWritable();
+    // private static final DoubleWritable SUM = new DoubleWritable();
     private static final PairOfFloatInt PMI = new PairOfFloatInt();
-    private static final Map<String, Integer> total = new HashMap<String, Integer>();
-    private static int threshold = 0;
-    private static long totalLines = 0;
+    private static final Map<String, Integer> wordCount = new HashMap<String, Integer>();
+
+    private static long numLines;
 
     @Override
-    public void setup(Context context) throws IOException{
-      //TODO Read from intermediate output of first job
-      // and build in-memory map of terms to their individual totals
-	    	    threshold = context.getConfiguration().getInt("threshold", 3);
-
+    public void setup(Context context) throws IOException, InterruptedException {
       Configuration conf = context.getConfiguration();
+       numLines = conf.getLong("counter", 0L);
+
       FileSystem fs = FileSystem.get(conf);
-      
-      String yoPath = conf.get("intermediatePath");
-      Path filePath = new Path(yoPath + "/part-r-00000");
-	    
-
-      if(!fs.exists(filePath)){
-        throw new IOException("File Not Found: ");
-      }
-      
-      BufferedReader reader = null;
-      try{
-        FSDataInputStream fin = fs.open(filePath);
-        InputStreamReader inStream = new InputStreamReader(fin);
-        reader = new BufferedReader(inStream);
-        
-      } catch(Exception e){
-        throw new IOException("Can not open file");
-      }
-      
-      
-      String line = reader.readLine();
-      while(line != null){
-        totalLines++;
-        String[] parts = line.split("\\s+");
-        if(parts.length != 2){
-          LOG.info("incorrect format");
-        } else {
-          total.put(parts[0], Integer.parseInt(parts[1]));
+      FileStatus[] status = fs.globStatus(new Path("temp/part-r-0000*"));
+      for (FileStatus file : status) {
+        FSDataInputStream is = fs.open(file.getPath());
+        InputStreamReader isr = new InputStreamReader(is, "UTF-8");
+        BufferedReader br = new BufferedReader(isr);
+        String line = br.readLine();
+        while (line != null) {
+          String[] data = line.split("\\s+");
+          if (data.length == 2) {
+            wordCount.put(data[0], Integer.parseInt(data[1]));
+          }
+          line = br.readLine();
         }
-        line = reader.readLine();
+        br.close();
       }
-      
-      reader.close();
     }
-      
-
 
     @Override
     public void reduce(PairOfStrings key, Iterable<IntWritable> values, Context context)
@@ -197,14 +173,15 @@ public class PairsPMI extends Configured implements Tool {
         sum += value.get();
       }
 
+      Configuration conf = context.getConfiguration();
+      int threshold = conf.getInt("threshold", 0);
 
       if (sum >= threshold) {
         String left = key.getLeftElement();
         String right = key.getRightElement();
 
-        double pmi = Math.log10((double)(sum * totalLines) / (double)(total.get(left) * total.get(right)));
-        float fpmi = (float)pmi;
-        PMI.set(fpmi, sum);
+        float pmi = (float) Math.log10((double)(sum * numLines) / (double)(wordCount.get(left) * wordCount.get(right)));
+        PMI.set(pmi, sum);
         context.write(key, PMI);
       }
     }
@@ -237,7 +214,7 @@ public class PairsPMI extends Configured implements Tool {
     final Args args = new Args();
     CmdLineParser parser = new CmdLineParser(args, ParserProperties.defaults().withUsageWidth(100));
 
-    String tempPath = "temp";
+    String tempPath = "temp/";
 
     try {
       parser.parseArgument(argv);
@@ -254,11 +231,10 @@ public class PairsPMI extends Configured implements Tool {
     LOG.info(" - threshold: " + args.threshold);
 
     Configuration conf = getConf();
-	  Path tempDir = new Path(tempPath);
-    conf.set("intermediatePath", tempPath);
+    conf.set("tempPath", tempPath);
     conf.set("threshold", Integer.toString(args.threshold));
     Job job = Job.getInstance(conf);
-    job.setJobName(PairsPMI.class.getSimpleName() + "WordCount");
+    job.setJobName(PairsPMI.class.getSimpleName());
     job.setJarByClass(PairsPMI.class);
 
     job.setNumReduceTasks(args.numReducers);
@@ -276,57 +252,59 @@ public class PairsPMI extends Configured implements Tool {
     job.setCombinerClass(MyReducerWordCount.class);
     job.setReducerClass(MyReducerWordCount.class);
 
-    job.getConfiguration().setInt("mapred.max.split.size", 1024 * 1024 * 32);
-    job.getConfiguration().set("mapreduce.map.memory.mb", "3072");
-    job.getConfiguration().set("mapreduce.map.java.opts", "-Xmx3072m");
-    job.getConfiguration().set("mapreduce.reduce.memory.mb", "3072");
-    job.getConfiguration().set("mapreduce.reduce.java.opts", "-Xmx3072m");
+//     job.getConfiguration().setInt("mapred.max.split.size", 1024 * 1024 * 32);
+//     job.getConfiguration().set("mapreduce.map.memory.mb", "3072");
+//     job.getConfiguration().set("mapreduce.map.java.opts", "-Xmx3072m");
+//     job.getConfiguration().set("mapreduce.reduce.memory.mb", "3072");
+//     job.getConfiguration().set("mapreduce.reduce.java.opts", "-Xmx3072m");
 
     // Delete the output directory if it exists already.
-    Path outputDir = new Path(tempPath);
+    Path outputDir = new Path(sideDataPath);
     FileSystem.get(conf).delete(outputDir, true);
 
     long startTime = System.currentTimeMillis();
-    long totalTime = System.currentTimeMillis();
+	      long totalTime = System.currentTimeMillis();
+
     job.waitForCompletion(true);
     LOG.info("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
 
 
-    // Second Job
-//     long count = job.getCounters().findCounter(MyMapper.MyCounter.LINE_COUNTER).getValue();
-//     conf.setLong("counter", count);
-    Job Job2 = Job.getInstance(conf);
-    Job2.setJobName(PairsPMI.class.getSimpleName() + "PairsPMI");
-    Job2.setJarByClass(PairsPMI.class);
+    long count = job.getCounters().findCounter(MyMapper.MyCounter.LINE_COUNTER).getValue();
+    conf.setLong("counter", count);
+    Job secondJob = Job.getInstance(conf);
+    secondJob.setJobName(PairsPMI.class.getSimpleName());
+    secondJob.setJarByClass(PairsPMI.class);
 
-    Job2.setNumReduceTasks(args.numReducers);
+    secondJob.setNumReduceTasks(args.numReducers);
 
-    FileInputFormat.setInputPaths(Job2, new Path(args.input));
-    FileOutputFormat.setOutputPath(Job2, new Path(args.output));
+    FileInputFormat.setInputPaths(secondJob, new Path(args.input));
+    FileOutputFormat.setOutputPath(secondJob, new Path(args.output));
 
-    Job2.setMapOutputKeyClass(PairOfStrings.class);
-    Job2.setMapOutputValueClass(IntWritable.class);
-    Job2.setOutputKeyClass(PairOfStrings.class);
-    Job2.setOutputValueClass(PairOfFloatInt.class);
-    Job2.setOutputFormatClass(TextOutputFormat.class);
+    secondJob.setMapOutputKeyClass(PairOfStrings.class);
+    secondJob.setMapOutputValueClass(IntWritable.class);
+    secondJob.setOutputKeyClass(PairOfStrings.class);
+    secondJob.setOutputValueClass(PairOfFloatInt.class);
+    secondJob.setOutputFormatClass(TextOutputFormat.class);
 
-    Job2.getConfiguration().setInt("mapred.max.split.size", 1024 * 1024 * 32);
-    Job2.getConfiguration().set("mapreduce.map.memory.mb", "3072");
-    Job2.getConfiguration().set("mapreduce.map.java.opts", "-Xmx3072m");
-    Job2.getConfiguration().set("mapreduce.reduce.memory.mb", "3072");
-    Job2.getConfiguration().set("mapreduce.reduce.java.opts", "-Xmx3072m");
+//     secondJob.getConfiguration().setInt("mapred.max.split.size", 1024 * 1024 * 32);
+//     secondJob.getConfiguration().set("mapreduce.map.memory.mb", "3072");
+//     secondJob.getConfiguration().set("mapreduce.map.java.opts", "-Xmx3072m");
+//     secondJob.getConfiguration().set("mapreduce.reduce.memory.mb", "3072");
+//     secondJob.getConfiguration().set("mapreduce.reduce.java.opts", "-Xmx3072m");
 
-    Job2.setMapperClass(MyMapper.class);
-    Job2.setCombinerClass(MyCombiner.class);
-    Job2.setReducerClass(MyReducer.class);
+    secondJob.setMapperClass(MyMapper.class);
+    secondJob.setCombinerClass(MyCombiner.class);
+    secondJob.setReducerClass(MyReducer.class);
 
     // Delete the output directory if it exists already.
     outputDir = new Path(args.output);
     FileSystem.get(conf).delete(outputDir, true);
 
     startTime = System.currentTimeMillis();
-    Job2.waitForCompletion(true);
+    secondJob.waitForCompletion(true);
     LOG.info("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
+	      LOG.info("Total Time is " + (System.currentTimeMillis() - totalTime) / 1000.0 + " seconds");
+
 
     return 0;
   }
