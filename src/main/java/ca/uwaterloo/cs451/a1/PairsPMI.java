@@ -67,7 +67,7 @@ public class PairsPMI extends Configured implements Tool {
         context.write(WORD, ONE);
       }
 
-      Counter counter = context.getCounter(MyCounter.LINE_COUNTER);
+//       Counter counter = context.getCounter(MyCounter.LINE_COUNTER);
 //       counter.increment(1L);
     }
   }
@@ -112,10 +112,10 @@ public class PairsPMI extends Configured implements Tool {
       String[] words = new String[uniqueWords.size()];
       words = uniqueWords.toArray(words);
 
-      for (int i = 0; i < words.size(); i++) {
-        for (int j = Math.max(i - window, 0); j < Math.min(i + window + 1, tokens.size()); j++) {
+      for (int i = 0; i < words.length; i++) {
+        for (int j = Math.max(i - window, 0); j < Math.min(i + window + 1, words.length); j++) {
           if (i == j) continue;
-          PAIR.set(words.get(i), words.get(j));
+          PAIR.set(words[i], words[j]);
           context.write(PAIR, ONE);
         }
       }
@@ -141,7 +141,7 @@ public class PairsPMI extends Configured implements Tool {
   public static final class MyReducer extends Reducer<PairOfStrings, IntWritable, PairOfStrings, PairOfFloatInt> {
     private static final PairOfFloatInt PMI = new PairOfFloatInt();
     private static final Map<String, Integer> total = new HashMap<String, Integer>();
-    private static final int threshold = 0;
+    private static int threshold = 0;
     private static long totalLines = 0;
 
     @Override
@@ -282,7 +282,7 @@ public class PairsPMI extends Configured implements Tool {
     job.getConfiguration().set("mapreduce.reduce.java.opts", "-Xmx3072m");
 
     // Delete the output directory if it exists already.
-    Path outputDir = new Path(sideDataPath);
+    Path outputDir = new Path(tempPath);
     FileSystem.get(conf).delete(outputDir, true);
 
     long startTime = System.currentTimeMillis();
@@ -292,7 +292,7 @@ public class PairsPMI extends Configured implements Tool {
 
 
     // Second Job
-    long count = job.getCounters().findCounter(MyMapper.MyCounter.LINE_COUNTER).getValue();
+//     long count = job.getCounters().findCounter(MyMapper.MyCounter.LINE_COUNTER).getValue();
 //     conf.setLong("counter", count);
     Job Job2 = Job.getInstance(conf);
     Job2.setJobName(PairsPMI.class.getSimpleName() + "PairsPMI");
@@ -324,7 +324,7 @@ public class PairsPMI extends Configured implements Tool {
     FileSystem.get(conf).delete(outputDir, true);
 
     startTime = System.currentTimeMillis();
-    secondJob.waitForCompletion(true);
+    Job2.waitForCompletion(true);
     LOG.info("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
 
     return 0;
