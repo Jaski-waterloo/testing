@@ -53,7 +53,7 @@ public class PairsPMI extends Configured implements Tool {
       int num = 0;
       Set<String> uniqueWords = new HashSet<String>();
       for (String word : Tokenizer.tokenize(value.toString())) {
-        set.add(word);
+        uniqueWords.add(word);
         num++;
         if (num >= 40) break;
       }
@@ -92,8 +92,14 @@ public class PairsPMI extends Configured implements Tool {
   public static final class MyMapper extends Mapper<LongWritable, Text, PairOfStrings, IntWritable> {
     private static final IntWritable ONE = new IntWritable(1);
     private static final PairOfStrings PAIR = new PairOfStrings();
+	   private int window = 2;
 
     @Override
+    public void setup(Context context) {
+      window = context.getConfiguration().getInt("window", 2);
+}
+	  
+	  @Override
     public void map(LongWritable key, Text value, Context context)
         throws IOException, InterruptedException {
       int num = 0;
@@ -104,8 +110,8 @@ public class PairsPMI extends Configured implements Tool {
         if (num >= 40) break;
       }
 
-      String[] tokens = new String[set.size()];
-      tokens = set.toArray(words);
+      String[] tokens = new String[uniqueWords.size()];
+      tokens = set.toArray(tokens);
 
       for (int i = 0; i < tokens.length; i++) {
         for (int j = Math.max(i - window, 0); j < Math.min(i + window + 1, tokens.length); j++) {
@@ -134,8 +140,7 @@ public class PairsPMI extends Configured implements Tool {
   }
 
   public static final class MyReducer extends Reducer<PairOfStrings, IntWritable, PairOfStrings, PairOfFloatInt> {
-    // private static final DoubleWritable PMI = new DoubleWritable();
-    // private static final DoubleWritable SUM = new DoubleWritable();
+
     private static final PairOfFloatInt PMI = new PairOfFloatInt();
     private static final Map<String, Integer> wordCount = new HashMap<String, Integer>();
 
