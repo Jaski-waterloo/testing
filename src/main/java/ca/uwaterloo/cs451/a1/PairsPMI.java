@@ -41,7 +41,7 @@ import java.io.InputStreamReader;
 public class PairsPMI extends Configured implements Tool {
   private static final Logger LOG = Logger.getLogger(PairsPMI.class);
 
-  public static final class MyMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
+  public static final class MyMapperWordCount extends Mapper<LongWritable, Text, Text, IntWritable> {
     // Reuse objects to save overhead of object creation.
     private static final IntWritable ONE = new IntWritable(1);
     private static final Text WORD = new Text();
@@ -59,7 +59,7 @@ public class PairsPMI extends Configured implements Tool {
         if (num >= 40) break;
       }
 
-      String[] words = new String[set.size()];
+      String[] words = new String[uniqueWords.size()];
       words = uniqueWords.toArray(words);
 
       for (int i = 0; i < words.length; i++) {
@@ -92,9 +92,11 @@ public class PairsPMI extends Configured implements Tool {
     }
   }
 
-  public static final class MySecondMapperWordCount extends Mapper<LongWritable, Text, PairOfStrings, IntWritable> {
+  public static final class MyMapper extends Mapper<LongWritable, Text, PairOfStrings, IntWritable> {
     private static final IntWritable ONE = new IntWritable(1);
     private static final PairOfStrings PAIR = new PairOfStrings();
+     private int window = 2;
+
     
     
     @Override
@@ -108,13 +110,13 @@ public class PairsPMI extends Configured implements Tool {
       int num = 0;
       Set<String> uniqueWords = new HashSet<String>();
       for (String token : Tokenizer.tokenize(value.toString())) {
-        UniqueWords.add(token);
+        uniqueWords.add(token);
         num++;
-        if (numWords >= 40) break;
+        if (num >= 40) break;
       }
 
-      String[] tokens = new String[set.size()];
-      tokens = set.toArray(words);
+      String[] tokens = new String[uniqueWords.size()];
+      tokens = uniqueWords.toArray(tokens);
 
       for (int i = 0; i < tokens.length; i++) {
         for (int j = Math.max(i - window, 0); j < Math.min(i + window + 1, tokens.length); j++) {
@@ -285,8 +287,8 @@ public class PairsPMI extends Configured implements Tool {
 
     Job2.setNumReduceTasks(args.numReducers);
 
-    FileInputFormat.setInputPaths(secondJob, new Path(args.input));
-    FileOutputFormat.setOutputPath(secondJob, new Path(args.output));
+    FileInputFormat.setInputPaths(Job2, new Path(args.input));
+    FileOutputFormat.setOutputPath(Job2, new Path(args.output));
 
     Job2.setMapOutputKeyClass(PairOfStrings.class);
     Job2.setMapOutputValueClass(IntWritable.class);
