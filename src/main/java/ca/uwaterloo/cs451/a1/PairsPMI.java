@@ -43,6 +43,8 @@ import java.io.InputStreamReader;
 
 public class PairsPMI extends Configured implements Tool {
   private static final Logger LOG = Logger.getLogger(PairsPMI.class);
+	    public enum MyCounter { LINE_COUNTER };
+
 
   public static final class MyMapperWordCount extends Mapper<LongWritable, Text, Text, IntWritable> {
     // Reuse objects to save overhead of object creation.
