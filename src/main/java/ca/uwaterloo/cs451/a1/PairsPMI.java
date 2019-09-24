@@ -46,7 +46,7 @@ public class PairsPMI extends Configured implements Tool {
     private static final IntWritable ONE = new IntWritable(1);
     private static final Text WORD = new Text();
 
-    public enum MyCounter { LINE_COUNTER };
+//     public enum MyCounter { LINE_COUNTER };
 
     @Override
     public void map(LongWritable key, Text value, Context context)
@@ -68,7 +68,7 @@ public class PairsPMI extends Configured implements Tool {
       }
 
       Counter counter = context.getCounter(MyCounter.LINE_COUNTER);
-      counter.increment(1L);
+//       counter.increment(1L);
     }
   }
 
@@ -110,12 +110,12 @@ public class PairsPMI extends Configured implements Tool {
       }
 
       String[] words = new String[uniqueWords.size()];
-      words = set.toArray(words);
+      words = uniqueWords.toArray(words);
 
-      for (int i = 0; i < tokens.size(); i++) {
+      for (int i = 0; i < words.size(); i++) {
         for (int j = Math.max(i - window, 0); j < Math.min(i + window + 1, tokens.size()); j++) {
           if (i == j) continue;
-          PAIR.set(tokens.get(i), tokens.get(j));
+          PAIR.set(words.get(i), words.get(j));
           context.write(PAIR, ONE);
         }
       }
@@ -141,8 +141,8 @@ public class PairsPMI extends Configured implements Tool {
   public static final class MyReducer extends Reducer<PairOfStrings, IntWritable, PairOfStrings, PairOfFloatInt> {
     private static final PairOfFloatInt PMI = new PairOfFloatInt();
     private static final Map<String, Integer> total = new HashMap<String, Integer>();
-
-    private static long numLines;
+    private static final int threshold = 0;
+    private static long totalLines = 0;
 
     @Override
     public void setup(Context context) throws IOException{
@@ -174,8 +174,7 @@ public class PairsPMI extends Configured implements Tool {
       
       String line = reader.readLine();
       while(line != null){
-	      totalSum += 1;
-        
+        totalLines++;
         String[] parts = line.split("\\s+");
         if(parts.length != 2){
           LOG.info("incorrect format");
@@ -203,7 +202,7 @@ public class PairsPMI extends Configured implements Tool {
         String left = key.getLeftElement();
         String right = key.getRightElement();
 
-        double pmi = Math.log10((double)(sum * numLines) / (double)(total.get(left) * total.get(right)));
+        double pmi = Math.log10((double)(sum * totalLines) / (double)(total.get(left) * total.get(right)));
         float fpmi = (float)pmi;
         PMI.set(fpmi, sum);
         context.write(key, PMI);
@@ -255,7 +254,7 @@ public class PairsPMI extends Configured implements Tool {
     LOG.info(" - threshold: " + args.threshold);
 
     Configuration conf = getConf();
-    conf.set("tempPath", sideDataPath);
+    conf.set("temp", tempPath);
     conf.set("threshold", Integer.toString(args.threshold));
     Job job = Job.getInstance(conf);
     job.setJobName(PairsPMI.class.getSimpleName() + "WordCount");
@@ -264,7 +263,7 @@ public class PairsPMI extends Configured implements Tool {
     job.setNumReduceTasks(args.numReducers);
 
     FileInputFormat.setInputPaths(job, new Path(args.input));
-    FileOutputFormat.setOutputPath(job, new Path(sideDataPath));
+    FileOutputFormat.setOutputPath(job, new Path(tempPath));
 
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(IntWritable.class);
@@ -294,15 +293,15 @@ public class PairsPMI extends Configured implements Tool {
 
     // Second Job
     long count = job.getCounters().findCounter(MyMapper.MyCounter.LINE_COUNTER).getValue();
-    conf.setLong("counter", count);
+//     conf.setLong("counter", count);
     Job Job2 = Job.getInstance(conf);
     Job2.setJobName(PairsPMI.class.getSimpleName() + "PairsPMI");
     Job2.setJarByClass(PairsPMI.class);
 
     Job2.setNumReduceTasks(args.numReducers);
 
-    FileInputFormat.setInputPaths(secondJob, new Path(args.input));
-    FileOutputFormat.setOutputPath(secondJob, new Path(args.output));
+    FileInputFormat.setInputPaths(Job2, new Path(args.input));
+    FileOutputFormat.setOutputPath(Job2, new Path(args.output));
 
     Job2.setMapOutputKeyClass(PairOfStrings.class);
     Job2.setMapOutputValueClass(IntWritable.class);
