@@ -345,7 +345,7 @@ public class PairsPMI extends Configured implements Tool {
     job.getConfiguration().setInt("window", args.window);
 	  job.getConfiguration().setInt("threshold", args.threshold);
 
-    job.setNumReduceTasks(args.numReducers);
+    job.setNumReduceTasks(1);
 
     FileInputFormat.setInputPaths(job, new Path(args.input));
     FileOutputFormat.setOutputPath(job, new Path(args.output));
