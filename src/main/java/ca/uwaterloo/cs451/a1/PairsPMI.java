@@ -254,7 +254,8 @@ public class PairsPMI extends Configured implements Tool {
     LOG.info(" - threshold: " + args.threshold);
 
     Configuration conf = getConf();
-    conf.set("temp", tempPath);
+	  Path tempDir = new Path(tempPath);
+    conf.set("intermediatePath", tempPath);
     conf.set("threshold", Integer.toString(args.threshold));
     Job job = Job.getInstance(conf);
     job.setJobName(PairsPMI.class.getSimpleName() + "WordCount");
