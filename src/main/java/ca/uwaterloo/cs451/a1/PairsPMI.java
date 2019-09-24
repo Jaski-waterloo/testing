@@ -28,12 +28,15 @@ import org.kohsuke.args4j.ParserProperties;
 import tl.lin.data.pair.PairOfStrings;
 import tl.lin.data.pair.PairOfFloatInt;
 
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Iterator;
 import java.util.Map;
+
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
@@ -65,6 +68,8 @@ public class PairsPMI extends Configured implements Tool {
         	WORD.set(words[i]);
         context.write(WORD, ONE);
       }
+	     Counter counter = context.getCounter(MyCounter.LINE_COUNTER);
+      counter.increment(1L);
 
     }
   }
@@ -274,8 +279,8 @@ public class PairsPMI extends Configured implements Tool {
     LOG.info("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
 
 
-//     long count = job.getCounters().findCounter(MyMapper.MyCounter.LINE_COUNTER).getValue();
-//     conf.setLong("counter", count);
+    long count = job.getCounters().findCounter(MyMapper.MyCounter.LINE_COUNTER).getValue();
+    conf.setLong("counter", count);
     Job secondJob = Job.getInstance(conf);
     secondJob.setJobName(PairsPMI.class.getSimpleName());
     secondJob.setJarByClass(PairsPMI.class);
