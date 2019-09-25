@@ -96,19 +96,19 @@ object BigramCount extends Configured with Tool with WritableConversions with To
       //
       // The combination of both means that a functional implementation may have unpredictable
       // behavior when the two issues interact.
-      var sum = 0
+      var sum = 0.0
       for (value <- values.asScala) {
         sum += value
       }
      var strkey = key.asInstanceOf[String]
      if(strkey.takeRight(1) == "*"){
       val1.set(sum)
-      context.write(key, VALUE)
+      context.write(key, val1)
       marginal = sum
      }
      else{
       val1.set(sum / marginal)
-      context.write(key, sum)
+      context.write(key, val1)
      }
     }
   }
