@@ -98,16 +98,16 @@ object BigramCount extends Configured with Tool with WritableConversions with To
       // behavior when the two issues interact.
       var sum = 0.0
       for (value <- values.asScala) {
-        sum += value
+        sum += value.asInstanceOf[Float]
       }
      var strkey = key.asInstanceOf[String]
      if(strkey.takeRight(1) == "*"){
-      val1.set(sum)
+      val1.set((sum).asInstanceOf[Float])
       context.write(key, val1)
       marginal = sum
      }
      else{
-      val1.set(sum / marginal)
+      val1.set((sum / marginal).asInstanceOf[Float])
       context.write(key, val1)
      }
     }
