@@ -100,7 +100,7 @@ object BigramCount extends Configured with Tool with WritableConversions with To
       for (value <- values.asScala) {
         sum += value
       }
-     strkey = key.toString()
+     var strkey = key.toString()
      if(strkey.takeRight(1) == "*"){
       val1.set((sum).asInstanceOf[Float])
       context.write(key, val1)
