@@ -82,7 +82,7 @@ object BigramCount extends Configured with Tool with WritableConversions with To
  
  
  class MyReducer extends Reducer[Text, FloatWritable, Text, FloatWritable] {
-  var marginal: Float = 0.0
+  var marginal = 0.0
   var VALUE: FloatWritable = new FloatWritable();
     override def reduce(key: Text, values: java.lang.Iterable[FloatWritable],
                         context: Reducer[Text, FloatWritable, Text, FloatWritable]#Context) = {
@@ -96,7 +96,7 @@ object BigramCount extends Configured with Tool with WritableConversions with To
       //
       // The combination of both means that a functional implementation may have unpredictable
       // behavior when the two issues interact.
-      var sum: Float = 0.0
+      var sum = 0.0
       for (value <- values.asScala) {
         sum += value
       }
