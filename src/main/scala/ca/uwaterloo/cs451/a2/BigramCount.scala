@@ -53,7 +53,7 @@ object BigramCount extends Configured with Tool with WritableConversions with To
       if (tokens.length > 1)
      {
         tokens.sliding(2).map(p => p.mkString(" ")).foreach(word => context.write(word, 1))
-        tokens.map(p => [p, "*"]).map(p => p.mkString(" ")).foreach(word => context.write(word, 1))
+        tokens.map(p => p + " *").foreach(word => context.write(word, 1))
      }
     }
   }
