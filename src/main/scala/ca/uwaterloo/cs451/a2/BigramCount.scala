@@ -75,7 +75,7 @@ object BigramCount extends Configured with Tool with WritableConversions with To
       for (value <- values.asScala) {
         sum += value
       }
-      context.write(key, sum)
+      context.write(key, sum.asInstanceOf[Float])
     }
   }
 
