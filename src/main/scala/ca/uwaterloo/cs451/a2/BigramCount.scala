@@ -51,7 +51,9 @@ object BigramCount extends Configured with Tool with WritableConversions with To
                      context: Mapper[LongWritable, Text, Text, IntWritable]#Context) = {
       val tokens = tokenize(value)
       if (tokens.length > 1)
+     {
         tokens.sliding(2).map(p => p.mkString(" ")).foreach(word => context.write(word, 1))
+        tokens.map(p => p.mkString(" *")).foreach(word => context.write(word, 1))
     }
   }
 
