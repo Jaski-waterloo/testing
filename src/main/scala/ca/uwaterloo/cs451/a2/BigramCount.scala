@@ -132,13 +132,13 @@ object BigramCount extends Configured with Tool with WritableConversions with To
     job.setJarByClass(this.getClass)
 
     job.setMapOutputKeyClass(classOf[Text])
-    job.setMapOutputValueClass(classOf[IntWritable])
+    job.setMapOutputValueClass(classOf[FloatWritable])
     job.setOutputKeyClass(classOf[Text])
-    job.setOutputValueClass(classOf[IntWritable])
-    job.setOutputFormatClass(classOf[TextOutputFormat[Text, IntWritable]])
+    job.setOutputValueClass(classOf[FloatWritable])
+    job.setOutputFormatClass(classOf[TextOutputFormat[Text, FloatWritable]])
 
     job.setMapperClass(classOf[MyMapper])
-    job.setCombinerClass(classOf[MyReducer])
+    job.setCombinerClass(classOf[MyCombiner])
     job.setReducerClass(classOf[MyReducer])
 
     job.setNumReduceTasks(args.reducers())
