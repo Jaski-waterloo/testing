@@ -46,9 +46,9 @@ class Conf(args: Seq[String]) extends ScallopConf(args) {
 object BigramCount extends Configured with Tool with WritableConversions with Tokenizer {
   val log = Logger.getLogger(getClass().getName())
 
-  class MyMapper extends Mapper[LongWritable, Text, Text, IntWritable] {
+  class MyMapper extends Mapper[LongWritable, Text, Text, FloatWritable] {
     override def map(key: LongWritable, value: Text,
-                     context: Mapper[LongWritable, Text, Text, IntWritable]#Context) = {
+                     context: Mapper[LongWritable, Text, Text, FloatWritable]#Context) = {
       val tokens = tokenize(value)
       if (tokens.length > 1)
      {
@@ -58,9 +58,9 @@ object BigramCount extends Configured with Tool with WritableConversions with To
     }
   }
 
-  class MyReducer extends Reducer[Text, IntWritable, Text, IntWritable] {
-    override def reduce(key: Text, values: java.lang.Iterable[IntWritable],
-                        context: Reducer[Text, IntWritable, Text, IntWritable]#Context) = {
+  class MyCombiner extends Reducer[Text, FloatWritable, Text, FloatWritable] {
+    override def reduce(key: Text, values: java.lang.Iterable[FloatWritable],
+                        context: Reducer[Text, FloatWritable, Text, FloatWritable]#Context) = {
       // Although it is possible to write the reducer in a functional style (e.g., with foldLeft),
       // an imperative implementation is clearer for two reasons:
       //
@@ -79,6 +79,41 @@ object BigramCount extends Configured with Tool with WritableConversions with To
     }
   }
 
+ 
+ 
+ class MyReducer extends Reducer[Text, FloatWritable, Text, FloatWritable] {
+  var marginal: Float = 0.0
+  var VALUE: FloatWritable = new FloatWritable();
+    override def reduce(key: Text, values: java.lang.Iterable[FloatWritable],
+                        context: Reducer[Text, FloatWritable, Text, FloatWritable]#Context) = {
+      // Although it is possible to write the reducer in a functional style (e.g., with foldLeft),
+      // an imperative implementation is clearer for two reasons:
+      //
+      //   (1) The MapReduce framework supplies an iterable over writable objects; since writable
+      //       are container objects, it simply returns (a reference to) the same object each time
+      //       but with a different payload inside it.
+      //   (2) Implicit writable conversions in WritableConversions.
+      //
+      // The combination of both means that a functional implementation may have unpredictable
+      // behavior when the two issues interact.
+      var sum: Float = 0.0
+      for (value <- values.asScala) {
+        sum += value
+      }
+     if(key.takeRight(1) == "*"){
+      VALUE.set(sum)
+      context.write(key, VALUE)
+      marginal = sum
+     }
+     else{
+      VALUE.set(sum / marginal)
+      context.write(key, sum)
+     }
+    }
+  }
+ 
+ 
+ 
   override def run(argv: Array[String]) : Int = {
     val args = new Conf(argv)
 
