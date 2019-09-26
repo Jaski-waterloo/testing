@@ -58,7 +58,7 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
       val tokens = tokenize(value)
       for (i <- tokens.indices) {
         for (j <- Math.max(i - window, 0) until Math.min(i + window + 1, tokens.length)) {
-          if (i != j) context.write(new PairOfStrings(tokens(i), tokens(j)), new PairOfIntFloat(1,1.0))
+          if (i != j) context.write(new PairOfStrings(tokens(i), tokens(j)), new PairOfIntFloat(1,1))
         }
       }
     }
@@ -71,7 +71,7 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
       for (value <- values.asScala) {
         sum += value
       }
-      context.write(key, new PairOfIntFloat(sum,1.0))
+      context.write(key, new PairOfIntFloat(sum,1))
     }
   }
 
