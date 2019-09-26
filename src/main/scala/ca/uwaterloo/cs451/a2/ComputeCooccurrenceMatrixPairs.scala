@@ -59,10 +59,15 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
       val tokens1 = tokenize(value)
      var s = Set(tokens1)
      val tokens = s.toArray
-//      val tokens = tokenize(tokensarr)
+          var str = " "
+
+     for( i <- tokens)
+      str += i
+     
+     val tokens = tokenize(str)
       for (i <- tokens.indices) {
         for (j <- Math.max(i - window, 0) until Math.min(i + window + 1, tokens.length)) {
-          if (i != j) context.write(new PairOfStrings(tokens[i], tokens[j]), 1)
+          if (i != j) context.write(new PairOfStrings(tokens(i), tokens(j)), 1)
         }
       }
     }
