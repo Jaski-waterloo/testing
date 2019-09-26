@@ -43,7 +43,7 @@ class Conf(args: Seq[String]) extends ScallopConf(args) {
   verify()
 }
 
-object BigramCount extends Configured with Tool with WritableConversions with Tokenizer {
+object ComputeBigramRelativeFrequencyPairs extends Configured with Tool with WritableConversions with Tokenizer {
   val log = Logger.getLogger(getClass().getName())
 
   class MyMapper extends Mapper[LongWritable, Text, Text, FloatWritable] {
