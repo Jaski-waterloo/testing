@@ -59,10 +59,10 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
       val tokens1 = tokenize(value)
      var s = Set(tokens1)
      val tokens2 = s.toArray
-          var str = " "
+          var str = ""
 
      for( i <- tokens2)
-      str += i
+      str = i + " "
      
      val tokens = tokenize(str)
       for (i <- tokens.indices) {
