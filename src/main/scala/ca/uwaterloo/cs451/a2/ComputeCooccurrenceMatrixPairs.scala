@@ -101,8 +101,8 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
     job.setMapOutputKeyClass(classOf[PairOfStrings])
     job.setMapOutputValueClass(classOf[IntWritable])
     job.setOutputKeyClass(classOf[PairOfStrings])
-    job.setOutputValueClass(classOf[IntWritable])
-    job.setOutputFormatClass(classOf[TextOutputFormat[PairOfStrings, IntWritable]])
+    job.setOutputValueClass(classOf[PairOfIntFloat])
+    job.setOutputFormatClass(classOf[TextOutputFormat[PairOfStrings, PairOfIntFloat]])
 
     job.setMapperClass(classOf[MyMapper])
     job.setCombinerClass(classOf[MyReducer])
