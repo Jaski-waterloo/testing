@@ -46,27 +46,27 @@ class ConfPairs(args: Seq[String]) extends ScallopConf(args) {
 object ComputeCooccurrenceMatrixPairs extends Configured with Tool with WritableConversions with Tokenizer {
   val log = Logger.getLogger(getClass.getName)
 
-  class MyMapper extends Mapper[LongWritable, Text, PairOfStrings, PairOfIntFloat] {
+  class MyMapper extends Mapper[LongWritable, Text, PairOfStrings, IntWritable] {
     var window = 2
 
-    override def setup(context: Mapper[LongWritable, Text, PairOfStrings, PairOfIntFloat]#Context) {
+    override def setup(context: Mapper[LongWritable, Text, PairOfStrings, IntWritable]#Context) {
       window = context.getConfiguration.getInt("window", 2)
     }
 
     override def map(key: LongWritable, value: Text,
-                     context: Mapper[LongWritable, Text, PairOfStrings, PairOfIntFloat]#Context) = {
+                     context: Mapper[LongWritable, Text, PairOfStrings, IntWritable]#Context) = {
       val tokens = tokenize(value)
       for (i <- tokens.indices) {
         for (j <- Math.max(i - window, 0) until Math.min(i + window + 1, tokens.length)) {
-          if (i != j) context.write(new PairOfStrings(tokens(i), tokens(j)), new PairOfIntFloat(1,1))
+          if (i != j) context.write(new PairOfStrings(tokens(i), tokens(j)), 1)
         }
       }
     }
   }
 
-  class MyReducer extends Reducer[PairOfStrings, PairOfIntFloat, PairOfStrings, PairOfIntFloat] {
-    override def reduce(key: PairOfStrings, values: java.lang.Iterable[PairOfIntFloat],
-                        context: Reducer[PairOfStrings, PairOfIntFloat, PairOfStrings, PairOfIntFloat]#Context) = {
+  class MyReducer extends Reducer[PairOfStrings, IntWritable, PairOfStrings, PairOfIntFloat] {
+    override def reduce(key: PairOfStrings, values: java.lang.Iterable[IntWritable],
+                        context: Reducer[PairOfStrings, IntWritable, PairOfStrings, PairOfIntFloat]#Context) = {
       var sum = 0
       for (value <- values.asScala) {
         sum += value
@@ -99,7 +99,7 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
     job.setJarByClass(this.getClass)
 
     job.setMapOutputKeyClass(classOf[PairOfStrings])
-    job.setMapOutputValueClass(classOf[PairOfIntFloat])
+    job.setMapOutputValueClass(classOf[IntWritable])
     job.setOutputKeyClass(classOf[PairOfStrings])
     job.setOutputValueClass(classOf[PairOfIntFloat])
     job.setOutputFormatClass(classOf[TextOutputFormat[PairOfStrings, PairOfIntFloat]])
