@@ -68,8 +68,8 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
     var SUM: IntWritable = new IntWritable(1);
 
     @Override
-    override def reduce(PairOfStrings key, Iterable<IntWritable> values, Context context)
-        throws IOException, InterruptedException {
+    override def reduce(key: PairOfStrings, values: java.lang.Iterable[IntWritable],
+                     context: Reducer[PairOfStrings, IntWritable, PairOfStrings, IntWritable]#Context) = {
       Iterator<IntWritable> iter = values.iterator();
       var sum: int = 0
       while (iter.hasNext()) {
