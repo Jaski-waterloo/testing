@@ -56,8 +56,8 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
     override def map(key: LongWritable, value: Text,
                      context: Mapper[LongWritable, Text, PairOfStrings, IntWritable]#Context) = {
      
-      val tokens = tokenize(value)
-     var s = Set(tokens)
+      val tokens1 = tokenize(value)
+     var s = Set(tokens1)
      tokens = s.copyToArray()
       for (i <- tokens.indices) {
         for (j <- Math.max(i - window, 0) until Math.min(i + window + 1, tokens.length)) {
