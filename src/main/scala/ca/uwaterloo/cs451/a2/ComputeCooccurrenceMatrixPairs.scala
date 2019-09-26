@@ -70,13 +70,11 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
     @Override
     override def reduce(key: PairOfStrings, values: java.lang.Iterable[IntWritable],
                      context: Reducer[PairOfStrings, IntWritable, PairOfStrings, IntWritable]#Context) = {
-      Iterator<IntWritable> iter = values.iterator();
-      var sum: int = 0
-      while (iter.hasNext()) {
-        sum += iter.next().get()
+     var sum = 0
+      for (value <- values.asScala) {
+        sum += value
       }
-      SUM.set(sum)
-      context.write(key, SUM)
+      context.write(key,  sum)
     }
 }
 
