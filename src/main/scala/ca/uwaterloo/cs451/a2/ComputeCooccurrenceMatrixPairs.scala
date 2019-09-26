@@ -63,19 +63,23 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
       }
     }
   }
+ 
+ public static final class MyCombiner extends Reducer<PairOfStrings, IntWritable, PairOfStrings, IntWritable> {
+    var SUM: IntWritable = new IntWritable(1);
 
-//  class MyReducer extends Reducer[PairOfStrings, IntWritable, PairOfStrings, PairOfIntFloat] {
-//    var PMI: PairOfIntFloat = new PairOfIntFloat(1,1);
-//     override def reduce(key: PairOfStrings, values: java.lang.Iterable[IntWritable],
-//                         context: Reducer[PairOfStrings, IntWritable, PairOfStrings, PairOfIntFloat]#Context) = {
-//       var sum = 0
-//       for (value <- values.asScala) {
-//         sum += value
-//       }
-//      PMI.set(sum,1)
-//       context.write(key,  PMI)
-//     }
-//   }
+    @Override
+    public void reduce(PairOfStrings key, Iterable<IntWritable> values, Context context)
+        throws IOException, InterruptedException {
+      Iterator<IntWritable> iter = values.iterator();
+      var sum: int = 0
+      while (iter.hasNext()) {
+        sum += iter.next().get()
+      }
+      SUM.set(sum)
+      context.write(key, SUM)
+    }
+}
+
  
   class MyReducer extends Reducer[PairOfStrings, IntWritable, PairOfStrings, PairOfIntFloat] {
    var PMI: PairOfIntFloat = new PairOfIntFloat(1,1);
@@ -120,7 +124,7 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
     job.setOutputFormatClass(classOf[TextOutputFormat[PairOfStrings, PairOfIntFloat]])
 
     job.setMapperClass(classOf[MyMapper])
-//     job.setCombinerClass(classOf[MyReducer])
+    job.setCombinerClass(classOf[MyCombiner])
     job.setReducerClass(classOf[MyReducer])
     job.setPartitionerClass(classOf[MyPartitioner])
 
