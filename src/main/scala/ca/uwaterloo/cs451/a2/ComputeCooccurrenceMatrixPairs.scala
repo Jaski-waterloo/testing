@@ -32,6 +32,7 @@ import org.apache.hadoop.util.ToolRunner
 import org.apache.log4j._
 import org.rogach.scallop._
 import tl.lin.data.pair.PairOfStrings
+import tl.lin.data.pair.PairOfIntFloat
 
 class ConfPairs(args: Seq[String]) extends ScallopConf(args) {
   mainOptions = Seq(input, output, reducers)
@@ -57,20 +58,20 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
       val tokens = tokenize(value)
       for (i <- tokens.indices) {
         for (j <- Math.max(i - window, 0) until Math.min(i + window + 1, tokens.length)) {
-          if (i != j) context.write(new PairOfStrings(tokens(i), tokens(j)), 1)
+          if (i != j) context.write(new PairOfStrings(tokens(i), tokens(j)), 1)+
         }
       }
     }
   }
 
-  class MyReducer extends Reducer[PairOfStrings, IntWritable, PairOfStrings, IntWritable] {
+  class MyReducer extends Reducer[PairOfStrings, IntWritable, PairOfStrings, PairOfIntFloat] {
     override def reduce(key: PairOfStrings, values: java.lang.Iterable[IntWritable],
-                        context: Reducer[PairOfStrings, IntWritable, PairOfStrings, IntWritable]#Context) = {
+                        context: Reducer[PairOfStrings, IntWritable, PairOfStrings, PairOfIntFloat]#Context) = {
       var sum = 0
       for (value <- values.asScala) {
         sum += value
       }
-      context.write(key, sum)
+      context.write(key, new PairOfIntFloat(sum,1))
     }
   }
 
