@@ -65,7 +65,7 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
   }
 
   class MyReducer extends Reducer[PairOfStrings, IntWritable, PairOfStrings, PairOfIntFloat] {
-   var PMI: PairOfIntFloat
+   var PMI: PairOfIntFloat = new PairOfIntFloat(1,1);
     override def reduce(key: PairOfStrings, values: java.lang.Iterable[IntWritable],
                         context: Reducer[PairOfStrings, IntWritable, PairOfStrings, PairOfIntFloat]#Context) = {
       var sum = 0
