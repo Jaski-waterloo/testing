@@ -65,8 +65,8 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
   }
 
   class MyReducer extends Reducer[PairOfStrings, PairOfIntFloat, PairOfStrings, PairOfIntFloat] {
-    override def reduce(key: PairOfStrings, values: java.lang.Iterable[IntWritable],
-                        context: Reducer[PairOfStrings, IntWritable, PairOfStrings, PairOfIntFloat]#Context) = {
+    override def reduce(key: PairOfStrings, values: java.lang.Iterable[PairOfIntFloat],
+                        context: Reducer[PairOfStrings, PairOfIntFloat, PairOfStrings, PairOfIntFloat]#Context) = {
       var sum = 0
       for (value <- values.asScala) {
         sum += value
