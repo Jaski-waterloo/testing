@@ -64,7 +64,7 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
     }
   }
  
- class MyCombiner extends Reducer<PairOfStrings, IntWritable, PairOfStrings, IntWritable> {
+ class MyCombiner extends Reducer[PairOfStrings, IntWritable, PairOfStrings, IntWritable] {
     var SUM: IntWritable = new IntWritable(1);
 
     @Override
