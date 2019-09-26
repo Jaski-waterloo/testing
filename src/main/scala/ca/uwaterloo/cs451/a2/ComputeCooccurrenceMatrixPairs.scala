@@ -64,11 +64,11 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
     }
   }
  
- public static final class MyCombiner extends Reducer<PairOfStrings, IntWritable, PairOfStrings, IntWritable> {
+ class MyCombiner extends Reducer<PairOfStrings, IntWritable, PairOfStrings, IntWritable> {
     var SUM: IntWritable = new IntWritable(1);
 
     @Override
-    public void reduce(PairOfStrings key, Iterable<IntWritable> values, Context context)
+    override def reduce(PairOfStrings key, Iterable<IntWritable> values, Context context)
         throws IOException, InterruptedException {
       Iterator<IntWritable> iter = values.iterator();
       var sum: int = 0
