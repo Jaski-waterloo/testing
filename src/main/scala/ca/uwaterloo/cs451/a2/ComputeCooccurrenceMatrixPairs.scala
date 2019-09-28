@@ -98,7 +98,7 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
    var PMI: PairOfIntFloat = new PairOfIntFloat(1,1);
    var threshold = 0;
    
-   override def setup(context: Mapper[PairOfStrings, IntWritable, PairOfStrings, PairOfIntFloat]#Context) {
+   override def setup(context: Reducer[PairOfStrings, IntWritable, PairOfStrings, PairOfIntFloat]#Context) {
       threshold = context.getConfiguration.getInt("threshold", 1)
     }
    
