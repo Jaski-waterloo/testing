@@ -1,6 +1,8 @@
 package ca.uwaterloo.cs451.a2;
 
 import org.apache.spark._
+import io.bespin.scala.util.Tokenizer
+
 import org.apache.spark.SparkContext._
 
 object WordCount {
