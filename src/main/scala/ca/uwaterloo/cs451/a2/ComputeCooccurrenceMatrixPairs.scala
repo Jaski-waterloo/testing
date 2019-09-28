@@ -150,7 +150,7 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
    
    val conf1 = new SparkConf().setAppName("wordCount")
       // Create a Scala Spark Context.
-      val sc = new SparkContext(conf)
+      val sc = new SparkContext(conf1)
       // Load our input data.
       val counts =  sc.textFile(args.input()).flatMap(line => tokenize(line).take(40)).map(word => (word, 1)).reduceByKey(_+_).collect
    
