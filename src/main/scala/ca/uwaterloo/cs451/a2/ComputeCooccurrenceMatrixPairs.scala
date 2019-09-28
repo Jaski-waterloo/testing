@@ -35,9 +35,9 @@ import tl.lin.data.pair.PairOfStrings
 import tl.lin.data.pair.PairOfIntFloat
 import scala.math.{log10}
 
-// import org.apache.spark._
+import org.apache.spark._
 
-// import org.apache.spark.SparkContext._
+import org.apache.spark.SparkContext._
 
 
 
@@ -148,12 +148,11 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
 //    val uniqueWords = words40.flatMap()
 //    val counts = words.map(word => (word, 1)).reduceByKey{case (x, y) => x + y}
    
-    val conf1 = getConf()
+   val conf1 = new SparkConf().setAppName("wordCount")
       // Create a Scala Spark Context.
-    val sc = Job.getInstance(conf1)
-        
+      val sc = new SparkContext(conf)
       // Load our input data.
-      val counts =  sc.textFile(inputFile).flatMap(line => tokenize(line).take(40)).map(word => (word, 1)).reduceByKey(_+_).collect
+      val counts =  sc.textFile(args.input()).flatMap(line => tokenize(line).take(40)).map(word => (word, 1)).reduceByKey(_+_).collect
    
     val rdd = sc.parallelize(counts,1)
         rdd.saveAsTextFile("wc")
