@@ -91,7 +91,7 @@ object BigramPairs extends Tokenizer {
     }
    })
    .map(p => p._1 + " " + p._2)
-   .sortByKey()
+//    .sortByKey()
       .saveAsTextFile(args.output())
   }
 }
