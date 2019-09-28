@@ -93,10 +93,10 @@ object PairsPMI extends Tokenizer {
    if (both > threshold)
    {
     var fpmi = Math.log10(both.toDouble * totalLinesBroadcast.value / (left.toDouble * right.toDouble))
-    (pair, (fpmi, both))
+    (pair._1, (fpmi, both))
    }
   })
-  .sortByKey()
+//   .sortByKey()
   .saveAsTextFile(args.output())
   
   
