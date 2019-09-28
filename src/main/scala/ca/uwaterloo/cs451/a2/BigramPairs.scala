@@ -59,19 +59,20 @@ object BigramPairs extends Tokenizer {
     var tokens = tokenize(line)
     if (tokens.length > 1)
      {
-      var pairs = scala.collection.mutable.ListBuffer[(String, Int)]()
+      var pairs = scala.collection.mutable.ListBuffer[(String)]()
         tokens.sliding(2).map(p => p.mkString(" ")).map(word => {
-         var pair : (String, Int) = (word,1)
+         var pair : (String) = word
          pairs += pair
         })
         tokens.map(p => p + " *").map(word => {
-         var pair : (String, Int) = (word,1)
+         var pair : (String) = word
          pairs += pair
         })
         pairs.toList
      }
     else List()
    })
+   .map(pair => (pair,1))
    .reduceByKey(_+_)
    .sortByKey()
    .collectAsMap()
