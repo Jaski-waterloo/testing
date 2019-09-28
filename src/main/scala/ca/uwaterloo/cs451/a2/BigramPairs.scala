@@ -56,7 +56,7 @@ object BigramPairs extends Tokenizer {
    
    textFile
    .map(line => {
-    tokens = tokenize(line)
+    var tokens = tokenize(line)
     if (tokens.length > 1)
      {
       var pairs = scala.collection.mutable.ListBuffer[(String, Int)]()
@@ -71,8 +71,8 @@ object BigramPairs extends Tokenizer {
    .sortByKey()
    .collectAsMap()
    .map(pair => {
-    left = tokenize(pair._1)(0)
-    right = tokenize(pair._1)(1)
+    var left = tokenize(pair._1)(0)
+    var right = tokenize(pair._1)(1)
     var marginal = 0
     if(right == "*")
     {
