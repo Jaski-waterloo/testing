@@ -24,7 +24,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.SparkConf
 import org.rogach.scallop._
 
-class ConfPairs(args: Seq[String]) extends ScallopConf(args) with Tokenizer {
+class ConfBPairs(args: Seq[String]) extends ScallopConf(args) with Tokenizer {
   mainOptions = Seq(input, output, reducers, threshold)
   val input = opt[String](descr = "input path", required = true)
   val output = opt[String](descr = "output path", required = true)
@@ -39,7 +39,7 @@ object BigramPairs extends Tokenizer {
   val log = Logger.getLogger(getClass().getName())
 
   def main(argv: Array[String]) {
-    val args = new ConfPairs(argv)
+    val args = new ConfBPairs(argv)
 
     log.info("Input: " + args.input())
     log.info("Output: " + args.output())
