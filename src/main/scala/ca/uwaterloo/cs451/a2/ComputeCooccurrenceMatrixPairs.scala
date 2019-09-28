@@ -45,6 +45,7 @@ class ConfPairs(args: Seq[String]) extends ScallopConf(args) {
 
 object ComputeCooccurrenceMatrixPairs extends Configured with Tool with WritableConversions with Tokenizer {
   val log = Logger.getLogger(getClass.getName)
+  var total:Long = 0
 
   class MyMapper extends Mapper[LongWritable, Text, PairOfStrings, IntWritable] {
     var window = 2
@@ -67,7 +68,10 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
      val tokens = tokenize(str)
       for (i <- tokens.indices) {
         for (j <- Math.max(i - window, 0) until Math.min(i + window + 1, tokens.length)) {
-          if (i != j) context.write(new PairOfStrings(tokens(i), tokens(j)), 1)
+          if (i != j) {
+           context.write(new PairOfStrings(tokens(i), tokens(j)), 1)
+           total += 1
+          }
         }
       }
     }
@@ -96,7 +100,8 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
       for (value <- values.asScala) {
         sum += value
       }
-     PMI.set(sum,1)
+     var fpmi:Float = sum / total
+     PMI.set(sum, fpmi)
       context.write(key,  PMI)
     }
   }
