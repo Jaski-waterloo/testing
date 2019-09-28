@@ -76,8 +76,8 @@ object BigramPairs extends Tokenizer {
    .reduceByKey(_+_)
    .collectAsMap()
    .map(pair => {
-    var left = tokenize(pair._1)(0)
-    var right = tokenize(pair._1)(1)
+    var left = tokenize(pair._1.toString)(0)
+    var right = tokenize(pair._1.toString)(1)
     var marginal = 0
     if(right == "*")
     {
