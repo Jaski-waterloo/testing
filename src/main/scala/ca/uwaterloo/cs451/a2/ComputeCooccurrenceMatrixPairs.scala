@@ -150,6 +150,7 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
     val startTime = System.currentTimeMillis()
     job.waitForCompletion(true)
     log.info("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds")
+    log.info("Total number of lines is " + total)
 
     return 0
   }
