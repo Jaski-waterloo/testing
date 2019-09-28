@@ -17,6 +17,7 @@ object WordCount {
       // Transform into word and count.
 //       val counts = words.map(word => (word, 1)).reduceByKey{case (x, y) => x + y}
       // Save the word count back out to a text file, causing evaluation.
-        counts.saveAsTextFile(outputFile)
+        val rdd = sc.parallelize(counts)
+        rdd.saveAsTextFile(outputFile)
     }
 }
