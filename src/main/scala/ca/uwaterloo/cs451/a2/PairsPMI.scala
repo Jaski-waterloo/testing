@@ -58,7 +58,7 @@ object PairsPMI extends Tokenizer {
                       .flatMap(line => {
                         val tokens = tokenize(line)
                         if (tokens.length > 0) tokens.take(Math.min(tokens.length, 40)).distinct 
-//                         else List()
+                        else List()
                       })
                       .map(word => (word, 1))
                       .reduceByKey(_ + _)
@@ -82,7 +82,7 @@ object PairsPMI extends Tokenizer {
             }
           }
           pairs.toList
-        } //else List()
+        } else List()
       })
       .map(pair => (pair, 1))
       .reduceByKey(_ + _)
