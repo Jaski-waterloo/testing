@@ -81,13 +81,13 @@ object PairsPMI extends Tokenizer {
       pairs = pairs :+ (x,y)
     }
    }
-   pairs.map(p => p._1.toStr + " " + p._2).toList
+   pairs.map(p => p._1.toString + " " + p._2).toList
   })
   .map(pair => ((tokenize(pair)(0), tokenize(pair)(1)), 1))
   .reduceByKey(_+_)
   .map(pair => {
-   val left = wordCountBroadcast.get(pair._1._1).head
-   val right = wordCountBroadcast.get(pair._1._2).head
+   val left = wordCountBroadcast.value.get(pair._1._1).head
+   val right = wordCountBroadcast.value.get(pair._1._2).head
    val both = pair._2
    
    if (both > threshold)
