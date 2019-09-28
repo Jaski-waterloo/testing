@@ -37,7 +37,7 @@ import scala.math.{log10}
 
 // import org.apache.spark._
 
-import org.apache.spark.SparkContext._
+// import org.apache.spark.SparkContext._
 
 
 
@@ -150,7 +150,7 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
    
     val conf1 = getConf()
       // Create a Scala Spark Context.
-      val sc = new SparkContext(conf1)
+    val sc = Job.getInstance(conf1)
         
       // Load our input data.
       val counts =  sc.textFile(inputFile).flatMap(line => tokenize(line).take(40)).map(word => (word, 1)).reduceByKey(_+_).collect
