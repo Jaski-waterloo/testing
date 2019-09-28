@@ -69,11 +69,11 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
       for (i <- tokens.indices) {
         for (j <- Math.max(i - window, 0) until Math.min(i + window + 1, tokens.length)) {
           if (i != j) {
-                      total += 1
                       context.write(new PairOfStrings(tokens(i), tokens(j)), 1)
           }
         }
       }
+     total += 1
     }
   }
  
