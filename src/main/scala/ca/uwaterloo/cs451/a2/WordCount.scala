@@ -11,7 +11,7 @@ object WordCount {
       // Create a Scala Spark Context.
       val sc = new SparkContext(conf)
       // Load our input data.
-      val counts =  sc.textFile(inputFile).flatMap(line => line.take(40).split(" ")).map(word => (word, 1)).reduceByKey(_+_) counts.collect
+      val counts =  sc.textFile(inputFile).flatMap(line => line.take(40).split(" ")).map(word => (word, 1)).reduceByKey(_+_).collect
       // Split up into words.
 //       val words = input.flatMap(line => line.take(40).split(" "))
       // Transform into word and count.
