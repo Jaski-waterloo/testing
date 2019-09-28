@@ -41,6 +41,7 @@ class ConfPairs(args: Seq[String]) extends ScallopConf(args) {
   val output = opt[String](descr = "output path", required = true)
   val reducers = opt[Int](descr = "number of reducers", required = false, default = Some(1))
   val window = opt[Int](descr = "cooccurrence window", required = false, default = Some(2))
+  val threshold = opt[Int](descr = "threshold of output", required = false, default = Some(1))
   verify()
 }
 
@@ -95,17 +96,25 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
  
   class MyReducer extends Reducer[PairOfStrings, IntWritable, PairOfStrings, PairOfIntFloat] {
    var PMI: PairOfIntFloat = new PairOfIntFloat(1,1);
+   var threshold = 0;
+   
+   override def setup(context: Mapper[PairOfStrings, IntWritable, PairOfStrings, PairOfIntFloat]#Context) {
+      threshold = context.getConfiguration.getInt("threshold", 1)
+    }
+   
     override def reduce(key: PairOfStrings, values: java.lang.Iterable[IntWritable],
                         context: Reducer[PairOfStrings, IntWritable, PairOfStrings, PairOfIntFloat]#Context) = {
       var sum:Float = 0
       for (value <- values.asScala) {
         sum += value
       }
+     if(sum > threshold){
      var pmi:Double = sum / total
      var fpmi = log10(pmi).asInstanceOf[Float]
      PMI.set(sum.asInstanceOf[Int], fpmi)
 //      print(pmi)
       context.write(key,  PMI)
+     }
     }
   }
 
@@ -122,6 +131,8 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
     log.info("Output: " + args.output())
     log.info("Number of reducers: " + args.reducers())
     log.info("Window: " + args.window())
+    log.info("threshold: " + args.threshold())
+
 
     val conf = getConf()
     val job = Job.getInstance(conf)
@@ -144,6 +155,8 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
     job.setPartitionerClass(classOf[MyPartitioner])
 
     job.getConfiguration.setInt("window", args.window())
+       job.getConfiguration.setInt("threshold", args.threshold())
+
 
     job.setNumReduceTasks(args.reducers())
 
