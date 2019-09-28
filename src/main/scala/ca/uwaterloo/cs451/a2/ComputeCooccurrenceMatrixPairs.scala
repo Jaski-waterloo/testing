@@ -33,6 +33,7 @@ import org.apache.log4j._
 import org.rogach.scallop._
 import tl.lin.data.pair.PairOfStrings
 import tl.lin.data.pair.PairOfIntFloat
+import scala.math.{log10}
 
 class ConfPairs(args: Seq[String]) extends ScallopConf(args) {
   mainOptions = Seq(input, output, reducers)
@@ -96,7 +97,7 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
    var PMI: PairOfIntFloat = new PairOfIntFloat(1,1);
     override def reduce(key: PairOfStrings, values: java.lang.Iterable[IntWritable],
                         context: Reducer[PairOfStrings, IntWritable, PairOfStrings, PairOfIntFloat]#Context) = {
-      var sum = 0
+      var sum:Float = 0
       for (value <- values.asScala) {
         sum += value
       }
