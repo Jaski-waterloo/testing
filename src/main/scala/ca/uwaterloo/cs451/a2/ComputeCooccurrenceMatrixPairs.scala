@@ -132,6 +132,18 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
     log.info("Number of reducers: " + args.reducers())
     log.info("Window: " + args.window())
     log.info("threshold: " + args.threshold())
+   
+   
+    val confWordCount = new SparkConf().setAppName("wordCount")
+   val sc = new SparkContext(confWordCount)
+   val input =  sc.textFile(args.input())
+   val words = input.map(line => line.split(" "))
+   val words40 = words.map(line => line[:40])
+   val uniqueWords = words40.flatMap()
+   val counts = words.map(word => (word, 1)).reduceByKey{case (x, y) => x + y}
+   
+   
+   
 
 
     val conf = getConf()
