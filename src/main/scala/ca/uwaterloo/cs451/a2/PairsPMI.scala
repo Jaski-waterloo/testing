@@ -78,7 +78,7 @@ object PairsPMI extends Tokenizer {
     for(y <- uniqueTokens)
     {
      if(x != y)
-      pairs = pairs: + (x,y)
+      pairs = pairs :+ (x,y)
     }
    }
    pairs.map(p => p._1.toStr + " " + p._2).toList
