@@ -1,4 +1,4 @@
-package ca.uwaterloo.cs.bigdata2017w.assignment2
+package ca.uwaterloo.cs451.a2;
 
 import io.bespin.scala.util.Tokenizer
 
