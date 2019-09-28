@@ -94,6 +94,7 @@ object PairsPMI extends Tokenizer {
         var pmi = Math.log10((both * totalLines.toFloat) / (left * right))
         (p._1, (pmi, both.toInt))
       })
+      .sortByKey()
       .map(p => p._1 + " " + p._2)
       .saveAsTextFile(args.output())
   }
