@@ -11,13 +11,12 @@ object WordCount {
       // Create a Scala Spark Context.
       val sc = new SparkContext(conf)
       // Load our input data.
-      val counts =  sc.textFile(inputFile).flatMap(line => line.take(40).split(" ")).map(word => (word, 1)).reduceByKey{case (x, y) => x + y}(collection.breakOut): List[(Array[String], List[Int])]
+      val counts =  sc.textFile(inputFile).flatMap(line => line.take(40).split(" ")).map(word => (word, 1)).reduceByKey(_+_) counts.collect
       // Split up into words.
 //       val words = input.flatMap(line => line.take(40).split(" "))
       // Transform into word and count.
 //       val counts = words.map(word => (word, 1)).reduceByKey{case (x, y) => x + y}
       // Save the word count back out to a text file, causing evaluation.
-//       counts.saveAsTextFile(outputFile)
-        val rdd=sc.parallelize(counts)
+        counts.saveAsTextFile(outputFile)
     }
 }
