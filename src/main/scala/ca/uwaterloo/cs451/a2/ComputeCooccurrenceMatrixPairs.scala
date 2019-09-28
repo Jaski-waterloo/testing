@@ -101,9 +101,9 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
         sum += value
       }
      var pmi:Double = sum / total
-     var fpmi = pmi.asInstanceOf[Float]
+     var fpmi = log10(pmi).asInstanceOf[Float]
      PMI.set(sum, fpmi)
-     print(pmi)
+//      print(pmi)
       context.write(key,  PMI)
     }
   }
