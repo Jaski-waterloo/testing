@@ -100,7 +100,8 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
       for (value <- values.asScala) {
         sum += value
       }
-     var fpmi:Float = sum / total
+     var pmi:Double = sum / total
+     var fpmi = pmi.asInstanceOf[Float]
      PMI.set(sum, fpmi)
       context.write(key,  PMI)
     }
