@@ -42,7 +42,7 @@ object PairsPMI extends Tokenizer {
  def main(argv: Array[String])
  {
   
-  val args = new ConfP(argv)
+  val args = new ConfPairs(argv)
 
   log.info("Input: " + args.input())
   log.info("Output: " + args.output())
@@ -55,7 +55,7 @@ object PairsPMI extends Tokenizer {
   FileSystem.get(sc.hadoopConfiguration).delete(outputDir, true)
   val textFile = sc.textFile(args.input())
   
-  val wordCounts = textFile.flatMap(line => {
+  val wordCount = textFile.flatMap(line => {
    val tokens = tokenize(line).take(40)
    val uniqueTokens = tokens.toSet
   uniqueTokens.map(t => t).toList
@@ -66,13 +66,13 @@ object PairsPMI extends Tokenizer {
   val totalLines = textFile.map(line => ("*", 1))
   .reduceByKey(_+_)
   
-  val wordCountBroadcast = sc.Broadcast(wordCount.collectAsMap())
-  val totalLinesBroadcast = sc.Broadcast(totalLines.lookup("*")(0))
+  val wordCountBroadcast = sc.broadcast(wordCount.collectAsMap())
+  val totalLinesBroadcast = sc.broadcast(totalLines.lookup("*")(0))
   
   val pmi = textFile.flatMap(line => {
    val tokens = tokenize(line).take(40)
    val uniqueTokens = tokens.toSet
-   var pairs = List[(String),(String)]()
+   var pairs = List[(String, String)]()
    for(x <- uniqueTokens)
    {
     for(y <- uniqueTokens)
