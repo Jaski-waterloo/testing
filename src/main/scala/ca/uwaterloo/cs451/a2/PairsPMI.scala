@@ -1,4 +1,4 @@
-package ca.uwaterloo.cs451.a2
+package ca.uwaterloo.cs.bigdata2017w.assignment2
 
 import io.bespin.scala.util.Tokenizer
 
@@ -8,12 +8,14 @@ import org.apache.spark.SparkContext
 import org.apache.spark.SparkConf
 import org.rogach.scallop._
 
-class ConfP(args: Seq[String]) extends ScallopConf(args) {
+class PairsPMIConf(args: Seq[String]) extends ScallopConf(args) with Tokenizer {
   mainOptions = Seq(input, output, reducers, threshold)
   val input = opt[String](descr = "input path", required = true)
   val output = opt[String](descr = "output path", required = true)
   val reducers = opt[Int](descr = "number of reducers", required = false, default = Some(1))
-  val threshold = opt[Int](descr = "threshold value", required = false, default = Some(10))
+  val threshold = opt[Int](descr = "threshold", required = false, default = Some(10))
+  val numExecutors = opt[Int](descr = "number of executors", required = false, default = Some(1))
+  val executorCores = opt[Int](descr = "number of cores", required = false, default = Some(1))
   verify()
 }
 
@@ -21,67 +23,61 @@ object PairsPMI extends Tokenizer {
   val log = Logger.getLogger(getClass().getName())
 
   def main(argv: Array[String]) {
-    val args = new ConfP(argv)
+    val args = new PairsPMIConf(argv)
 
     log.info("Input: " + args.input())
     log.info("Output: " + args.output())
     log.info("Number of reducers: " + args.reducers())
-    log.info("Threshold Value: " + args.threshold())
 
-    val conf = new SparkConf().setAppName("PairsPMI")
+    val conf = new SparkConf().setAppName("Pairs PMI")
     val sc = new SparkContext(conf)
+    val threshold = args.threshold()
 
     val outputDir = new Path(args.output())
-    val threshold = args.threshold().toInt
     FileSystem.get(sc.hadoopConfiguration).delete(outputDir, true)
 
-    val textFile = sc.textFile(args.input())
-    
-    val single_counts = textFile.flatMap( line => {
-            val tokens = tokenize(line).take(40)
-            val set_tokens = tokens.toSet
-            set_tokens.map( p => p).toList
-       })
-       .map(gram => (gram, 1))
-       .reduceByKey(_+_)
-    
-    val total_count = textFile.flatMap( line => {
-            val tokens = tokenize(line).take(40)
-            val set_tokens = tokens.toSet
-            set_tokens.map( p => p).toList
-       })
-       .map(gram => ("*",1))
-       .reduceByKey(_+_)
-       
-    val total_count_B = sc.broadcast(total_count.lookup("*")(0))
-    val single_counts_B = sc.broadcast(single_counts.collectAsMap())
-      
-    val pmi = textFile.flatMap( line => {
-            val tokens = tokenize(line)
-            val set_tokens = tokens.take(40).toSet
-            var pairs = List[(String,String)]()
-            for (x<-set_tokens) {
-              for (y<-set_tokens) {
-                if (x != y) {
-                  pairs = pairs :+ (x,y)
-                }
+    val textFile = sc.textFile(args.input(), args.reducers())
+    val lineNumber = textFile.count()
+    val wordCount = textFile
+                      .flatMap(line => {
+                        val tokens = tokenize(line)
+                        if (tokens.length > 0) tokens.take(Math.min(tokens.length, 40)).distinct 
+                        else List()
+                      })
+                      .map(word => (word, 1))
+                      .reduceByKey(_ + _)
+                      .collectAsMap()
+    val broadcastVar = sc.broadcast(wordCount)
+
+    textFile
+      .flatMap(line => {
+        val tokens = tokenize(line)
+        val words = tokens.take(Math.min(tokens.length, 40)).distinct
+        if (words.length > 1) {
+          var pairs = scala.collection.mutable.ListBuffer[(String, String)]()
+          var i = 0
+          var j = 0
+          for (i <- 0 to words.length - 1) {
+            for (j <- 0 to words.length - 1) {
+              if ((i != j) && (words(i) != words(j))) {
+                var pair : (String, String) = (words(i), words(j))
+                pairs += pair
               }
             }
-            pairs.map(p=> p._1.toString + " " + p._2  ).toList 
-       })
-       .map(bigram => ((tokenize(bigram)(0),tokenize(bigram)(1)), 1))
-       .reduceByKey(_+_)
-       .map(gram => {
-            val joint_count = gram._2
-            val prob_A = single_counts_B.value.get(gram._1._1).head
-            val prob_B = single_counts_B.value.get(gram._1._2).head
-            if (joint_count > threshold) {
-                val pmi = Math.log10(joint_count.toDouble*total_count_B.value/(prob_A.toDouble*prob_B.toDouble))
-                ((gram._1),(pmi,joint_count))
-            }
-            else (("Below","Threshold"),(0,0))
-       })
-       .sortByKey()
-    pmi.saveAsTextFile(args.output())
+          }
+          pairs.toList
+        } else List()
+      })
+      .map(pair => (pair, 1))
+      .reduceByKey(_ + _)
+      .filter((m) => m._2 >= threshold)
+      .map(p => {
+        var xCount = broadcastVar.value(p._1._1)
+        var yCount = broadcastVar.value(p._1._2)
+        var pmi = Math.log10((p._2.toFloat * lineNumber.toFloat) / (xCount * yCount))
+        (p._1, (pmi, p._2.toInt))
+      })
+      .map(p => p._1 + " " + p._2)
+      .saveAsTextFile(args.output())
   }
 }
