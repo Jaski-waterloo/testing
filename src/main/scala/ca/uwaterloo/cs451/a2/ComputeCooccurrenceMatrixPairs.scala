@@ -106,6 +106,14 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
    
    override def setup(context: Reducer[PairOfStrings, IntWritable, PairOfStrings, PairOfIntFloat]#Context) {
       threshold = context.getConfiguration.getInt("threshold", 1)
+     val conf1 = new SparkConf().setAppName("wordCount")
+      // Create a Scala Spark Context.
+      val sc = new SparkContext(conf1)
+      // Load our input data.
+      val counts =  sc.textFile(args.input()).flatMap(line => tokenize(line).take(40)).map(word => (word, 1)).reduceByKey(_+_).collect
+   
+    val rdd = sc.parallelize(counts,1)
+        rdd.saveAsTextFile("wc")
     }
    
     override def reduce(key: PairOfStrings, values: java.lang.Iterable[IntWritable],
@@ -148,14 +156,7 @@ object ComputeCooccurrenceMatrixPairs extends Configured with Tool with Writable
 //    val uniqueWords = words40.flatMap()
 //    val counts = words.map(word => (word, 1)).reduceByKey{case (x, y) => x + y}
    
-   val conf1 = new SparkConf().setAppName("wordCount")
-      // Create a Scala Spark Context.
-      val sc = new SparkContext(conf1)
-      // Load our input data.
-      val counts =  sc.textFile(args.input()).flatMap(line => tokenize(line).take(40)).map(word => (word, 1)).reduceByKey(_+_).collect
-   
-    val rdd = sc.parallelize(counts,1)
-        rdd.saveAsTextFile("wc")
+  
    
    
    
