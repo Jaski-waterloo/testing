@@ -74,6 +74,7 @@ object BigramPairs extends Tokenizer {
    })
    .map(pair => (pair,1))
    .reduceByKey(_+_)
+   .sortByKey()
 //    .collectAsMap()
    .map(pair => {
     var left = tokenize(pair._1.toString)(0)
@@ -90,8 +91,7 @@ object BigramPairs extends Tokenizer {
      (pair._1, sum)
     }
    })
-   .map(p => p._1 + " " + p._2)
-//    .sortByKey()
+      .map(p => "(" + p._1._1 + ", " + p._1._2 + "), " + p._2)//    .sortByKey()
       .saveAsTextFile(args.output())
   }
 }
