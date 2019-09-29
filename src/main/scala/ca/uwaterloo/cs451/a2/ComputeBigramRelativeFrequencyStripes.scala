@@ -35,7 +35,7 @@ class ConfPairs(args: Seq[String]) extends ScallopConf(args) with Tokenizer {
   verify()
 }
 
-object PairsPMI extends Tokenizer {
+object ComputeBigramRelativeFrequencyStripes extends Tokenizer {
   val log = Logger.getLogger(getClass().getName())
 
   def main(argv: Array[String]) {
@@ -45,7 +45,7 @@ object PairsPMI extends Tokenizer {
     log.info("Output: " + args.output())
     log.info("Number of reducers: " + args.reducers())
 
-    val conf = new SparkConf().setAppName("Pairs PMI")
+    val conf = new SparkConf().setAppName("Compute Bigram Relative Frequency Stripes")
     val sc = new SparkContext(conf)
     val threshold = args.threshold()
 
