@@ -24,7 +24,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.SparkConf
 import org.rogach.scallop._
 
-class BigramStripesConf(args: Seq[String]) extends ScallopConf(args) with Tokenizer {
+class ConfBigramStripes(args: Seq[String]) extends ScallopConf(args) with Tokenizer {
   mainOptions = Seq(input, output, reducers)
   val input = opt[String](descr = "input path", required = true)
   val output = opt[String](descr = "output path", required = true)
@@ -38,7 +38,7 @@ object ComputeBigramRelativeFrequencyStripes extends Tokenizer {
   val log = Logger.getLogger(getClass().getName())
 
   def main(argv: Array[String]) {
-    val args = new BigramStripesConf(argv)
+    val args = new ConfBigramStripes(argv)
 
     log.info("Input: " + args.input())
     log.info("Output: " + args.output())
@@ -55,17 +55,17 @@ object ComputeBigramRelativeFrequencyStripes extends Tokenizer {
       .flatMap(line => {
         val tokens = tokenize(line)
         if (tokens.length > 1) {
-          tokens.sliding(2).map(p => {
-            (p.head, Map(p.last -> 1.0))
+          tokens.sliding(2).map(pair => {
+            (pair.head, Map(pair.last -> 1.0))
           })
         } else List()
       })
-      .reduceByKey((stripe1, stripe2) => {
-        stripe1 ++ stripe2.map{ case (k, v) => k -> (v + stripe1.getOrElse(k, 0.0)) }
+      .reduceByKey((Smap1, Smap2) => {
+        Smap1 ++ Smap2.map{ case (key, value) => key -> (value + Smap1.getOrElse(key, 0.0)) }
       })
-      .map(stripe => {
-        val sum = stripe._2.foldLeft(0.0)(_+_._2)
-        (stripe._1, stripe._2 map {case (k, v) => k + "=" + (v / sum)})
+      .map(pair => {
+        var sum = pair._2.foldLeft(0.0)(_+_._2)
+        (pair._1, pair._2.map {case (key, value) => key + "=" + (value / sum)})
       })
       .map(p => p._1 + " {" + (p._2 mkString ", ") + "}")
       .saveAsTextFile(args.output())
