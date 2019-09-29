@@ -63,7 +63,7 @@ object ComputeBigramRelativeFrequencyStripes extends Tokenizer {
      else List()
     })
    .reduceByKey((Smap1, Smap2) => {
-    Smap1 ++ Smap2.map {case(key,value) => k -> (value + Smap1.getOrElse(key,0.0)) }
+    Smap1 ++ Smap2.map {case(key,value) => key -> (value + Smap1.getOrElse(key,0.0)) }
    })
    .map(pair => {
     var sum = pair._2.foldleft()(value + Smap._2)
