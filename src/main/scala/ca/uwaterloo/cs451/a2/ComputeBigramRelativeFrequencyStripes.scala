@@ -58,7 +58,7 @@ object PairsPMI extends Tokenizer {
     textFile.FlatMap(line => {
      val tokens = tokenize(line)
      if(tokens.length > 1){
-      tokens.sliding(2).map(pair => (pair.head, Map(pair.last,1.0))
+      tokens.sliding(2).map(pair => (pair.head, Map(pair.last,1.0)))
      }
      else List()
     })
@@ -66,7 +66,7 @@ object PairsPMI extends Tokenizer {
     Smap1 ++ Smap2.map {case(key,value) => k -> (value + Smap1.getOrElse(key,0.0)) }
    })
    .map(pair => {
-    var sum = pair._2.foldleft()(val + Smap._2)
+    var sum = pair._2.foldleft()(value + Smap._2)
     (pair._1, pair._2.map{case(key,value) => k-> key + "->" + (value/sum)})
    })
    .map(pair => pair._1.toString + "-> {" + pair._2.toString + "}")
