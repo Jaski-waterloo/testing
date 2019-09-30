@@ -55,7 +55,7 @@ object ComputeBigramRelativeFrequencyPairs  extends Tokenizer {
     val textFile = sc.textFile(args.input(), args.reducers())
     val totalLines = textFile.count()
    
-    totalLines.flatMap(line => {
+    textFile.flatMap(line => {
      val tokens = tokenize(line)
      if(tokens.length > 1){
       tokens.sliding(2) ++ tokens.map(token => (token,"*"))
