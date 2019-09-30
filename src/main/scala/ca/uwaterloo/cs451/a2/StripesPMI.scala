@@ -34,7 +34,7 @@ class ConfStripesPMI(args: Seq[String]) extends ScallopConf(args) with Tokenizer
   verify()
 }
 
-object ComputeBigramRelativeFrequencyStripes extends Tokenizer {
+object StripesPMI extends Tokenizer {
   val log = Logger.getLogger(getClass().getName())
 
   def main(argv: Array[String]) {
