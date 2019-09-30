@@ -37,6 +37,7 @@ class ConfBigramPairs(args: Seq[String]) extends ScallopConf(args) with Tokenize
 
 object ComputeBigramRelativeFrequencyPairs  extends Tokenizer {
   val log = Logger.getLogger(getClass().getName())
+ var marginal = 0.0
 
   def main(argv: Array[String]) {
     val args = new ConfBigramPairs(argv)
@@ -70,7 +71,6 @@ object ComputeBigramRelativeFrequencyPairs  extends Tokenizer {
     ((tokens(0),tokens(1)), pair._2)
    })
    .map(pair => {
-    var marginal = 0.0
     if(pair._1._2 == "*")
     {
      marginal = pair._2
