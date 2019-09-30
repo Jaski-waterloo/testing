@@ -95,7 +95,7 @@ object PairsPMI extends Tokenizer {
         (p._1, (pmi, both.toInt))
       })
       .sortByKey()
-      .map(p => p._1 + " " + p._2)
+      .map(p => "(" + p._1 + " " + p._2 + ")")
       .saveAsTextFile(args.output())
   }
 }
