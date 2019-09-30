@@ -54,3 +54,29 @@ object PairsPMI extends Tokenizer {
 
     val textFile = sc.textFile(args.input(), args.reducers())
     val totalLines = textFile.count()
+   
+    totalLines.flatMap(line => {
+     val tokens = tokenize(line)
+     if(tokens.length > 1){
+      tokens.sliding(2) ++ tokens.map(token => (token,"*"))
+     }
+     else List()
+    })
+   .map(word => (word,1))
+   .reduceByKey(_+_)
+   .sortByKey()
+   .map(pair => {
+    var marginal = 0.0
+    if(pair._1._2 == "*")
+    {
+     marginal = pair._2
+     (pair._1, pair._2)
+    }
+    else
+    {
+     (pair._1, pair._2.toDouble / marginal)
+    }
+   })
+   .saveAsTextFile(args.output())
+  }
+}
