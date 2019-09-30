@@ -31,6 +31,7 @@ class ConfStripesPMI(args: Seq[String]) extends ScallopConf(args) with Tokenizer
   val reducers = opt[Int](descr = "number of reducers", required = false, default = Some(1))
   val numExecutors = opt[Int](descr = "number of executors", required = false, default = Some(1))
   val executorCores = opt[Int](descr = "number of cores", required = false, default = Some(1))
+ val reducers = opt[Int](descr = "number of reducers", required = false, default = Some(1))
   verify()
 }
 
@@ -46,6 +47,7 @@ object StripesPMI extends Tokenizer {
 
     val conf = new SparkConf().setAppName("Compute Bigram Relative Frequency Stripes")
     val sc = new SparkContext(conf)
+   val threshold = args.threshold()
 
     val outputDir = new Path(args.output())
     FileSystem.get(sc.hadoopConfiguration).delete(outputDir, true)
@@ -87,6 +89,7 @@ object StripesPMI extends Tokenizer {
    .reduceByKey((Smap1, Smap2)  => {
     Smap1 ++ Smap2.map{case(key,value) => key -> (value + Smap1.getOrElse(key, 0.0)) }
    })
+   .filter((pair) => pair._2.foldLeft(0.0)(_+_._2) >= threshold)
    .map(pair => {
     var both = pair._2.foldLeft(0.0)(_+_._2)
     val right = pair._2.map{case(key,value) => key + "->" + ((totalLines.toDouble * both) / (wordCountBroadcast.value(pair._1) * wordCountBroadcast.value(key)))}
