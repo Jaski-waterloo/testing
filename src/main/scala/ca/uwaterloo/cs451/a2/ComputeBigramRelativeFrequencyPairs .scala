@@ -62,7 +62,7 @@ object ComputeBigramRelativeFrequencyPairs  extends Tokenizer {
      }
      else List()
     })
-//    .map(word => (word._1 + " " + word._2, 1))
+   .map(word => (word, 1))
    .reduceByKey(_+_)
    .sortByKey()
    .map(pair => {
