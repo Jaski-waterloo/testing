@@ -74,7 +74,7 @@ object ComputeBigramRelativeFrequencyPairs  extends Tokenizer {
     if(pair._1._2 == "*")
     {
      marginal = pair._2
-     (pair._1, pair._2)
+     (pair._1, 1.0)
     }
     else
     {
