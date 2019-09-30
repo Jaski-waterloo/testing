@@ -58,11 +58,11 @@ object ComputeBigramRelativeFrequencyPairs  extends Tokenizer {
     textFile.flatMap(line => {
      val tokens = tokenize(line)
      if(tokens.length > 1){
-      tokens.sliding(2) ++ tokens.map(token => (token,"*"))
+      tokens.sliding(2).map(pair => (pair.head, pair.tail)).toList ++ tokens.map(token => (token,"*")).toList
      }
      else List()
     })
-   .map(word => (word.head + " " + word.last, 1))
+   .map(word => (word._1 + " " + word._2, 1))
    .reduceByKey(_+_)
    .sortByKey()
    .map(pair => {
