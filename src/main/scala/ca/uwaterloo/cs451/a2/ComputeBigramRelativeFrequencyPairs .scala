@@ -62,11 +62,11 @@ object ComputeBigramRelativeFrequencyPairs  extends Tokenizer {
      }
      else List()
     })
-   .map(word => (word._1 + " " + word._2, 1))
+   .map(word => (word.head + " " + word.last, 1))
    .reduceByKey(_+_)
    .sortByKey()
    .map(pair => {
-    tokens = tokenize(pair._1)
+    val tokens = tokenize(pair._1)
     ((tokens(0),tokens(1)), pair._2)
    })
    .map(pair => {
