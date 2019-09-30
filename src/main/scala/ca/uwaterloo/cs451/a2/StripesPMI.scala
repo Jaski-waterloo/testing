@@ -57,8 +57,8 @@ object StripesPMI extends Tokenizer {
     var wordCount = textFile.flatMap(line => {
      var tokens = tokenize(line)
      
-     if(tokens.length >0) tokens = tokens.take(Math.min(40, tokens.length)).distinct
-     else list()
+     if(tokens.length >0) tokens.take(Math.min(40, tokens.length)).distinct
+     else List()
     })
    .map(word => (word,1))
    .reduceByKey(_+_)
