@@ -17,143 +17,40 @@
 package ca.uwaterloo.cs451.a2
 
 import io.bespin.scala.util.Tokenizer
-import io.bespin.scala.util.WritableConversions
 
-import java.util.StringTokenizer
-
-import scala.collection.JavaConverters._
-import scala.collection.mutable._
-
-import org.apache.hadoop.conf._
-import org.apache.hadoop.fs._
-import org.apache.hadoop.io._
-import org.apache.hadoop.mapreduce._
-import org.apache.hadoop.mapreduce.lib.input._
-import org.apache.hadoop.mapreduce.lib.output._
-import org.apache.hadoop.util.Tool
-import org.apache.hadoop.util.ToolRunner
 import org.apache.log4j._
+import org.apache.hadoop.fs._
+import org.apache.spark.SparkContext
+import org.apache.spark.SparkConf
 import org.rogach.scallop._
 
-class Conf(args: Seq[String]) extends ScallopConf(args) {
-  mainOptions = Seq(input, output, reducers)
+class ConfPairs(args: Seq[String]) extends ScallopConf(args) with Tokenizer {
+  mainOptions = Seq(input, output, reducers, threshold)
   val input = opt[String](descr = "input path", required = true)
   val output = opt[String](descr = "output path", required = true)
   val reducers = opt[Int](descr = "number of reducers", required = false, default = Some(1))
+  val threshold = opt[Int](descr = "threshold", required = false, default = Some(10))
+  val numExecutors = opt[Int](descr = "number of executors", required = false, default = Some(1))
+  val executorCores = opt[Int](descr = "number of cores", required = false, default = Some(1))
   verify()
 }
 
-object ComputeBigramRelativeFrequencyPairs extends Configured with Tool with WritableConversions with Tokenizer {
+object PairsPMI extends Tokenizer {
   val log = Logger.getLogger(getClass().getName())
 
-  class MyMapper extends Mapper[LongWritable, Text, Text, FloatWritable] {
-    override def map(key: LongWritable, value: Text,
-                     context: Mapper[LongWritable, Text, Text, FloatWritable]#Context) = {
-      val tokens = tokenize(value)
-      if (tokens.length > 1)
-     {
-        tokens.sliding(2).map(p => p.mkString(" ")).foreach(word => context.write(word, 1))
-        tokens.map(p => p + " *").foreach(word => context.write(word, 1))
-     }
-    }
-  }
-
-  class MyCombiner extends Reducer[Text, FloatWritable, Text, FloatWritable] {
-    override def reduce(key: Text, values: java.lang.Iterable[FloatWritable],
-                        context: Reducer[Text, FloatWritable, Text, FloatWritable]#Context) = {
-      // Although it is possible to write the reducer in a functional style (e.g., with foldLeft),
-      // an imperative implementation is clearer for two reasons:
-      //
-      //   (1) The MapReduce framework supplies an iterable over writable objects; since writable
-      //       are container objects, it simply returns (a reference to) the same object each time
-      //       but with a different payload inside it.
-      //   (2) Implicit writable conversions in WritableConversions.
-      //
-      // The combination of both means that a functional implementation may have unpredictable
-      // behavior when the two issues interact.
-      var sum = 0.0
-      for (value <- values.asScala) {
-        sum += value
-      }
-      context.write(key, sum.asInstanceOf[Float])
-    }
-  }
-
- 
- 
- class MyReducer extends Reducer[Text, FloatWritable, Text, FloatWritable] {
-  var marginal = 0.0
-  var val1: FloatWritable = new FloatWritable();
-    override def reduce(key: Text, values: java.lang.Iterable[FloatWritable],
-                        context: Reducer[Text, FloatWritable, Text, FloatWritable]#Context) = {
-      // Although it is possible to write the reducer in a functional style (e.g., with foldLeft),
-      // an imperative implementation is clearer for two reasons:
-      //
-      //   (1) The MapReduce framework supplies an iterable over writable objects; since writable
-      //       are container objects, it simply returns (a reference to) the same object each time
-      //       but with a different payload inside it.
-      //   (2) Implicit writable conversions in WritableConversions.
-      //
-      // The combination of both means that a functional implementation may have unpredictable
-      // behavior when the two issues interact.
-      var sum = 0.0
-      for (value <- values.asScala) {
-        sum += value
-      }
-     var strkey = key.toString()
-     if(strkey.takeRight(1) == "*"){
-      val1.set((sum).asInstanceOf[Float])
-      context.write(key, val1)
-      marginal = sum
-     }
-     else{
-      val1.set((sum / marginal).asInstanceOf[Float])
-      context.write(key, val1)
-     }
-    }
-  }
- 
- 
- 
-  override def run(argv: Array[String]) : Int = {
-    val args = new Conf(argv)
+  def main(argv: Array[String]) {
+    val args = new ConfPairs(argv)
 
     log.info("Input: " + args.input())
     log.info("Output: " + args.output())
     log.info("Number of reducers: " + args.reducers())
 
-    val conf = getConf()
-    val job = Job.getInstance(conf)
-
-    FileInputFormat.addInputPath(job, new Path(args.input()))
-    FileOutputFormat.setOutputPath(job, new Path(args.output()))
-
-    job.setJobName("Word Count")
-    job.setJarByClass(this.getClass)
-
-    job.setMapOutputKeyClass(classOf[Text])
-    job.setMapOutputValueClass(classOf[FloatWritable])
-    job.setOutputKeyClass(classOf[Text])
-    job.setOutputValueClass(classOf[FloatWritable])
-    job.setOutputFormatClass(classOf[TextOutputFormat[Text, FloatWritable]])
-
-    job.setMapperClass(classOf[MyMapper])
-    job.setCombinerClass(classOf[MyCombiner])
-    job.setReducerClass(classOf[MyReducer])
-
-    job.setNumReduceTasks(args.reducers())
+    val conf = new SparkConf().setAppName("Pairs PMI")
+    val sc = new SparkContext(conf)
+    val threshold = args.threshold()
 
     val outputDir = new Path(args.output())
-    FileSystem.get(conf).delete(outputDir, true)
+    FileSystem.get(sc.hadoopConfiguration).delete(outputDir, true)
 
-    val startTime = System.currentTimeMillis()
-    job.waitForCompletion(true)
-    log.info("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds")
-
-    return 0
-  }
-
-  def main(args: Array[String]) {
-    ToolRunner.run(this, args)
-  }
-}
+    val textFile = sc.textFile(args.input(), args.reducers())
+    val totalLines = textFile.count()
