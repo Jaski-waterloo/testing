@@ -54,7 +54,7 @@ object StripesPMI extends Tokenizer {
    
     val totalLines = textFile.count()
 
-    wordCount = textFile.flatMap(line => {
+    var wordCount = textFile.flatMap(line => {
      var tokens = tokenize(line)
      
      if(tokens.length >0) tokens = tokens.take(Math.min(40, tokens.length)).distinct
@@ -64,11 +64,11 @@ object StripesPMI extends Tokenizer {
    .reduceByKey(_+_)
    .collectAsMap()
    
-   wordCountBroadcast = sc.broadcast(wordCount)
+   val wordCountBroadcast = sc.broadcast(wordCount)
    
    textFile.flatMap(line => {
-    tokens = tokenize(line)
-    uniqueTokens = tokens.take(Math.min(40, tokens.length)).distinct
+    val tokens = tokenize(line)
+    val uniqueTokens = tokens.take(Math.min(40, tokens.length)).distinct
     if(uniqueTokens.length > 0){
     var pairs = scala.collection.mutable.ListBuffer[(String, String)]()
     for(i <- 0 to uniqueTokens.length-1) {
@@ -79,7 +79,7 @@ object StripesPMI extends Tokenizer {
       }
      }
     }
-     pairs.toList()
+     pairs.toList
     }
     else List()
    })
