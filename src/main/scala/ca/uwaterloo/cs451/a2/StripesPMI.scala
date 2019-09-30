@@ -71,7 +71,7 @@ object ComputeBigramRelativeFrequencyStripes extends Tokenizer {
     uniqueTokens = tokens.take(Math.min(40, tokens.length)).distinct
     if(uniqueTokens.length > 0){
     var pairs = scala.collection.mutable.ListBuffer[(String, String)]()
-    for(i <- 0; to uniqueTokens.length-1) {
+    for(i <- 0 to uniqueTokens.length-1) {
      for(j <- 0 to uniqueTokens.length-1) {
       if(i!=j && uniqueTokens(i) != uniqueTokens(j)) {
        var pair: (String,String) = (uniqueTokens(i), uniqueTokens(j))
