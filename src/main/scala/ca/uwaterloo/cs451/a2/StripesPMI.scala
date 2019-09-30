@@ -31,7 +31,7 @@ class ConfStripesPMI(args: Seq[String]) extends ScallopConf(args) with Tokenizer
   val reducers = opt[Int](descr = "number of reducers", required = false, default = Some(1))
   val numExecutors = opt[Int](descr = "number of executors", required = false, default = Some(1))
   val executorCores = opt[Int](descr = "number of cores", required = false, default = Some(1))
- val reducers = opt[Int](descr = "number of reducers", required = false, default = Some(1))
+  val threshold = opt[Int](descr = "threshold", required = false, default = Some(10))
   verify()
 }
 
