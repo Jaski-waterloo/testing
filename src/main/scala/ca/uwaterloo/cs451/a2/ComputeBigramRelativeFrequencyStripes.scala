@@ -67,7 +67,7 @@ object ComputeBigramRelativeFrequencyStripes extends Tokenizer {
         var sum = pair._2.foldLeft(0.0)(_+_._2)
         (pair._1, pair._2.map {case (key, value) => key + "->" + (value / sum)})
       })
-      .map(p => p._1 + "{ " + (p._2 mkString ", ") + " }")
+      .map(p => "(" + p._1 + "{ " + (p._2 mkString ", ") + " }" + ")")
       .saveAsTextFile(args.output())
   }
 }
