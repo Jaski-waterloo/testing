@@ -38,8 +38,6 @@ object ComputeBigramRelativeFrequencyStripes extends Tokenizer {
   val log = Logger.getLogger(getClass().getName())
 
   def main(argv: Array[String]) {
-  }
-  }
     val args = new ConfStripesPMI(argv)
 
     log.info("Input: " + args.input())
@@ -53,3 +51,16 @@ object ComputeBigramRelativeFrequencyStripes extends Tokenizer {
     FileSystem.get(sc.hadoopConfiguration).delete(outputDir, true)
 
     val textFile = sc.textFile(args.input(), args.reducers())
+
+    wordCount = textFile.flatMap(line => {
+     var tokens = tokenize(line)
+     
+     if(tokens.length >0) tokens = tokens.take(Math.min(40, tokens.length)).distinct
+     else list()
+    })
+   .map(word => (word,1))
+   .reduceByKey(_+_)
+   
+
+
+     
