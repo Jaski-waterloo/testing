@@ -93,7 +93,7 @@ object StripesPMI extends Tokenizer {
     (pair._1, right)
    })
    .map(pair => pair._1 + "{ " + (pair._2 mkString ", ") + " }")
-   .saveAsText(args.output())
+   .saveAsTextFile(args.output())
   }
 }
    
