@@ -68,7 +68,7 @@ object ComputeBigramRelativeFrequencyPairs  extends Tokenizer {
    .sortByKey()
    .map(pair => {
     val tokens = pair._1.split(" ")
-    ((tokens(0),tokens(1)), pair._2)
+    ((tokens(0),tokens(1)).toList, pair._2)
    })
    .map(pair => {
     if(pair._1._2 == "*")
