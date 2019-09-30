@@ -51,6 +51,8 @@ object ComputeBigramRelativeFrequencyStripes extends Tokenizer {
     FileSystem.get(sc.hadoopConfiguration).delete(outputDir, true)
 
     val textFile = sc.textFile(args.input(), args.reducers())
+   
+    val totalLines = textFile.count()
 
     wordCount = textFile.flatMap(line => {
      var tokens = tokenize(line)
@@ -60,6 +62,40 @@ object ComputeBigramRelativeFrequencyStripes extends Tokenizer {
     })
    .map(word => (word,1))
    .reduceByKey(_+_)
+   .collectAsMap()
+   
+   wordCountBroadcast = sc.broadcast(wordCount)
+   
+   textFile.flatMap(line => {
+    tokens = tokenize(line)
+    uniqueTokens = tokens.take(Math.min(40, tokens.length)).distinct
+    if(uniqueTokens.length > 0){
+    var pairs = scala.collection.mutable.ListBuffer[(String, String)]()
+    for(i <- 0; to uniqueTokens.length-1) {
+     for(j <- 0 to uniqueTokens.length-1) {
+      if(i!=j && uniqueTokens(i) != uniqueTokens(j)) {
+       var pair: (String,String) = (uniqueTokens(i), uniqueTokens(j))
+       pairs += pair
+      }
+     }
+    }
+     pairs.toList()
+    }
+    else List()
+   })
+   .map(pair => (pair._1, Map(pair._2 -> 1.0)))
+   .reduceByKey((Smap1, Smap2)  => {
+    Smap1 ++ Smap2.map{case(key,value) => key -> (value + Smap1.getOrElse(key, 0.0)) }
+   })
+   .map(pair => {
+    var left = pair._2.foldLeft(0.0)(_+_._2)
+    pair._2.map{case(key,value) => key + "->" + ((totalLines * value.toDouble) / (wordCountBroadcast.get(pair._1).toDouble * wordCountBroadcast.get(key).toDouble))}
+   })
+   .map(pair => pair._1 + "{ " + (pair._2 mkString ", ") + " }")
+   .saveAsText(args.output())
+  }
+}
+   
    
 
 
