@@ -89,7 +89,8 @@ object StripesPMI extends Tokenizer {
    })
    .map(pair => {
     var left = pair._2.foldLeft(0.0)(_+_._2)
-    (pair._1, pair._2.map{case(key,value) => key + "->" + ((totalLines.toDouble * left) / (wordCountBroadcast.value(value) * wordCountBroadcast.value(key))))}
+    val right = pair._2.map{case(key,value) => key + "->" + ((totalLines.toDouble * left) / (wordCountBroadcast.value(value) * wordCountBroadcast.value(key)))}
+    (pair._1, right)
    })
    .map(pair => pair._1 + "{ " + (pair._2 mkString ", ") + " }")
    .saveAsText(args.output())
