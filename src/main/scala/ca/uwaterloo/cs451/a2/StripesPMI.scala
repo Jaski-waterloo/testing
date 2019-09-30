@@ -95,7 +95,7 @@ object StripesPMI extends Tokenizer {
     val right = pair._2.map{case(key,value) => key + "->" + ((totalLines.toDouble * both) / (wordCountBroadcast.value(pair._1) * wordCountBroadcast.value(key)))}
     (pair._1, right)
    })
-   .map(pair => pair._1 + "{ " + (pair._2 mkString ", ") + " }")
+   .map(pair => "(" + pair._1 + ",{ " + (pair._2 mkString ", ") + " }" +")")
    .saveAsTextFile(args.output())
   }
 }
