@@ -88,8 +88,8 @@ object StripesPMI extends Tokenizer {
     Smap1 ++ Smap2.map{case(key,value) => key -> (value + Smap1.getOrElse(key, 0.0)) }
    })
    .map(pair => {
-    var left = pair._2.foldLeft(0.0)(_+_._2)
-    val right = pair._2.map{case(key,value) => key + "->" + ((totalLines.toDouble * left) / (wordCountBroadcast.value(value) * wordCountBroadcast.value(key)))}
+    var both = pair._2.foldLeft(0.0)(_+_._2)
+    val right = pair._2.map{case(key,value) => key + "->" + ((totalLines.toDouble * both) / (wordCountBroadcast.value(pair._1) * wordCountBroadcast.value(key)))}
     (pair._1, right)
    })
    .map(pair => pair._1 + "{ " + (pair._2 mkString ", ") + " }")
