@@ -9,6 +9,7 @@ import org.apache.hadoop.fs._
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkConf
 import org.rogach.scallop._
+import scala.util.Try
 
 class ConfQ2(args: Seq[String]) extends ScallopConf(args) {
   mainOptions = Seq(input, date)
@@ -68,7 +69,7 @@ object Q2 extends Tokenizer
      .filter((pair) => pair._2 contains date)
      .foreach(line => {
        if(counts < 20){
-         if(ordersBroadcast.value(line._1)){
+         if(Try(ordersBroadcast.value(line._1).toBoolean).getOrElse(false)){
            var output : (String, String) = (ordersBroadcast.value(line._1), line._1)
            queryOutput += output
          }
