@@ -72,7 +72,7 @@ object Q2 extends Tokenizer
          if(Try(ordersBroadcast.value(line._1).toBoolean).getOrElse(false)){
            var output : (String, String) = (ordersBroadcast.value(line._1), line._1)
            queryOutput += output
-           counts = counts + 1;
+           counts++;
            println("inside if")
          }
 //          println("outside if")
