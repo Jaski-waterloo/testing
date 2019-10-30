@@ -10,7 +10,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.SparkConf
 import org.rogach.scallop._
 
-class Conf(args: Seq[String]) extends ScallopConf(args) {
+class ConfQ2(args: Seq[String]) extends ScallopConf(args) {
   mainOptions = Seq(input, date)
   val input = opt[String](descr = "input path", required = true)
 //   val output = opt[String](descr = "output path", required = true)
@@ -31,7 +31,7 @@ object Q2 extends Tokenizer
   
   
    def main(argv: Array[String]) {
-    val args = new Conf(argv)
+    val args = new ConfQ2(argv)
 
     log.info("Input: " + args.input())
     log.info("Date : " + args.date())
