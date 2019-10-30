@@ -75,6 +75,6 @@ object Q2 extends Tokenizer {
      })
      
      println("ANSWER=");
-     for(output in queryOutput){
+     for(output <- queryOutput){
        println("(" + output._1 + "," + output._2 + ")")
      }
