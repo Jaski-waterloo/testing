@@ -56,11 +56,8 @@ object Q1 extends Tokenizer {
               if(line == args.date())
               {
                 count += 1;
-                line
-              }
-              else List()
-              )
-     .saveAsTextFile("testoutput")
+              })
+//      .saveAsTextFile("testoutput")
      
      println("ANSWER=" + count.value)
               
