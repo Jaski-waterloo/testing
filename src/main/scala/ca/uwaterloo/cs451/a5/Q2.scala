@@ -64,7 +64,7 @@ object Q2 extends Tokenizer {
        tokens = line.split('|')
        (tokens(0),tokens(10))
      })
-     .filter((pair) pair._2 contains date)
+     .filter((pair) => pair._2 contains date)
      .foreach(line => {
        if(counts < 20){
          if(ordersBroadcast.value(line._1)){
@@ -77,3 +77,4 @@ object Q2 extends Tokenizer {
      println("ANSWER=");
      for(output in queryOutput){
        println("(" + output._1 + "," + output._2 + ")")
+     }
