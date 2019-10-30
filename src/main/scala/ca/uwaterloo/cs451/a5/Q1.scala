@@ -40,14 +40,23 @@ object Q1 extends Tokenizer {
     val sc = new SparkContext(conf)
      
     val textFile = sc.textFile(args.input() + "/lineitem.tbl")
+     
+     val count = sc.accumulator(0, "accumulator")
 
      textFile.map(line=> {
        val tokens = line.split('|')
 //        var arrayname = new Array[datatype](tokens.length)
        tokens
      })
-//        .filter()
+     .map(line => line(10))
+     .foreach(line =>
+              if(line == args.date()) counts++
+              )
        .saveAsTextFile("testoutput")
+     
+     println("ANSWER=" + count.value)
+              
+       
 
    }
 }
