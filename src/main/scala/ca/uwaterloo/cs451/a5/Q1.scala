@@ -45,7 +45,7 @@ object Q1 extends Tokenizer {
        val tokens = line.split('|')
        tokens
      })
-       .filter()
+//        .filter()
        .saveAsTextFile("testoutput")
 
    }
