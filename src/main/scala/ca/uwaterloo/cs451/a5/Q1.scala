@@ -25,8 +25,8 @@ class Conf(args: Seq[String]) extends ScallopConf(args) {
 object Q1 extends Tokenizer {
    val log = Logger.getLogger(getClass().getName())
   
-  val outputDir = new Path(args.output())
-  FileSystem.get(sc.hadoopConfiguration).delete(outputDir, true)
+//   val outputDir = new Path(args.output())
+//   FileSystem.get(sc.hadoopConfiguration).delete(outputDir, true)
   
   
    def main(argv: Array[String]) {
@@ -53,7 +53,7 @@ object Q1 extends Tokenizer {
      })
      .map(line => line(10))
      .foreach(line =>
-              if(line == args.date()) count++
+              if(line == args.date()) count += 1
               )
        .saveAsTextFile("testoutput")
      
