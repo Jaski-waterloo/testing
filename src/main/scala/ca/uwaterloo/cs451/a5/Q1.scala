@@ -39,12 +39,13 @@ object Q1 extends Tokenizer {
     val conf = new SparkConf().setAppName("Q1")
     val sc = new SparkContext(conf)
      
-    val textFile = sc.textFile(args.input())
+    val textFile = sc.textFile(args.input() + "/lineterm.tbl")
 
      textFile.flatMap(line=> {
-       val tokens = line.split("|")
+       val tokens = line.split('|')
        tokens
      })
+       .filter()
        .saveAsTextFile("testoutput")
 
    }
