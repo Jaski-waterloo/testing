@@ -22,7 +22,7 @@ class Conf(args: Seq[String]) extends ScallopConf(args) {
   verify()
 }
 
-object Q1 extends Tokenizer {
+object Q2 extends Tokenizer {
    val log = Logger.getLogger(getClass().getName())
   
 //   val outputDir = new Path(args.output())
@@ -39,13 +39,41 @@ object Q1 extends Tokenizer {
      log.info("Text Data : " + args.text())
      log.info("Parquet Data : " + args.parquet())
 
-    val conf = new SparkConf().setAppName("Q1")
+    val conf = new SparkConf().setAppName("Q2")
     val sc = new SparkContext(conf)
      
-    val textFile = sc.textFile(args.input() + "/lineitem.tbl")
+    val lineitem = sc.textFile(args.input() + "/lineitem.tbl")
+    val orders = sc.textFile(args.input() + "/orders.tbl")
      
-     val count = sc.accumulator(0, "accumulator");
+//      val count = sc.accumulator(0, "accumulator");
 //      val date = sc.broadcast(args.date())
      val date = args.date();
 
-textFile.map(line=> {
+    orders.map(line=> {
+      tokens = line.split('|')
+      (tokens(0),tokens(6))
+    })
+     .collectAsMap()
+     
+    val ordersBroadcast = sc.broadcast(orders)
+    val counts = 0
+    var queryOutput = scala.collection.mutable.ListBuffer[(String, String)]()
+     
+     
+     lineitem.map(line => {
+       tokens = line.split('|')
+       (tokens(0),tokens(10))
+     })
+     .filter((pair) pair._2 contains date)
+     .foreach(line => {
+       if(counts < 20){
+         if(ordersBroadcast.value(line._1)){
+           var output : (String, String) = (ordersBroadcast.value(line._1), line._1)
+           queryOutput += output
+         }
+       }
+     })
+     
+     println("ANSWER=");
+     for(output in queryOutput){
+       println("(" + output._1 + "," + output._2 + ")")
