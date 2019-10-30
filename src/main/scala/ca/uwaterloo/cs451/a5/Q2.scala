@@ -50,7 +50,7 @@ object Q2 extends Tokenizer
 //      val date = sc.broadcast(args.date())
      val date = args.date();
 
-    ordersB = orders.map(line=> {
+    val ordersB = orders.map(line=> {
       val tokens = line.split('|')
       (tokens(0),tokens(6))
     })
