@@ -54,7 +54,7 @@ object Q1 extends Tokenizer {
      })
      .map(line => line(10))
      .foreach(line =>
-              if(line == date)
+              if(line == date.value())
               {
                 count += 1;
               })
