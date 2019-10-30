@@ -68,7 +68,7 @@ object Q2 extends Tokenizer
      })
      .filter((pair) => pair._2 contains date)
      .foreach(line => {
-       if(count.value < 20){
+       if(count.localValue < 20){
          if(Try(ordersBroadcast.value(line._1).toBoolean).getOrElse(false)){
            var output : (String, String) = (ordersBroadcast.value(line._1), line._1)
            queryOutput += output
