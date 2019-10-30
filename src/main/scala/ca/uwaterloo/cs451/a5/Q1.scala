@@ -44,8 +44,9 @@ object Q1 extends Tokenizer {
      
     val textFile = sc.textFile(args.input() + "/lineitem.tbl")
      
-     val count = sc.accumulator(0, "accumulator")
-     val date = sc.broadcast(args.date())
+     val count = sc.accumulator(0, "accumulator");
+//      val date = sc.broadcast(args.date())
+     val date = args.date();
 
      textFile.map(line=> {
        val tokens = line.split('|')
