@@ -50,41 +50,63 @@ object Q2 extends Tokenizer
      val count = sc.accumulator(0, "accumulator");
 //      val date = sc.broadcast(args.date())
      val date = args.date();
-
-    val ordersB = orders.map(line=> {
-      val tokens = line.split('|')
-      (tokens(0),tokens(6))
-    })
-     .collectAsMap()
      
-    val ordersBroadcast = sc.broadcast(ordersB)
-//     val counts = 0
-    var queryOutput = scala.collection.mutable.ListBuffer[(String, String)]()
-     
-     
-     lineitem
-     .filter(line => {
+     val lineB = lineitems.filter(line => {
        line.split('|')(10) contains date
      })
      .map(line => {
-       val tokens = line.split('|')
-       (tokens(0),tokens(10))
-     })
-     .foreach(line => {
-       if(count.localValue < 20){
-         if(Try(ordersBroadcast.value(line._1).toBoolean).getOrElse(false)){
-           var output : (String, String) = (ordersBroadcast.value(line._1), line._1)
-           queryOutput += output
-           count += 1;
-           println("inside if")
-         }
-//          println("outside if")
-       }
+       line.split('|').(0)
      })
      
-     println("ANSWER=");
-     for(output <- queryOutput){
-       println("(" + output._1 + "," + output._2 + ")")
-     }
+     orders.map(line => {
+       val tokens = line.split('|')
+       (tokens(0), tokens(6))
+     })
+     .foreach(line => {
+       if(lineB contains line._1){
+         line
+       }
+       else List()
+     })
+     .sortBy(key)
+     .take(20)
+     .foreach(line => {
+       println("(" + line._2 + "," + line._1 + ")")
+
+//     val ordersB = orders.map(line=> {
+//       val tokens = line.split('|')
+//       (tokens(0),tokens(6))
+//     })
+//      .collectAsMap()
+     
+//     val ordersBroadcast = sc.broadcast(ordersB)
+// //     val counts = 0
+//     var queryOutput = scala.collection.mutable.ListBuffer[(String, String)]()
+     
+     
+//      lineitem
+//      .filter(line => {
+//        line.split('|')(10) contains date
+//      })
+//      .map(line => {
+//        val tokens = line.split('|')
+//        (tokens(0),tokens(10))
+//      })
+//      .foreach(line => {
+//        if(count.localValue < 20){
+//          if(Try(ordersBroadcast.value(line._1).toBoolean).getOrElse(false)){
+//            var output : (String, String) = (ordersBroadcast.value(line._1), line._1)
+//            queryOutput += output
+//            count += 1;
+//            println("inside if")
+//          }
+// //          println("outside if")
+//        }
+//      })
+     
+//      println("ANSWER=");
+//      for(output <- queryOutput){
+//        println("(" + output._1 + "," + output._2 + ")")
+//      }
    }
 }
