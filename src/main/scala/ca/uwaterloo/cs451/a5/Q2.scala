@@ -62,11 +62,14 @@ object Q2 extends Tokenizer
     var queryOutput = scala.collection.mutable.ListBuffer[(String, String)]()
      
      
-     lineitem.map(line => {
+     lineitem
+     .filter(line => {
+       line.split('|')(10) contains date
+     })
+     .map(line => {
        val tokens = line.split('|')
        (tokens(0),tokens(10))
      })
-     .filter((pair) => pair._2 contains date)
      .foreach(line => {
        if(count.localValue < 20){
          if(Try(ordersBroadcast.value(line._1).toBoolean).getOrElse(false)){
