@@ -41,8 +41,9 @@ object Q1 extends Tokenizer {
      
     val textFile = sc.textFile(args.input() + "/lineitem.tbl")
 
-     textFile.flatMap(line=> {
+     textFile.map(line=> {
        val tokens = line.split('|')
+       var arrayname = new Array[datatype](tokens.length)
        tokens
      })
 //        .filter()
