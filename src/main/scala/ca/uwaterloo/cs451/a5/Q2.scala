@@ -50,13 +50,13 @@ object Q2 extends Tokenizer
 //      val date = sc.broadcast(args.date())
      val date = args.date();
 
-    orders.map(line=> {
+    ordersB = orders.map(line=> {
       val tokens = line.split('|')
       (tokens(0),tokens(6))
     })
      .collectAsMap()
      
-    val ordersBroadcast = sc.broadcast(orders)
+    val ordersBroadcast = sc.broadcast(ordersB)
     val counts = 0
     var queryOutput = scala.collection.mutable.ListBuffer[(String, String)]()
      
