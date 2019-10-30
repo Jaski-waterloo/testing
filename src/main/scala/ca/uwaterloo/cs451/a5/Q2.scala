@@ -22,7 +22,8 @@ class Conf(args: Seq[String]) extends ScallopConf(args) {
   verify()
 }
 
-object Q2 extends Tokenizer {
+object Q2 extends Tokenizer 
+{
    val log = Logger.getLogger(getClass().getName())
   
 //   val outputDir = new Path(args.output())
@@ -78,3 +79,5 @@ object Q2 extends Tokenizer {
      for(output <- queryOutput){
        println("(" + output._1 + "," + output._2 + ")")
      }
+   }
+}
