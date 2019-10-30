@@ -55,7 +55,7 @@ object Q2 extends Tokenizer
        line.split('|')(10) contains date
      })
      .map(line => {
-       line.split('|').(0)
+       line.split('|')(0)
      })
      
      orders.map(line => {
@@ -72,6 +72,10 @@ object Q2 extends Tokenizer
      .take(20)
      .foreach(line => {
        println("(" + line._2 + "," + line._1 + ")")
+     })
+   }
+}
+
 
 //     val ordersB = orders.map(line=> {
 //       val tokens = line.split('|')
@@ -108,5 +112,3 @@ object Q2 extends Tokenizer
 //      for(output <- queryOutput){
 //        println("(" + output._1 + "," + output._2 + ")")
 //      }
-   }
-}
