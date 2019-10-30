@@ -51,7 +51,7 @@ object Q2 extends Tokenizer
 //      val date = sc.broadcast(args.date())
      val date = args.date();
      
-     val lineB = lineitems.filter(line => {
+     val lineB = lineitem.filter(line => {
        line.split('|')(10) contains date
      })
      .map(line => {
@@ -64,11 +64,11 @@ object Q2 extends Tokenizer
      })
      .foreach(line => {
        if(lineB contains line._1){
-         line
+         (line._1,line._2)
        }
        else List()
      })
-     .sortBy(key)
+     .sortByKey()
      .take(20)
      .foreach(line => {
        println("(" + line._2 + "," + line._1 + ")")
