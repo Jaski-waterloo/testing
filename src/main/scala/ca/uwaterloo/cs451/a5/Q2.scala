@@ -63,7 +63,7 @@ object Q2 extends Tokenizer
        (tokens(0), tokens(6))
      })
      .foreach(line => {
-       if(lineB contains line._1){
+       if(Try(lineB.filter(p => p contains line._1).toBoolean).getOrElse(false)){
          (line._1,line._2)
        }
        else List()
