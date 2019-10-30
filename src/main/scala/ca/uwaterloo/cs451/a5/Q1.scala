@@ -43,7 +43,7 @@ object Q1 extends Tokenizer {
 
      textFile.map(line=> {
        val tokens = line.split('|')
-       var arrayname = new Array[datatype](tokens.length)
+//        var arrayname = new Array[datatype](tokens.length)
        tokens
      })
 //        .filter()
