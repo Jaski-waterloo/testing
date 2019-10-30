@@ -40,6 +40,13 @@ object Q1 extends Tokenizer {
     val sc = new SparkContext(conf)
      
     val textFile = sc.textFile(args.input())
+
+     textFile.flatMap(line=> {
+       val tokens = line.split("|")
+       tokens
+     })
+       .saveAsTextFile("testoutput")
+
    }
 }
 
