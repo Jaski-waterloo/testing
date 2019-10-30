@@ -44,35 +44,22 @@ object Q2 extends Tokenizer
     val conf = new SparkConf().setAppName("Q2")
     val sc = new SparkContext(conf)
      
-    val lineitem = sc.textFile(args.input() + "/lineitem.tbl")
-    val orders = sc.textFile(args.input() + "/orders.tbl")
-     
-     val count = sc.accumulator(0, "accumulator");
+//      val count = sc.accumulator(0, "accumulator");
 //      val date = sc.broadcast(args.date())
      val date = args.date();
      
-     val lineB = lineitem.filter(line => {
-       line.split('|')(10) contains date
-     })
-     .map(line => {
-       line.split('|')(0)
-     })
-     
-     orders.map(line => {
-       val tokens = line.split('|')
-       (tokens(0), tokens(6))
-     })
-     .foreach(line => {
-       if(Try(lineB.filter(p => p contains line._1).toBoolean).getOrElse(false)){
-         (line._1,line._2)
-       }
-       else List()
-     })
-     .sortByKey()
-     .take(20)
-     .foreach(line => {
-       println("(" + line._2 + "," + line._1 + ")")
-     })
+     val orders = sc.textFile(args.input() + "/orders.tbl")
+  			.map(line => (line.split("\\|")(0).toInt, line.split("\\|")(6)))
+  		
+  		val lineitem = sc.textFile(args.input() + "/lineitem.tbl")
+  			.map(line => (line.split("\\|")(0).toInt, line.split("\\|")(10)))
+  			.filter(_._2.contains(date))
+  			.cogroup(orders)
+  			.filter(_._2._1.size != 0)
+  			.sortByKey()
+  			.take(20)
+  			.map(p => (p._2._2.head, p._1.toLong))
+        .foreach(println)
    }
 }
 
