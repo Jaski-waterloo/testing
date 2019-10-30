@@ -47,7 +47,7 @@ object Q2 extends Tokenizer
     val lineitem = sc.textFile(args.input() + "/lineitem.tbl")
     val orders = sc.textFile(args.input() + "/orders.tbl")
      
-//      val count = sc.accumulator(0, "accumulator");
+     val count = sc.accumulator(0, "accumulator");
 //      val date = sc.broadcast(args.date())
      val date = args.date();
 
@@ -58,7 +58,7 @@ object Q2 extends Tokenizer
      .collectAsMap()
      
     val ordersBroadcast = sc.broadcast(ordersB)
-    val counts = 0
+//     val counts = 0
     var queryOutput = scala.collection.mutable.ListBuffer[(String, String)]()
      
      
@@ -68,11 +68,11 @@ object Q2 extends Tokenizer
      })
      .filter((pair) => pair._2 contains date)
      .foreach(line => {
-       if(counts < 20){
+       if(count < 20){
          if(Try(ordersBroadcast.value(line._1).toBoolean).getOrElse(false)){
            var output : (String, String) = (ordersBroadcast.value(line._1), line._1)
            queryOutput += output
-           counts++;
+           count += 1;
            println("inside if")
          }
 //          println("outside if")
