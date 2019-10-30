@@ -51,7 +51,7 @@ object Q2 extends Tokenizer
      val date = args.date();
 
     orders.map(line=> {
-      tokens = line.split('|')
+      val tokens = line.split('|')
       (tokens(0),tokens(6))
     })
      .collectAsMap()
@@ -62,7 +62,7 @@ object Q2 extends Tokenizer
      
      
      lineitem.map(line => {
-       tokens = line.split('|')
+       val tokens = line.split('|')
        (tokens(0),tokens(10))
      })
      .filter((pair) => pair._2 contains date)
