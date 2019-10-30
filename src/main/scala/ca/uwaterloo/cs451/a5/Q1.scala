@@ -53,8 +53,12 @@ object Q1 extends Tokenizer {
      })
      .map(line => line(10))
      .foreach(line =>
-              if(line == args.date()) count += 1
-              line
+              if(line == args.date())
+              {
+                count += 1;
+                line
+              }
+              else List()
               )
      .saveAsTextFile("testoutput")
      
