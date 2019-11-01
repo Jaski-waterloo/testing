@@ -63,7 +63,7 @@ object Q3 extends Tokenizer
         .filter(_._2._2.size != 0)
   			.sortByKey()
   			.take(20)
-  			.map(p => (p._2._2.head,p._2._3.head, p._1.toLong))
+  			.map(p => (p._2._2.head,p._2._1.head, p._1.toLong))
         .foreach(println)
    }
 }
