@@ -46,24 +46,48 @@ object Q3 extends Tokenizer
      
 //      val count = sc.accumulator(0, "accumulator");
 //      val date = sc.broadcast(args.date())
-     val date = args.date();
-     
-     val parts = sc.textFile(args.input() + "/part.tbl")
-  			.map(line => (line.split('|')(0).toInt, line.split('|')(1)))
-     
-     val suppliers = sc.textFile(args.input() + "/supplier.tbl")
-  			.map(line => (line.split('|')(0).toInt, line.split('|')(1)))
-  		
-  		val lineitem = sc.textFile(args.input() + "/lineitem.tbl")
-  			.map(line => (line.split('|')(0).toInt, line.split('|')(10)))
-  			.filter(_._2.contains(date))
-  			.cogroup(parts)
-        .cogroup(suppliers)
-  			.filter(_._2._1.size != 0)
-        .filter(_._2._2.size != 0)
-  			.sortByKey()
-  			.take(20)
-  			.map(p => (p._2._2.head,p._2._1.head, p._1.toLong))
-        .foreach(println)
+    val date = args.date()
+    val partMap:HashMap[Int,String] = HashMap()
+    val suppMap:HashMap[Int,String] = HashMap()
+
+    val part = sc.textFile(args.input() + "/part.tbl")
+    part
+      .map(line => {
+        val a = line.split("\\|")
+        (a(0), a(1))
+      })
+      .collect()
+      .foreach(p => {
+        partMap += (p._1.toInt -> p._2)
+      })
+
+    val supplier = sc.textFile(args.input() + "/supplier.tbl")
+    supplier
+      .map(line => {
+        val a = line.split("\\|")
+        (a(0), a(1))
+      })
+      .collect()
+      .foreach(p => {
+        suppMap += (p._1.toInt -> p._2)
+      })
+
+    val bPartMap = sc.broadcast(partMap)
+    val bSuppMap = sc.broadcast(suppMap)
+
+    val lineitems = sc.textFile(args.input() + "/lineitem.tbl")
+    lineitems
+      .filter(line => {
+        line.split("\\|")(10) contains date
+      })
+      .map(line => {
+        val a = line.split("\\|")
+        (a(0).toInt, (bPartMap.value(a(1).toInt), bSuppMap.value(a(2).toInt)))
+      })
+      .sortByKey()
+      .take(20)
+      .foreach(p => {
+        println((p._1,p._2._1,p._2._2))
+      })
    }
 }
