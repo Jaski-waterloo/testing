@@ -11,7 +11,7 @@ import org.apache.spark.SparkConf
 import org.rogach.scallop._
 import scala.util.Try
 
-class ConfQ2(args: Seq[String]) extends ScallopConf(args) {
+class ConfQ3(args: Seq[String]) extends ScallopConf(args) {
   mainOptions = Seq(input, date)
   val input = opt[String](descr = "input path", required = true)
 //   val output = opt[String](descr = "output path", required = true)
@@ -23,7 +23,7 @@ class ConfQ2(args: Seq[String]) extends ScallopConf(args) {
   verify()
 }
 
-object Q2 extends Tokenizer 
+object Q3 extends Tokenizer 
 {
    val log = Logger.getLogger(getClass().getName())
   
@@ -32,7 +32,7 @@ object Q2 extends Tokenizer
   
   
    def main(argv: Array[String]) {
-    val args = new ConfQ2(argv)
+    val args = new ConfQ3(argv)
 
     log.info("Input: " + args.input())
     log.info("Date : " + args.date())
@@ -41,7 +41,7 @@ object Q2 extends Tokenizer
      log.info("Text Data : " + args.text())
      log.info("Parquet Data : " + args.parquet())
 
-    val conf = new SparkConf().setAppName("Q2")
+    val conf = new SparkConf().setAppName("Q3")
     val sc = new SparkContext(conf)
      
 //      val count = sc.accumulator(0, "accumulator");
