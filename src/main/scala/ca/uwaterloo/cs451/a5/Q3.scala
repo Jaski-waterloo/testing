@@ -48,17 +48,22 @@ object Q2 extends Tokenizer
 //      val date = sc.broadcast(args.date())
      val date = args.date();
      
-     val orders = sc.textFile(args.input() + "/orders.tbl")
-  			.map(line => (line.split("\\|")(0).toInt, line.split("\\|")(6)))
+     val parts = sc.textFile(args.input() + "/part.tbl")
+  			.map(line => (line.split('|')(0).toInt, line.split('|')(1)))
+     
+     val suppliers = sc.textFile(args.input() + "/supplier.tbl")
+  			.map(line => (line.split('|')(0).toInt, line.split('|')(1)))
   		
   		val lineitem = sc.textFile(args.input() + "/lineitem.tbl")
-  			.map(line => (line.split("\\|")(0).toInt, line.split("\\|")(10)))
+  			.map(line => (line.split('|')(0).toInt, line.split('|')(10)))
   			.filter(_._2.contains(date))
-  			.cogroup(orders)
+  			.cogroup(parts)
+        .cogroup(suppliers)
   			.filter(_._2._1.size != 0)
+        .filter(_._3._1.size != 0)
   			.sortByKey()
   			.take(20)
-  			.map(p => (p._2._2.head, p._1.toLong))
+  			.map(p => (p._2._2.head,p._3._2.head, p._1.toLong))
         .foreach(println)
    }
 }
