@@ -11,7 +11,7 @@ import org.apache.spark.SparkConf
 import org.rogach.scallop._
 import scala.util.Try
 
-class ConfQ3(args: Seq[String]) extends ScallopConf(args) {
+class ConfQ4(args: Seq[String]) extends ScallopConf(args) {
   mainOptions = Seq(input, date)
   val input = opt[String](descr = "input path", required = true)
 //   val output = opt[String](descr = "output path", required = true)
@@ -23,7 +23,7 @@ class ConfQ3(args: Seq[String]) extends ScallopConf(args) {
   verify()
 }
 
-object Q3 extends Tokenizer 
+object Q4 extends Tokenizer 
 {
    val log = Logger.getLogger(getClass().getName())
   
@@ -32,7 +32,7 @@ object Q3 extends Tokenizer
   
   
    def main(argv: Array[String]) {
-    val args = new ConfQ3(argv)
+    val args = new ConfQ4(argv)
 
     log.info("Input: " + args.input())
     log.info("Date : " + args.date())
@@ -41,36 +41,67 @@ object Q3 extends Tokenizer
      log.info("Text Data : " + args.text())
      log.info("Parquet Data : " + args.parquet())
 
-    val conf = new SparkConf().setAppName("Q3")
+    val conf = new SparkConf().setAppName("Q4")
     val sc = new SparkContext(conf)
      
 //      val count = sc.accumulator(0, "accumulator");
 //      val date = sc.broadcast(args.date())
     val date = args.date()
-    val partMap:HashMap[Int,String] = HashMap()
-    val suppMap:HashMap[Int,String] = HashMap()
+    val custMap:HashMap[Int,String] = HashMap()
+    val nationMap:HashMap[Int,String] = HashMap()
 
-    val part = sc.textFile(args.input() + "/part.tbl")
-    part
+    val cust = sc.textFile(args.input() + "/customer.tbl")
+    cust
+      .map(line => {
+        val a = line.split("\\|")
+        (a(0), a(3))
+      })
+      .collect()
+      .foreach(p => {
+        partMap += (p._1.toInt -> p._3)
+      })
+
+    val nation = sc.textFile(args.input() + "/nation.tbl")
+    nation
       .map(line => {
         val a = line.split("\\|")
         (a(0), a(1))
       })
       .collect()
       .foreach(p => {
-        partMap += (p._1.toInt -> p._2)
+        nationMap += (p._1.toInt -> p._2)
       })
 
-    val supplier = sc.textFile(args.input() + "/supplier.tbl")
-    supplier
-      .map(line => {
-        val a = line.split("\\|")
-        (a(0), a(1))
+    val bCustMap = sc.broadcast(custMap)
+    val bNationMap = sc.broadcast(nationMap)
+     
+    val lineitems = sc.textFile(args.input() + "/lineitem.tbl")
+    .filter(line => {
+        line.split("\\|")(10) contains date
       })
-      .collect()
-      .foreach(p => {
-        suppMap += (p._1.toInt -> p._2)
-      })
-
-    val bPartMap = sc.broadcast(partMap)
-    val bSuppMap = sc.broadcast(suppMap)
+    .map(line => {
+      tokens = line.split('|')
+      (tokens(0), tokens(10))
+    })
+     
+    val orders = sc.textFile(args.input() + "/orders.tbl")
+    .map(line => {
+      tokens = line.split('|')
+      (tokens(0), tokens(1))
+    })
+    .cogroup(lineitems)
+    .filter(_._2._1.size != 0)
+    .map(line => {
+      val temp = bCusMap.value(line._2._1.iterator.next())
+      (temp,1)
+    })
+    .reduceByKey(_,_)
+    .sortByKey()
+    .collect()
+    .foreach(line => {
+      println((line._1, bNationMap.value(p._1), p._2))
+    })
+   }
+}
+     
+    
