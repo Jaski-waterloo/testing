@@ -58,7 +58,7 @@ object Q4 extends Tokenizer
       })
       .collect()
       .foreach(p => {
-        partMap += (p._1.toInt -> p._3)
+        custtMap += (p._1.toInt -> p._3)
       })
 
     val nation = sc.textFile(args.input() + "/nation.tbl")
@@ -80,26 +80,26 @@ object Q4 extends Tokenizer
         line.split("\\|")(10) contains date
       })
     .map(line => {
-      tokens = line.split('|')
+      val tokens = line.split('|')
       (tokens(0), tokens(10))
     })
      
     val orders = sc.textFile(args.input() + "/orders.tbl")
     .map(line => {
-      tokens = line.split('|')
+      val tokens = line.split('|')
       (tokens(0), tokens(1))
     })
     .cogroup(lineitems)
     .filter(_._2._1.size != 0)
     .map(line => {
-      val temp = bCusMap.value(line._2._1.iterator.next())
+      val temp = bCustMap.value(line._2._1.iterator.next())
       (temp,1)
     })
     .reduceByKey(_,_)
     .sortByKey()
     .collect()
     .foreach(line => {
-      println((line._1, bNationMap.value(p._1), p._2))
+      println((line._1, bNationMap.value(line._1), line._2))
     })
    }
 }
