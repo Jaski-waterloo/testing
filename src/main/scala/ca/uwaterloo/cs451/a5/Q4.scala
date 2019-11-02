@@ -53,18 +53,16 @@ object Q4 extends Tokenizer
         val a = line.split("\\|")
         (a(0).toInt, a(3).toInt)
       })
-      .collectAsMap()
 
     val nation = sc.textFile(args.input() + "/nation.tbl")
       .map(line => {
         val a = line.split("\\|")
         (a(0).toInt, a(1).toInt)
       })
-      .collectAsMap()
     
 
-    val bCusMap = sc.broadcast(customer)
-    val bNatMap = sc.broadcast(nation)
+    val bCusMap = sc.broadcast(customer.collectAsMap())
+    val bNatMap = sc.broadcast(nation.collectAsMap())
 
     val lineitems = sc.textFile(args.input() + "/lineitem.tbl")
       .filter(line => {
