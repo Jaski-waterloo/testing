@@ -47,41 +47,59 @@ object Q4 extends Tokenizer
 //      val count = sc.accumulator(0, "accumulator");
 //      val date = sc.broadcast(args.date())
     val date = args.date()
+
     val customer = sc.textFile(args.input() + "/customer.tbl")
-        .map(line => (line.split("\\|")(0).toInt, line.split("\\|")(3).toInt))
-      val custBroadcast = sc.broadcast(customer.collectAsMap())
+      .map(line => {
+        val a = line.split("\\|")
+        (a(0).toInt, a(3).toInt)
+      })
+      .collectAsMap()
 
-      val nation = sc.textFile(args.input() + "/nation.tbl")
-        .map(line => (line.split("\\|")(0).toInt, line.split("\\|")(1)))
-      val nationBroadcast = sc.broadcast(nation.collectAsMap())
+    val nation = sc.textFile(args.input() + "/nation.tbl")
+      .map(line => {
+        val a = line.split("\\|")
+        (a(0).toInt, a(1).toInt)
+      })
+      .collectAsMap()
+    
 
-      val orders = sc.textFile(args.input() + "/orders.tbl")
-        .map(line => (line.split("\\|")(0).toInt, line.split("\\|")(1).toInt))
+    val bCusMap = sc.broadcast(customer)
+    val bNatMap = sc.broadcast(nation)
 
-      val lineitem = sc.textFile(args.input() + "/lineitem.tbl")
-        .filter(line => line.split("\\|")(10).contains(date))
-        .map(line => (line.split("\\|")(0).toInt, 1))
-        .reduceByKey(_ + _)
-        .cogroup(orders)
-        .filter(_._2._1.size != 0)
-        .flatMap(p => {
-          var list = scala.collection.mutable.ListBuffer[((Int, String), Int)]()
-          val nationKey = custBroadcast.value(p._2._2.head)
-          val nationName = nationBroadcast.value(nationKey)
-          val counts = p._2._1.iterator
-          while (counts.hasNext) {
-            list += (((nationKey, nationName), counts.next()))
-          }
-          list
-        })
-        .reduceByKey(_ + _)
-        .map(p => (p._1._1, (p._1._2, p._2)))
-        .sortByKey()
-        .collect()
-        .foreach(p => println(p._1, p._2._1, p._2._2))
+    val lineitems = sc.textFile(args.input() + "/lineitem.tbl")
+      .filter(line => {
+        line.split("\\|")(10) contains date
+      })
+      .map(line => {
+        (line.split("\\|")(0).toInt, 0)
+      })
+
+    val orders = sc.textFile(args.input() + "/orders.tbl")
+    orders
+      .map(line => {
+        val a = line.split("\\|")
+        (a(0).toInt, a(1).toInt)
+      })
+      .cogroup(lineitems)
+      .filter(p => {
+        !p._2._2.isEmpty
+      })
+      .map(p => {
+        val nkey = bCusMap.value(p._2._1.iterator.next())
+        (nkey, 1) 
+      })
+      .reduceByKey(_ + _)
+      .sortByKey()
+      .collect()
+      .foreach(p => {
+        println((p._1, bNatMap.value(p._1), p._2))
+      })
 
   }
 }
+
+
+
 
 
      
