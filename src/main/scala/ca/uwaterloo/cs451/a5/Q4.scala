@@ -61,8 +61,8 @@ object Q4 extends Tokenizer
       })
     
 
-    val bCusMap = sc.broadcast(customer.collectAsMap())
-    val bNatMap = sc.broadcast(nation.collectAsMap())
+    val bcustomer = sc.broadcast(customer.collectAsMap())
+    val bnation = sc.broadcast(nation.collectAsMap())
 
     val lineitems = sc.textFile(args.input() + "/lineitem.tbl")
       .filter(line => {
@@ -83,14 +83,14 @@ object Q4 extends Tokenizer
         !p._2._2.isEmpty
       })
       .map(p => {
-        val nkey = bCusMap.value(p._2._1.iterator.next())
+        val nkey = bcustomer.value(p._2._1.iterator.next())
         (nkey, 1) 
       })
       .reduceByKey(_ + _)
       .sortByKey()
       .collect()
       .foreach(p => {
-        println((p._1, bNatMap.value(p._1), p._2))
+        println((p._1, bnation.value(p._1), p._2))
       })
 
   }
