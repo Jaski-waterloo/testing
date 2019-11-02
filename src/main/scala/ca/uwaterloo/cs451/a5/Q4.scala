@@ -47,18 +47,18 @@ object Q4 extends Tokenizer
 //      val count = sc.accumulator(0, "accumulator");
 //      val date = sc.broadcast(args.date())
     val date = args.date()
-    val custMap:HashMap[Int,String] = HashMap()
-    val nationMap:HashMap[Int,String] = HashMap()
+    val cusMap:HashMap[Int,Int] = HashMap()
+    val natMap:HashMap[Int,String] = HashMap()
 
-    val cust = sc.textFile(args.input() + "/customer.tbl")
-    cust
+    val customer = sc.textFile(args.input() + "/customer.tbl")
+    customer
       .map(line => {
         val a = line.split("\\|")
         (a(0), a(3))
       })
       .collect()
       .foreach(p => {
-        custtMap += (p._1.toInt -> p._3)
+        cusMap += (p._1.toInt -> p._2.toInt)
       })
 
     val nation = sc.textFile(args.input() + "/nation.tbl")
@@ -69,39 +69,45 @@ object Q4 extends Tokenizer
       })
       .collect()
       .foreach(p => {
-        nationMap += (p._1.toInt -> p._2)
+        natMap += (p._1.toInt -> p._2)
       })
 
-    val bCustMap = sc.broadcast(custMap)
-    val bNationMap = sc.broadcast(nationMap)
-     
+    val bCusMap = sc.broadcast(cusMap)
+    val bNatMap = sc.broadcast(natMap)
+
     val lineitems = sc.textFile(args.input() + "/lineitem.tbl")
-    .filter(line => {
+    val l = lineitems
+      .filter(line => {
         line.split("\\|")(10) contains date
       })
-    .map(line => {
-      val tokens = line.split('|')
-      (tokens(0), tokens(10))
-    })
-     
+      .map(line => {
+        (line.split("\\|")(0).toInt, 0)
+      })
+
     val orders = sc.textFile(args.input() + "/orders.tbl")
-    .map(line => {
-      val tokens = line.split('|')
-      (tokens(0), tokens(1))
-    })
-    .cogroup(lineitems)
-    .filter(_._2._1.size != 0)
-    .map(line => {
-      val temp = bCustMap.value(line._2._1.iterator.next())
-      (temp,1)
-    })
-    .reduceByKey(_,_)
-    .sortByKey()
-    .collect()
-    .foreach(line => {
-      println((line._1, bNationMap.value(line._1), line._2))
-    })
-   }
+    orders
+      .map(line => {
+        val a = line.split("\\|")
+        (a(0).toInt, a(1).toInt)
+      })
+      .cogroup(l)
+      .filter(p => {
+        !p._2._2.isEmpty
+      })
+      .map(p => {
+        val nkey = bCusMap.value(p._2._1.iterator.next())
+        (nkey, 1) 
+      })
+      .reduceByKey(_ + _)
+      .sortByKey()
+      .collect()
+      .foreach(p => {
+        println((p._1, bNatMap.value(p._1), p._2))
+      })
+
+  }
 }
+
+
      
     
