@@ -57,7 +57,7 @@ object Q4 extends Tokenizer
     val nation = sc.textFile(args.input() + "/nation.tbl")
       .map(line => {
         val a = line.split("\\|")
-        (a(0).toInt, a(1).toInt)
+        (a(0).toInt, a(1))
       })
     
 
