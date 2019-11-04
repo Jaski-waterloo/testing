@@ -85,6 +85,23 @@ object Q7 extends Tokenizer
       (p._1, (bcustomer.value(p._2), p._3, p._4))
     })
     .cogroup(lineitem)
-    .saveAsTextFile("myOutput.txt")
+//     .saveAsTextFile("myOutput.txt")
+    .filter(p => {
+        !p._2._2.isEmpty && !p._2._1.isEmpty
+      })
+    .map(p => {
+        val items = p._2._1.iterator.next()
+        val c_name = items._1
+        val l_orderkey = p._1
+        val o_orderdate = items._2
+        val o_shippriority = items._3
+        val sum = p._2._2.foldLeft(0.0)((b,a) => b+a)
+        (sum, (c_name, l_orderkey, o_orderdate, o_shippriority))
+      })
+      .sortByKey(false)
+      .take(10)
+      .foreach(p => {
+        println((p._2._1, p._2._2, p._1, p._2._3, p._2._4))
+      })
   }
 }
