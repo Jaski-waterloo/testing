@@ -12,7 +12,7 @@ import org.rogach.scallop._
 import scala.util.Try
 
 class ConfQ7(args: Seq[String]) extends ScallopConf(args) {
-  mainOptions = Seq(input, data)
+  mainOptions = Seq(input, date)
   val input = opt[String](descr = "input path", required = true)
   //   val output = opt[String](descr = "output path", required = true)
 //   val reducers = opt[Int](descr = "number of reducers", required = false, default = Some(1))
@@ -44,7 +44,7 @@ object Q7 extends Tokenizer
     val conf = new SparkConf().setAppName("Q7")
     val sc = new SparkContext(conf)
     
-    val date = args.date().split('-')
+    val date = args.date().split('-').map(_.toInt)
     
     val customer = sc.textFile(args.input() + "/customer.tbl")
     .map(line => {
@@ -60,7 +60,7 @@ object Q7 extends Tokenizer
       (a(0).toInt, a(5).toDouble, a(6).toDouble, a(10))
     })
     .filter(p => {
-      val date1 = p._4.split('-') // year-month-day // lshipdate > date
+      val date1 = p._4.split('-').map(_.toInt) // year-month-day // lshipdate > date
       if(date1(0) > date(0)){
         if(date1(1) > date(1)){
           if(date1(2) > date(2)) true
@@ -78,7 +78,7 @@ object Q7 extends Tokenizer
       (a(0).toInt, a(1).toInt, a(4), a(7))
     })
     .filter( p => {
-      val date1 = p._3.split('-') // orderdate < date
+      val date1 = p._3.split('-').map(_.toInt) // orderdate < date
       if(date1(0) < date(0)){
         if(date1(1) < date(1)){
           if(date1(2) < date(2)) true
