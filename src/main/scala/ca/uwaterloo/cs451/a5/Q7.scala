@@ -63,6 +63,11 @@ object Q7 extends Tokenizer
       val date1 = p._4.split('-').map(_.toInt) // year-month-day // lshipdate > date
       (date1(0) > date(0)) || (date1(0) == date(0) && date1(1) > date(1)) || (date1(0) == date(0) && date1(1) == date(1) && date1(2) > date(2))
     })
+    .map(p => {
+      val l_extendedprice = p._2
+      val l_discount = p._3
+      (p._1, l_extendedprice*(1-l_discount))
+    })
     
     
     val orders = sc.textFile(args.input + "/orders.tbl")
