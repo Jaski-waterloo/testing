@@ -57,18 +57,36 @@ object Q7 extends Tokenizer
     val lineitem = sc.textFile(args.input() + "/lineitem.tbl")
     .map(line => {
       val a = line.split('|')
-      (a(0).toInt, a(10))
+      (a(0).toInt, a(5).toDouble, a(6).toDouble, a(10))
     })
     .filter(p => {
-      date1 = p._2.split('-') // year-month-day // lshipdate > date
+      date1 = p._4.split('-') // year-month-day // lshipdate > date
       if(date1(0) > date(0)){
-        if(date1(1) > date(1){
+        if(date1(1) > date(1)){
           if(date1(2) > date(2)) true
         }
            }
       else false
     })
     
-      }
-    }
-            
+    
+    val orders = sc.textFile(args.input + "/orders.tbl")
+    
+    orders.
+    map(line => {
+      a = line.split('|')
+      (a(0).toInt, a(1).toInt, a(4), a(7))
+    })
+    .filter( p => {
+      date1 = p._3.split('-') // orderdate < date
+      if(date1(0) < date(0)){
+        if(date1(1) < date(1)){
+          if(date1(2) < date(2)) true
+        }
+           }
+      else false
+    })
+    .cogroup(lineitem)
+    .saveAsTextFile("myOutput.txt")
+  }
+}
