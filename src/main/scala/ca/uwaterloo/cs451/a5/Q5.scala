@@ -99,7 +99,7 @@ object Q5 extends Tokenizer
      })
     .flatMap(p => {
       val temp = bnation.value(p._2._1.iterator.next())
-      while(p._2._2.iterator.hasNext())
+      while(p._2._2.iterator.hasNext)
       {
         ((temp, p._2._2.iterator.next()), 1)
       }
