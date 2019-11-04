@@ -54,16 +54,16 @@ object Q5 extends Tokenizer
         (a(0).toInt, a(3).toInt)
       })
      .map(pair => {
-       if(pair(1) == 3){
-         (pair(0), "CANADA")
+       if(pair._2 == 3){
+         (pair._1, "CANADA")
        }
-       else if(pair(1) == 24)
+       else if(pair._2 == 24)
        {
-         (pair(0), "US")
+         (pair._1, "US")
        }
        else
        {
-         (pair(0), "NA")
+         (pair._1, "NA")
        }
      })
      
@@ -93,12 +93,12 @@ object Q5 extends Tokenizer
        !p._2._2.isEmpty && !p._2._1.isEmpty
      })       
      .filter(p => {
-       temp = bnation.value(p._2._1.iterator.next())
+       val temp = bnation.value(p._2._1.iterator.next())
        if(temp == "US" || temp =="CANADA") true
        else false
      })
     .flatmap(p => {
-      temp = bnation.value(p._2._1.iterator.next())
+      val temp = bnation.value(p._2._1.iterator.next())
       while(p._2._2.iterator.hasNext())
       {
         ((temp, p._2._2.iterator.next()), 1)
