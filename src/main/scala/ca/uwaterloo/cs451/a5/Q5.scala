@@ -17,7 +17,7 @@ class ConfQ5(args: Seq[String]) extends ScallopConf(args) {
 //   val output = opt[String](descr = "output path", required = true)
 //   val reducers = opt[Int](descr = "number of reducers", required = false, default = Some(1))
 //   val imc = opt[Boolean](descr = "use in-mapper combining", required = false)
-  val date = opt[String](descr = "date of Select Query", required = true)
+//   val date = opt[String](descr = "date of Select Query", required = true)
   val text = opt[Boolean](descr = "Use Text Data", required = false)
   val parquet = opt[Boolean](descr = "Use parquet Data", required = false)
   verify()
@@ -35,7 +35,7 @@ object Q5 extends Tokenizer
     val args = new ConfQ5(argv)
 
     log.info("Input: " + args.input())
-    log.info("Date : " + args.date())
+//     log.info("Date : " + args.date())
 //     log.info("Output: " + args.output())
 //     log.info("Number of reducers: " + args.reducers())
      log.info("Text Data : " + args.text())
@@ -46,7 +46,7 @@ object Q5 extends Tokenizer
      
 //      val count = sc.accumulator(0, "accumulator");
 //      val date = sc.broadcast(args.date())
-    val date = args.date()
+//     val date = args.date()
 
     val customer = sc.textFile(args.input() + "/customer.tbl")
       .map(line => {
@@ -88,7 +88,7 @@ object Q5 extends Tokenizer
     .collect()
     .foreach(p => {
       a = p.split(" ")
-      println((p.(0), bnation.value(p(0)), p(1))
+      println((p(0), bnation.value(p(0)), p(1))
       })
 
   }
