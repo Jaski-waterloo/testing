@@ -61,12 +61,7 @@ object Q7 extends Tokenizer
     })
     .filter(p => {
       val date1 = p._4.split('-').map(_.toInt) // year-month-day // lshipdate > date
-      if(date1(0) > date(0)){
-        if(date1(1) > date(1)){
-          if(date1(2) > date(2)) true
-        }
-           }
-      else false
+      (date1(0) > date(0)) || (date1(0) == date(0) && date1(1) > date(1)) || (date1(0) == date(0) && date1(1) == date(1) && date1(2) > date(2))
     })
     
     
@@ -79,12 +74,7 @@ object Q7 extends Tokenizer
     })
     .filter( p => {
       val date1 = p._3.split('-').map(_.toInt) // orderdate < date
-      if(date1(0) < date(0)){
-        if(date1(1) < date(1)){
-          if(date1(2) < date(2)) true
-        }
-           }
-      else false
+      (date1(0) < date(0)) || (date1(0) == date(0) && date1(1) < date(1)) || (date1(0) == date(0) && date1(1) == date(1) && date1(2) < date(2))
     })
     .cogroup(lineitem)
     .saveAsTextFile("myOutput.txt")
