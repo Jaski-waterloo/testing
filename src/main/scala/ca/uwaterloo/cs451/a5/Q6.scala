@@ -23,49 +23,67 @@ class ConfQ6(args: Seq[String]) extends ScallopConf(args) {
   verify()
 }
 
-object Q6 {
-  val log = Logger.getLogger(getClass().getName())
-
-  def main(argv: Array[String]) {
+object Q6 extends Tokenizer 
+{
+   val log = Logger.getLogger(getClass().getName())
+  
+//   val outputDir = new Path(args.output())
+//   FileSystem.get(sc.hadoopConfiguration).delete(outputDir, true)
+  
+  
+   def main(argv: Array[String]) {
     val args = new ConfQ6(argv)
 
     log.info("Input: " + args.input())
-    log.info("Date: " + args.date())
+    log.info("Date : " + args.date())
+//     log.info("Output: " + args.output())
+//     log.info("Number of reducers: " + args.reducers())
+     log.info("Text Data : " + args.text())
+     log.info("Parquet Data : " + args.parquet())
 
     val conf = new SparkConf().setAppName("Q6")
     val sc = new SparkContext(conf)
-
+     
+//      val count = sc.accumulator(0, "accumulator");
+//      val date = sc.broadcast(args.date())
     val date = args.date()
-
+    
     val lineitems = sc.textFile(args.input() + "/lineitem.tbl")
-    lineitems
-      .filter(line => {
-        line.split("\\|")(10) contains date
-      })
-      .map(line => {
-        val a = line.split("\\|")
-        val l_q = a(4).toDouble
-        val l_ep = a(5).toDouble
-        val l_d = a(6).toDouble
-        val l_t = a(7).toDouble
-        ((a(8), a(9)), (l_q, l_ep, l_ep*(1-l_d), l_ep*(1-l_d)*(1+l_t), 1, l_d))
-      })
-      .reduceByKey((v1, v2) => {
-        (v1._1+v2._1, v1._2+v2._2, v1._3+v2._3, v1._4+v2._4, v1._5+v2._5, v1._6+v2._6)
-      })
-      .collect()
-      .foreach(p => {
-        val count = p._2._5
-        val l_1 = BigDecimal(p._2._1).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
-        val l_2 = BigDecimal(p._2._2).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
-        val l_3 = BigDecimal(p._2._3).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
-        val l_4 = BigDecimal(p._2._4).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
-        val l_5 = BigDecimal(p._2._1/count).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
-        val l_6 = BigDecimal(p._2._2/count).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
-        val l_7 = BigDecimal(p._2._6/count).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
-        println((p._1._1, p._1._2, l_1, l_2, l_3, l_4, l_5, l_6, l_7, count))
-      })
-  }
+    lineitems.
+    filter(line => {
+      line.split('|')(10) contains date
+    })
+    .map(line => {
+      val a = line.split('|')
+      val retFlag = a(8)
+      val lineStatus = a(9)
+      val l_quantity = a(4).toDouble
+      val l_extendedprice = a(5).toDouble
+      val l_discount = a(6).toDouble
+      val l_tax = a(7).toDouble
+      
+      ((retFlag, lineStatus), (l_quantity, l_extendedprice, l_extendedprice*(1-l_discount), l_extendedprice*(1-l_discount)*(1+l_tax), l_discount, 1))
+      
+    })
+    .reduceByKey((a,b) => {
+      (a._1 + b._1, a._2 + b._2, a._3 + b._3, a._4 + b._4, a._5 + b._5, a._6 + a._6)
+    })
+    .collect()
+    .foreach(a => {
+      val count = a._2._6
+      val l_returnflag = a._1._1
+      val l_linestatus = a._1._2
+      val sum_qty = a._2._1
+      val sum_base_price = a._2._2
+      val sum_disc_price = a._2._3
+      val sum_charge = a._2._4
+      val avg_qty = sum_qty / count
+      val avg_price = sum_base_price / count
+      val avg_disc = a._2._5 / count
+//       count(*) as count_order
+      println((l_returnflag, l_linestatus, sum_qty, sum_base_price, sum_disc_price, sum_charge, avg_qty, avg_price, avg_disc, count))
+    })
+   }
 }
       
       
