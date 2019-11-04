@@ -11,7 +11,7 @@ import org.apache.spark.SparkConf
 import org.rogach.scallop._
 import scala.util.Try
 
-class ConfQ4(args: Seq[String]) extends ScallopConf(args) {
+class ConfQ6(args: Seq[String]) extends ScallopConf(args) {
   mainOptions = Seq(input, date)
   val input = opt[String](descr = "input path", required = true)
 //   val output = opt[String](descr = "output path", required = true)
