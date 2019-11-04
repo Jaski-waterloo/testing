@@ -88,7 +88,7 @@ object Q5 extends Tokenizer
     .collect()
     .foreach(p => {
       a = p.split(" ")
-      println((p(0), bnation.value(p(0)), p(1))
+      println((p(0), bnation.value(p(0)), p(1)))
       })
 
   }
