@@ -66,7 +66,7 @@ object Q6 extends Tokenizer
       
     })
     .reduceByKey((a,b) => {
-      (a._1 + b._1, a._2 + b._2, a._3 + b._3, a._4 + b._4, a._5 + b._5, a._6 + a._6)
+      (a._1 + b._1, a._2 + b._2, a._3 + b._3, a._4 + b._4, a._5 + b._5, a._6 + b._6)
     })
     .collect()
     .foreach(a => {
