@@ -97,7 +97,7 @@ object Q5 extends Tokenizer
        if(temp == "US" || temp =="CANADA") true
        else false
      })
-    .flatmap(p => {
+    .flatMap(p => {
       val temp = bnation.value(p._2._1.iterator.next())
       while(p._2._2.iterator.hasNext())
       {
