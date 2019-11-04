@@ -12,7 +12,7 @@ import org.rogach.scallop._
 import scala.util.Try
 
 class ConfQ5(args: Seq[String]) extends ScallopConf(args) {
-  mainOptions = Seq(input, date)
+  mainOptions = Seq(input)
   val input = opt[String](descr = "input path", required = true)
 //   val output = opt[String](descr = "output path", required = true)
 //   val reducers = opt[Int](descr = "number of reducers", required = false, default = Some(1))
@@ -60,7 +60,7 @@ object Q5 extends Tokenizer
        (a(0).toInt, a(1))
      })
    
-    val lineitem = sc.textFile(args.input() + "/lineitem.tbl")
+    val lineitems = sc.textFile(args.input() + "/lineitem.tbl")
      .map(line => {
        val a = line.split('|')
        (a(0).toInt, a(10))
@@ -72,7 +72,7 @@ object Q5 extends Tokenizer
      
     val orders = sc.textFile(args.input() + "/orders.tbl")
      .map(line => {
-       a = line.split('|')
+       val a = line.split('|')
        (a(0).toInt)
      })
      .cogroup(lineitems)
@@ -87,8 +87,8 @@ object Q5 extends Tokenizer
     .sortByKey()
     .collect()
     .foreach(p => {
-      a = p.split(" ")
-      println((p(0), bnation.value(p(0)), p(1)))
+      val a = p.split(" ")
+      println((a(0), a(1), p._2))
       })
 
   }
