@@ -99,10 +99,11 @@ object Q5 extends Tokenizer
      })
     .flatMap(p => {
       val temp = bnation.value(p._2._1.iterator.next())
-      while(p._2._2.iterator.hasNext)
-      {
-        ((temp, p._2._2.iterator.next()), 1)
-      }
+//       while(p._2._2.iterator.hasNext)
+//       {
+//         ((temp, p._2._2.iterator.next()), 1)
+//       }
+      p._2._2.map(d => ((temp, d), 1)).toList
     })
     .reduceByKey(_+_)
     .collect()
