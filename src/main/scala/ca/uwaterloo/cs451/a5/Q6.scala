@@ -69,19 +69,19 @@ object Q6 extends Tokenizer
       (a._1 + b._1, a._2 + b._2, a._3 + b._3, a._4 + b._4, a._5 + b._5, a._6 + a._6)
     })
     .collect()
-    .foreach(p => {
-      val count = p._6
-//       l_returnflag,
-//       l_linestatus,
-      val sum_qty = a._1
-      val sum_base_price = a._2
-      val sum_disc_price = a._3
-      val sum_charge = a._4
-      val avg_qty = a._1 / count
-      val avg_price = a._2 / count
+    .foreach(a => {
+      val count = a._2._6
+      val l_returnflag = a._1._1
+      val l_linestatus = a._1._2
+      val sum_qty = a._2._1
+      val sum_base_price = a._2._2
+      val sum_disc_price = a._2._3
+      val sum_charge = a._2._4
+      val avg_qty = sum_qty / count
+      val avg_price = sum_base_price / count
       val avg_disc = a._5 / count
 //       count(*) as count_order
-      println((sum_qty, sum_base_price, sum_disc_price, sum_charge, avg_qty, avg_price, avg_disc, count))
+      println((l_returnflag, l_linestatus, sum_qty, sum_base_price, sum_disc_price, sum_charge, avg_qty, avg_price, avg_disc, count))
     })
    }
 }
