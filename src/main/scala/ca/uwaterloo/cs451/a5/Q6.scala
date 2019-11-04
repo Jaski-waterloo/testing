@@ -79,7 +79,7 @@ object Q6 extends Tokenizer
       val sum_charge = a._2._4
       val avg_qty = sum_qty / count
       val avg_price = sum_base_price / count
-      val avg_disc = a._5 / count
+      val avg_disc = a._2._5 / count
 //       count(*) as count_order
       println((l_returnflag, l_linestatus, sum_qty, sum_base_price, sum_disc_price, sum_charge, avg_qty, avg_price, avg_disc, count))
     })
