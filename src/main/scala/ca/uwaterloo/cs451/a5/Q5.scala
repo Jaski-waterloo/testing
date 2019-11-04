@@ -53,6 +53,18 @@ object Q5 extends Tokenizer
         val a = line.split("\\|")
         (a(0).toInt, a(3).toInt)
       })
+     .map(pair => {
+       if(pair(1) == 3){
+         (pair(0), "CANADA")
+       }
+       else if(pair(1) == 24)
+       {
+         (pair(0), "US")
+       else
+       {
+         (pair(0), "NA")
+       }
+     })
      
     val nation = sc.textFile(args.input() + "/nation.tbl")
      .map(line => {
@@ -63,7 +75,7 @@ object Q5 extends Tokenizer
     val lineitems = sc.textFile(args.input() + "/lineitem.tbl")
      .map(line => {
        val a = line.split('|')
-       (a(0).toInt, a(10))
+       (a(0).toInt, a(10).substring(0,7))
      })
     
     val bcustomer = sc.broadcast(customer.collectAsMap())
@@ -76,8 +88,25 @@ object Q5 extends Tokenizer
        (a(0).toInt, a(1).toInt)
      })
      .cogroup(lineitems)
-     .saveAsTextFile("myOutput.txt")
-
+     .filter(p => {
+       !p._2._2.isEmpty && !p._2._1.isEmpty
+     })       
+     .filter(p => {
+       temp = bnation.value(p._2._1.iterator.next())
+       if(temp == "US" || temp =="CANADA") true
+       else false
+     })
+    .flatmap(p => {
+      temp = bnation.value(p._2._1.iterator.next())
+      while(p._2._2.iterator.hasNext())
+      {
+        ((temp, p._2._2.iterator.next()), 1)
+      }
+    .reduceByKey(_+_)
+    .collect()
+    .foreach(p => {
+        println((p._1._1, p._1._2, p._2))
+    })
   }
 } 
        
