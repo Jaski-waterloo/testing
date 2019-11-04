@@ -70,7 +70,7 @@ object Q7 extends Tokenizer
     })
     
     
-    val orders = sc.textFile(args.input + "/orders.tbl")
+    val orders = sc.textFile(args.input() + "/orders.tbl")
     
     orders.
     map(line => {
