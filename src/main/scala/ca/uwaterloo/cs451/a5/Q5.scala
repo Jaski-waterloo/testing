@@ -76,20 +76,7 @@ object Q5 extends Tokenizer
        (a(0).toInt, a(1).toInt)
      })
      .cogroup(lineitems)
-     .filter(p => {
-        !p._2._3.isEmpty
-      })
-     .map(p => {
-        val nkey = bcustomer.value(p._2._1.iterator.next()) + " " + p._2._2
-        (nkey, 1) 
-      })
-    .reduceByKey(_ + _)
-    .sortByKey()
-    .collect()
-    .foreach(p => {
-      val a = p.split(" ")
-      println((a(0), a(1), p._2))
-      })
+     .toTextFile("myOutput.txt")
 
   }
 } 
