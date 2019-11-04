@@ -26,7 +26,7 @@ class ConfQ7(args: Seq[String]) extends ScallopConf(args) {
 
 object Q7 extends Tokenizer
 {
-  val logger = Logger.getLogger(getClass().getName())
+  val log = Logger.getLogger(getClass().getName())
   
   //   val outputDir = new Path(args.output())
 //   FileSystem.get(sc.hadoopConfiguration).delete(outputDir, true)
@@ -60,7 +60,7 @@ object Q7 extends Tokenizer
       (a(0).toInt, a(5).toDouble, a(6).toDouble, a(10))
     })
     .filter(p => {
-      date1 = p._4.split('-') // year-month-day // lshipdate > date
+      val date1 = p._4.split('-') // year-month-day // lshipdate > date
       if(date1(0) > date(0)){
         if(date1(1) > date(1)){
           if(date1(2) > date(2)) true
@@ -74,11 +74,11 @@ object Q7 extends Tokenizer
     
     orders.
     map(line => {
-      a = line.split('|')
+      val a = line.split('|')
       (a(0).toInt, a(1).toInt, a(4), a(7))
     })
     .filter( p => {
-      date1 = p._3.split('-') // orderdate < date
+      val date1 = p._3.split('-') // orderdate < date
       if(date1(0) < date(0)){
         if(date1(1) < date(1)){
           if(date1(2) < date(2)) true
