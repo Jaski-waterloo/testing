@@ -83,6 +83,7 @@ object Q7 extends Tokenizer
     })
     .map(p => {
       (p._1, (bcustomer.value(p._2), p._3, p._4))
+    })
     .cogroup(lineitem)
     .saveAsTextFile("myOutput.txt")
   }
