@@ -11,17 +11,23 @@ import org.apache.spark.SparkConf
 import org.rogach.scallop._
 import scala.util.Try
 
-class Conf6(args: Seq[String]) extends ScallopConf(args) {
+class ConfQ6(args: Seq[String]) extends ScallopConf(args) {
   mainOptions = Seq(input, date)
   val input = opt[String](descr = "input path", required = true)
-  val date = opt[String](descr = "date", required = true)
+//   val output = opt[String](descr = "output path", required = true)
+//   val reducers = opt[Int](descr = "number of reducers", required = false, default = Some(1))
+//   val imc = opt[Boolean](descr = "use in-mapper combining", required = false)
+  val date = opt[String](descr = "date of Select Query", required = true)
+  val text = opt[Boolean](descr = "Use Text Data", required = false)
+  val parquet = opt[Boolean](descr = "Use parquet Data", required = false)
+  verify()
 }
 
 object Q6 {
   val log = Logger.getLogger(getClass().getName())
 
   def main(argv: Array[String]) {
-    val args = new Conf6(argv)
+    val args = new ConfQ6(argv)
 
     log.info("Input: " + args.input())
     log.info("Date: " + args.date())
@@ -61,3 +67,5 @@ object Q6 {
       })
   }
 }
+      
+      
