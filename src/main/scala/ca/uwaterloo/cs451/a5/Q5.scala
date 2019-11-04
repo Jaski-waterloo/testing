@@ -76,7 +76,7 @@ object Q5 extends Tokenizer
        (a(0).toInt, a(1).toInt)
      })
      .cogroup(lineitems)
-     .toTextFile("myOutput.txt")
+     .saveAsTextFile("myOutput.txt")
 
   }
 } 
