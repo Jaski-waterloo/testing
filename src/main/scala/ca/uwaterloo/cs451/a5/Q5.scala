@@ -93,12 +93,12 @@ object Q5 extends Tokenizer
        !p._2._2.isEmpty && !p._2._1.isEmpty
      })       
      .filter(p => {
-       val temp = bnation.value(p._2._1.iterator.next())
+       val temp = bcustomer.value(p._2._1.iterator.next())
        if(temp == "US" || temp =="CANADA") true
        else false
      })
     .flatMap(p => {
-      val temp = bnation.value(p._2._1.iterator.next())
+      val temp = bcustomer.value(p._2._1.iterator.next())
 //       while(p._2._2.iterator.hasNext)
 //       {
 //         ((temp, p._2._2.iterator.next()), 1)
