@@ -51,29 +51,19 @@ object Q3 extends Tokenizer
     val suppMap:HashMap[Int,String] = HashMap()
 
     val part = sc.textFile(args.input() + "/part.tbl")
-    part
       .map(line => {
         val a = line.split("\\|")
-        (a(0), a(1))
-      })
-      .collect()
-      .foreach(p => {
-        partMap += (p._1.toInt -> p._2)
+        (a(0).toInt, a(1))
       })
 
     val supplier = sc.textFile(args.input() + "/supplier.tbl")
-    supplier
       .map(line => {
         val a = line.split("\\|")
-        (a(0), a(1))
+        (a(0).toInt, a(1))
       })
-      .collect()
-      .foreach(p => {
-        suppMap += (p._1.toInt -> p._2)
-      })
-
-    val bPartMap = sc.broadcast(partMap)
-    val bSuppMap = sc.broadcast(suppMap)
+     
+    val bPartMap = sc.broadcast(part.collectAsMap())
+    val bSuppMap = sc.broadcast(supplier.collectAsMap())
 
     val lineitems = sc.textFile(args.input() + "/lineitem.tbl")
     lineitems
