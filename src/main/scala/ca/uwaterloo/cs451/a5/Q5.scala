@@ -73,7 +73,7 @@ object Q5 extends Tokenizer
     val orders = sc.textFile(args.input() + "/orders.tbl")
      .map(line => {
        val a = line.split('|')
-       (a(0).toInt)
+       (a(0).toInt, a(1).toInt)
      })
      .cogroup(lineitems)
      .filter(p => {
