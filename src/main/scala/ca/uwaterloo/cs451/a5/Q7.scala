@@ -81,6 +81,8 @@ object Q7 extends Tokenizer
       val date1 = p._3.split('-').map(_.toInt) // orderdate < date
       (date1(0) < date(0)) || (date1(0) == date(0) && date1(1) < date(1)) || (date1(0) == date(0) && date1(1) == date(1) && date1(2) < date(2))
     })
+    .map(p => {
+      (p._1, (bcustomer.value(p._2), p._3, p._4))
     .cogroup(lineitem)
     .saveAsTextFile("myOutput.txt")
   }
