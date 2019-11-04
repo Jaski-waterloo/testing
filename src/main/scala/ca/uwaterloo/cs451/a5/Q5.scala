@@ -106,6 +106,7 @@ object Q5 extends Tokenizer
       p._2._2.map(d => ((temp, d), 1)).toList
     })
     .reduceByKey(_+_)
+    .sortByKey()
     .collect()
     .foreach(p => {
         println((p._1._1, p._1._2, p._2))
