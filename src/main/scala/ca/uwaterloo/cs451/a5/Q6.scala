@@ -48,7 +48,7 @@ object Q6 extends Tokenizer
 //      val date = sc.broadcast(args.date())
     val date = args.date()
     
-    val lineitems = sc.textFile(args.input() + "/lineitems.tbl")
+    val lineitems = sc.textFile(args.input() + "/lineitem.tbl")
     lineitems.
     filter(line => {
       line.split('|')(10) contains date
