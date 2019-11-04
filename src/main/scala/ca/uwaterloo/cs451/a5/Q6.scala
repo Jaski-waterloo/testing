@@ -54,13 +54,13 @@ object Q6 extends Tokenizer
       line.split('|')(10) contains date
     })
     .map(line => {
-      a = line.split('|')
-      retFlag = a(8)
-      lineStatus = a(9)
-      l_quantity = a(4).toDouble
-      l_extendedprice = a(5).toDouble
-      l_discount = a(6).toDouble
-      l_tax = a(7).toDouble
+      val a = line.split('|')
+      val retFlag = a(8)
+      val lineStatus = a(9)
+      val l_quantity = a(4).toDouble
+      val l_extendedprice = a(5).toDouble
+      val l_discount = a(6).toDouble
+      val l_tax = a(7).toDouble
       
       ((retFlag, lineStatus), (l_quantity, l_extendedprice, l_extendedprice*(1-l_discount), l_extendedprice*(1-l_discount)*(1+l_tax), l_discount, 1))
       
@@ -70,16 +70,16 @@ object Q6 extends Tokenizer
     })
     .collect()
     .foreach(p => {
-      count = p._6
+      val count = p._6
 //       l_returnflag,
 //       l_linestatus,
-      sum_qty = a._1
-      sum_base_price = a._2
-      sum_disc_price = a._3
-      sum_charge = a._4
-      avg_qty = a._1 / count
-      avg_price = a._2 / count
-      avg_disc = a._5 / count
+      val sum_qty = a._1
+      val sum_base_price = a._2
+      val sum_disc_price = a._3
+      val sum_charge = a._4
+      val avg_qty = a._1 / count
+      val avg_price = a._2 / count
+      val avg_disc = a._5 / count
 //       count(*) as count_order
       println((sum_qty, sum_base_price, sum_disc_price, sum_charge, avg_qty, avg_price, avg_disc, count))
     })
