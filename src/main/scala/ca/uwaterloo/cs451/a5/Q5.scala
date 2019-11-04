@@ -60,6 +60,7 @@ object Q5 extends Tokenizer
        else if(pair(1) == 24)
        {
          (pair(0), "US")
+       }
        else
        {
          (pair(0), "NA")
@@ -102,6 +103,7 @@ object Q5 extends Tokenizer
       {
         ((temp, p._2._2.iterator.next()), 1)
       }
+    })
     .reduceByKey(_+_)
     .collect()
     .foreach(p => {
