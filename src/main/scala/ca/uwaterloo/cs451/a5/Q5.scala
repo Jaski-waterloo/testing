@@ -10,6 +10,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.SparkConf
 import org.rogach.scallop._
 import scala.util.Try
+import org.apache.spark.sql.SparkSession
 
 class ConfQ5(args: Seq[String]) extends ScallopConf(args) {
   mainOptions = Seq(input)
@@ -48,6 +49,9 @@ object Q5 extends Tokenizer
 //      val date = sc.broadcast(args.date())
 //     val date = args.date()
 
+     
+     if(args.text())
+     {
     val customer = sc.textFile(args.input() + "/customer.tbl")
       .map(line => {
         val a = line.split("\\|")
@@ -111,6 +115,77 @@ object Q5 extends Tokenizer
     .foreach(p => {
         println((p._1._1, p._1._2, p._2))
     })
+     }
+     
+     else
+     {
+       
+       val sparkSession = SparkSession.builder.getOrCreate
+      val customerDF = sparkSession.read.parquet(args.input() + "/customer")
+      val customerRDD = customerDF.rdd
+      .map(line => {
+        (line.getInt(0), line.getInt(3))
+      })
+     .map(pair => {
+       if(pair._2 == 3){
+         (pair._1, "CANADA")
+       }
+       else if(pair._2 == 24)
+       {
+         (pair._1, "US")
+       }
+       else
+       {
+         (pair._1, "NA")
+       }
+     })
+     
+      val nationDF = sparkSession.read.parquet(args.input() + "/nation")
+      val nationRDD = nationDF.rdd
+     .map(line => {
+       (line.getInt(0), line.getString(1))
+     })
+   
+      val lineitemsDF = sparkSession.read.parquet(args.input() + "/lineitem")
+      val lineitems = lineitemsDF.rdd
+     .map(line => {
+       (line.getInt(0), line.getString(10).substring(0,7))
+     })
+    
+    val bcustomer = sc.broadcast(customerRDD.collectAsMap())
+    val bnation = sc.broadcast(nationRDD.collectAsMap())
+    
+     
+      val ordersDF = sparkSession.read.parquet(args.input() + "/orders")
+      val partRDD = partDF.rdd     
+       .map(line => {
+       (line.getInt(0), line.getInt(1))
+     })
+     .cogroup(lineitems)
+     .filter(p => {
+       !p._2._2.isEmpty && !p._2._1.isEmpty
+     })       
+     .filter(p => {
+       val temp = bcustomer.value(p._2._1.iterator.next())
+       if(temp == "US" || temp =="CANADA") true
+       else false
+     })
+    .flatMap(p => {
+      val temp = bcustomer.value(p._2._1.iterator.next())
+//       while(p._2._2.iterator.hasNext)
+//       {
+//         ((temp, p._2._2.iterator.next()), 1)
+//       }
+      p._2._2.map(d => ((temp, d), 1)).toList
+    })
+    .reduceByKey(_+_)
+    .sortByKey()
+    .collect()
+    .foreach(p => {
+        println((p._1._1, p._1._2, p._2))
+    })
+       
+     }
   }
 } 
        
