@@ -10,6 +10,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.SparkConf
 import org.rogach.scallop._
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.rdd.RDD
 
 class Conf(args: Seq[String]) extends ScallopConf(args) {
   mainOptions = Seq(input, date)
@@ -43,7 +44,7 @@ object Q1 extends Tokenizer {
     val conf = new SparkConf().setAppName("Q1")
     val sc = new SparkContext(conf)
      
-    var textFile
+    var textFile: RDD[String] = sc.emptyRDD[String]
     if(args.text())
      {
      textFile = sc.textFile(args.input() + "/lineitem.tbl")
