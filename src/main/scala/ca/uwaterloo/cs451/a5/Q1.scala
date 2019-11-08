@@ -42,7 +42,16 @@ object Q1 extends Tokenizer {
     val conf = new SparkConf().setAppName("Q1")
     val sc = new SparkContext(conf)
      
-    val textFile = sc.textFile(args.input() + "/lineitem.tbl")
+    if(args.text())
+     {
+     val textFile = sc.textFile(args.input() + "/lineitem.tbl")
+     }
+     else
+     {
+        val sparkSession = SparkSession.builder.getOrCreate
+      val lineitemDF = sparkSession.read.parquet(args.input() + "/lineitem")
+      val textFile = lineitemDF.rdd
+     }
      
      val count = sc.accumulator(0, "accumulator");
 //      val date = sc.broadcast(args.date())
