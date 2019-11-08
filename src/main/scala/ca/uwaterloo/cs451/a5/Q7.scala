@@ -48,7 +48,7 @@ object Q7 extends Tokenizer
     val date = args.date().split('-').map(_.toInt)
     
     
-    if(args.date())
+    if(args.text())
     {
     val customer = sc.textFile(args.input() + "/customer.tbl")
     .map(line => {
