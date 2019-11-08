@@ -10,6 +10,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.SparkConf
 import org.rogach.scallop._
 import scala.util.Try
+import org.apache.spark.sql.SparkSession
 
 class ConfQ7(args: Seq[String]) extends ScallopConf(args) {
   mainOptions = Seq(input, date)
@@ -46,6 +47,9 @@ object Q7 extends Tokenizer
     
     val date = args.date().split('-').map(_.toInt)
     
+    
+    if(args.date())
+    {
     val customer = sc.textFile(args.input() + "/customer.tbl")
     .map(line => {
       val a = line.split('|')
@@ -103,5 +107,68 @@ object Q7 extends Tokenizer
       .foreach(p => {
         println((p._2._1, p._2._2, p._1, p._2._3, p._2._4))
       })
+    }
+    
+    else
+    {
+      
+      val sparkSession = SparkSession.builder.getOrCreate
+      val customerDF = sparkSession.read.parquet(args.input() + "/customer")
+      val customerRDD = customerDF.rdd
+      .map(line => {
+      (line.getInt(0), line.getString(1))
+    })
+    
+    val bcustomer = sc.broadcast(customerRDD.collectAsMap())
+    
+      val lineitemDF = sparkSession.read.parquet(args.input() + "/lineitem")
+      val lineitemRDD = lineitemDF.rdd
+      .map(line => {
+      (line.getInt(0), line.getDouble(5), line.getDouble(6), line.getString(10))
+    })
+    .filter(p => {
+      val date1 = p._4.split('-').map(_.toInt) // year-month-day // lshipdate > date
+      (date1(0) > date(0)) || (date1(0) == date(0) && date1(1) > date(1)) || (date1(0) == date(0) && date1(1) == date(1) && date1(2) > date(2))
+    })
+    .map(p => {
+      val l_extendedprice = p._2
+      val l_discount = p._3
+      (p._1, l_extendedprice*(1-l_discount))
+    })
+    
+    
+      val ordersDF = sparkSession.read.parquet(args.input() + "/orders")
+      val ordersRDD = ordersDF.rdd    
+    .map(line => {
+      (line.getInt(0), line.getInt(1, line.getString(4), line.getString(7))
+    })
+    .filter( p => {
+      val date1 = p._3.split('-').map(_.toInt) // orderdate < date
+      (date1(0) < date(0)) || (date1(0) == date(0) && date1(1) < date(1)) || (date1(0) == date(0) && date1(1) == date(1) && date1(2) < date(2))
+    })
+    .map(p => {
+      (p._1, (bcustomer.value(p._2), p._3, p._4))
+    })
+    .cogroup(lineitemRDD)
+//     .saveAsTextFile("myOutput.txt")
+    .filter(p => {
+        !p._2._2.isEmpty && !p._2._1.isEmpty
+      })
+    .map(p => {
+        val items = p._2._1.iterator.next()
+        val c_name = items._1
+        val l_orderkey = p._1
+        val o_orderdate = items._2
+        val o_shippriority = items._3
+        val sum = p._2._2.foldLeft(0.0)((b,a) => b+a)
+        (sum, (c_name, l_orderkey, o_orderdate, o_shippriority))
+      })
+      .sortByKey(false)
+      .take(10)
+      .foreach(p => {
+        println((p._2._1, p._2._2, p._1, p._2._3, p._2._4))
+      })
+      
+    }
   }
 }
