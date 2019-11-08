@@ -44,24 +44,16 @@ object Q1 extends Tokenizer {
     val conf = new SparkConf().setAppName("Q1")
     val sc = new SparkContext(conf)
      
-    var textFile: RDD[String] = sc.emptyRDD[String]
-     if(args.text())
-     {
-     val File = sc.textFile(args.input() + "/lineitem.tbl")
-       textFile ++ File
-     }
-     else
-     {
-        val sparkSession = SparkSession.builder.getOrCreate
-      val lineitemDF = sparkSession.read.parquet(args.input() + "/lineitem")
-      val File = lineitemDF.rdd
-       textFile ++ File
-     }
+
      
      val count = sc.accumulator(0, "accumulator");
 //      val date = sc.broadcast(args.date())
      val date = args.date();
-
+      
+     
+     if(args.text())
+     {
+     val textFile = sc.textFile(args.input() + "/lineitem.tbl")
      textFile.map(line=> {
        val tokens = line.split('|')
 //        var arrayname = new Array[datatype](tokens.length)
@@ -76,6 +68,30 @@ object Q1 extends Tokenizer {
 //      .saveAsTextFile("testoutput")
      
      println("ANSWER=" + count.value);
+     }
+     
+     else
+     {
+       val sparkSession = SparkSession.builder.getOrCreate
+      val lineitemDF = sparkSession.read.parquet(args.input() + "/lineitem")
+      val textFile = lineitemDF.rdd
+       
+       textFile.map(line=> {
+       val tokens = line.split('|')
+//        var arrayname = new Array[datatype](tokens.length)
+       tokens
+     })
+     .map(line => line(10))
+     .foreach(line =>
+              if(line contains date)
+              {
+                count += 1;
+              })
+//      .saveAsTextFile("testoutput")
+     
+     println("ANSWER=" + count.value);
+       
+     }
               
        
 
