@@ -10,6 +10,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.SparkConf
 import org.rogach.scallop._
 import scala.util.Try
+import org.apache.spark.sql.SparkSession
 
 class ConfQ3(args: Seq[String]) extends ScallopConf(args) {
   mainOptions = Seq(input, date)
@@ -47,9 +48,9 @@ object Q3 extends Tokenizer
 //      val count = sc.accumulator(0, "accumulator");
 //      val date = sc.broadcast(args.date())
     val date = args.date()
-    val partMap:HashMap[Int,String] = HashMap()
-    val suppMap:HashMap[Int,String] = HashMap()
-
+  
+     if(args.date())
+     {
     val part = sc.textFile(args.input() + "/part.tbl")
       .map(line => {
         val a = line.split("\\|")
@@ -79,5 +80,42 @@ object Q3 extends Tokenizer
       .foreach(p => {
         println((p._1,p._2._1,p._2._2))
       })
+       
+     }
+     
+     
+     else
+     {
+      val sparkSession = SparkSession.builder.getOrCreate
+      val partDF = sparkSession.read.parquet(args.input() + "/part")
+      val partRDD = partDF.rdd
+      .map(line => {
+        (line.getInt(0), line.getString(1))
+      })
+
+      val supplierDF = sparkSession.read.parquet(args.input() + "/supplier")
+      val supplierRDD = supplierDF.rdd      
+       .map(line => {
+         (line.getInt(0), line.getString(1))
+      })
+     
+    val bPartMap = sc.broadcast(partRDD.collectAsMap())
+    val bSuppMap = sc.broadcast(supplierRDD.collectAsMap())
+
+    val lineitemDF = sparkSession(args.input() + "/lineitem.tbl")
+    val lineitemsRDD = lineitemsDF.rdd
+      .filter(line => {
+        line.getString(10) contains date
+      })
+      .map(line => {
+        (line.getInt(0), (bPartMap.value(line.getInt(1)), bSuppMap.value(line.getInt(2))))
+      })
+      .sortByKey()
+      .take(20)
+      .foreach(p => {
+        println((p._1,p._2._1,p._2._2))
+      })
+       
+     }
    }
 }
