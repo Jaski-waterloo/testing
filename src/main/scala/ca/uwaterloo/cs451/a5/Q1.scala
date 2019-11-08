@@ -44,8 +44,8 @@ object Q1 extends Tokenizer {
     val conf = new SparkConf().setAppName("Q1")
     val sc = new SparkContext(conf)
      
-    var textFile: emptyRDD = sc.emptyRDD()
-    if(args.text())
+    val rdd: RDD[String] = sc.emptyRDD[String]
+     if(args.text())
      {
      textFile = sc.textFile(args.input() + "/lineitem.tbl")
      }
