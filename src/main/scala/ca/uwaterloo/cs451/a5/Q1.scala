@@ -53,7 +53,7 @@ object Q1 extends Tokenizer {
      {
         val sparkSession = SparkSession.builder.getOrCreate
       val lineitemDF = sparkSession.read.parquet(args.input() + "/lineitem")
-      textFile = lineitemDF.rdd
+      textFile = lineitemDF.rdd.RDD[String]
      }
      
      val count = sc.accumulator(0, "accumulator");
