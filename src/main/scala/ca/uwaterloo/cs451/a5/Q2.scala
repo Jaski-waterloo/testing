@@ -10,6 +10,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.SparkConf
 import org.rogach.scallop._
 import scala.util.Try
+import org.apache.spark.sql.SparkSession
 
 class ConfQ2(args: Seq[String]) extends ScallopConf(args) {
   mainOptions = Seq(input, date)
@@ -48,6 +49,8 @@ object Q2 extends Tokenizer
 //      val date = sc.broadcast(args.date())
      val date = args.date();
      
+     if(args.text())
+     {
      val orders = sc.textFile(args.input() + "/orders.tbl")
   			.map(line => (line.split("\\|")(0).toInt, line.split("\\|")(6)))
   		
@@ -60,42 +63,28 @@ object Q2 extends Tokenizer
   			.take(20)
   			.map(p => (p._2._2.head, p._1.toLong))
         .foreach(println)
+       
+     }
+     
+     else
+     {
+       val sparkSession = SparkSession.builder.getOrCreate
+      val ordersDF = sparkSession.read.parquet(args.input() + "/orders")
+      val ordersRDD = ordersDF.rdd
+      val orders = ordersRDD
+        .map(line => (line.getInt(0), line.getString(6)))
+      
+      val lineitemDF = sparkSession.read.parquet(args.input() + "/lineitem")
+      val lineitemRDD = lineitemDF.rdd
+      val lineitem = lineitemRDD
+        .map(line => (line.getInt(0), line.getString(10)))
+        .filter(_._2.contains(date))
+        .cogroup(orders)
+        .filter(_._2._1.size != 0)
+        .sortByKey()
+        .take(20)
+        .map(p => (p._2._2.head, p._1.toLong))
+        .foreach(println)
+     }
    }
 }
-
-
-//     val ordersB = orders.map(line=> {
-//       val tokens = line.split('|')
-//       (tokens(0),tokens(6))
-//     })
-//      .collectAsMap()
-     
-//     val ordersBroadcast = sc.broadcast(ordersB)
-// //     val counts = 0
-//     var queryOutput = scala.collection.mutable.ListBuffer[(String, String)]()
-     
-     
-//      lineitem
-//      .filter(line => {
-//        line.split('|')(10) contains date
-//      })
-//      .map(line => {
-//        val tokens = line.split('|')
-//        (tokens(0),tokens(10))
-//      })
-//      .foreach(line => {
-//        if(count.localValue < 20){
-//          if(Try(ordersBroadcast.value(line._1).toBoolean).getOrElse(false)){
-//            var output : (String, String) = (ordersBroadcast.value(line._1), line._1)
-//            queryOutput += output
-//            count += 1;
-//            println("inside if")
-//          }
-// //          println("outside if")
-//        }
-//      })
-     
-//      println("ANSWER=");
-//      for(output <- queryOutput){
-//        println("(" + output._1 + "," + output._2 + ")")
-//      }
