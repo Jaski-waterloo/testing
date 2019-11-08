@@ -48,6 +48,7 @@ object Q1 extends Tokenizer {
      if(args.text())
      {
      val textFile = sc.textFile(args.input() + "/lineitem.tbl")
+       println("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
      print(textFile.getClass())
      }
      else
