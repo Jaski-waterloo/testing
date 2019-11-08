@@ -10,6 +10,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.SparkConf
 import org.rogach.scallop._
 import scala.util.Try
+import org.apache.spark.sql.SparkSession
 
 class ConfQ4(args: Seq[String]) extends ScallopConf(args) {
   mainOptions = Seq(input, date)
@@ -48,6 +49,8 @@ object Q4 extends Tokenizer
 //      val date = sc.broadcast(args.date())
     val date = args.date()
 
+     if(args.text())
+     {
     val customer = sc.textFile(args.input() + "/customer.tbl")
       .map(line => {
         val a = line.split("\\|")
@@ -92,6 +95,58 @@ object Q4 extends Tokenizer
       .foreach(p => {
         println((p._1, bnation.value(p._1), p._2))
       })
+     }
+     
+     else
+     {
+       
+       val sparkSession = SparkSession.builder.getOrCreate
+      val customerDF = sparkSession.read.parquet(args.input() + "/customer")
+      val customerRDD = customerDF.rdd
+      .map(line => {
+        (line.getInt(0), line.getInt(3))
+      })
+
+       val nationDF = sparkSession.read.parquet(args.input() + "/nation")
+      val nationRDD = nationDF.rdd
+      .map(line => {
+        (line.getInt(0), line.getString(1))
+      })
+    
+
+    val bcustomer = sc.broadcast(customerRDD.collectAsMap())
+    val bnation = sc.broadcast(nationRDD.collectAsMap())
+
+      val lineitemDF = sparkSession.read.parquet(args.input() + "/lineitem")
+      val lineitems = lineitemDF.rdd      
+       .filter(line => {
+        line.getString(10) contains date
+      })
+      .map(line => {
+        (line.getInt(0), 0)
+      })
+
+       val ordersDF = sparkSession.read.parquet(args.input() + "/orders")
+      val ordersRDD = ordersDF.rdd
+      .map(line => {
+        (line.getInt(0), line.getInt(1))
+      })
+      .cogroup(lineitems)
+      .filter(p => {
+        !p._2._2.isEmpty
+      })
+      .map(p => {
+        val nkey = bcustomer.value(p._2._1.iterator.next())
+        (nkey, 1) 
+      })
+      .reduceByKey(_ + _)
+      .sortByKey()
+      .collect()
+      .foreach(p => {
+        println((p._1, bnation.value(p._1), p._2))
+      })
+       
+     }
 
   }
 }
