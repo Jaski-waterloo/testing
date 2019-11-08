@@ -140,7 +140,7 @@ object Q7 extends Tokenizer
       val ordersDF = sparkSession.read.parquet(args.input() + "/orders")
       val ordersRDD = ordersDF.rdd    
     .map(line => {
-      (line.getInt(0), line.getInt(1), line.getString(4), line.getString(7))
+      (line.getInt(0), line.getInt(1), line.getString(4), line.getInt(7))
     })
     .filter( p => {
       val date1 = p._3.split('-').map(_.toInt) // orderdate < date
