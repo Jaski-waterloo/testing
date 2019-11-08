@@ -102,7 +102,7 @@ object Q3 extends Tokenizer
     val bPartMap = sc.broadcast(partRDD.collectAsMap())
     val bSuppMap = sc.broadcast(supplierRDD.collectAsMap())
 
-    val lineitemDF = sparkSession.read.parquet(args.input() + "/lineitem.tbl")
+    val lineitemDF = sparkSession.read.parquet(args.input() + "/lineitem")
     val lineitemRDD = lineitemDF.rdd
       .filter(line => {
         line.getString(10) contains date
