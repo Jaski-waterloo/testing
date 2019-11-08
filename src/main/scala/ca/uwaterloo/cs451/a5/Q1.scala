@@ -77,11 +77,10 @@ object Q1 extends Tokenizer {
       val textFile = lineitemDF.rdd
        
        textFile.map(line=> {
-       val tokens = line.split('|')
+       val tokens = line.getString(10)
 //        var arrayname = new Array[datatype](tokens.length)
        tokens
      })
-     .map(line => line(10))
      .foreach(line =>
               if(line contains date)
               {
