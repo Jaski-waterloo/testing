@@ -157,7 +157,7 @@ object Q5 extends Tokenizer
     
      
       val ordersDF = sparkSession.read.parquet(args.input() + "/orders")
-      val partRDD = partDF.rdd     
+      val ordersRDD = ordersDF.rdd     
        .map(line => {
        (line.getInt(0), line.getInt(1))
      })
