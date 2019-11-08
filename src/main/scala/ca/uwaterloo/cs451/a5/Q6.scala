@@ -10,6 +10,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.SparkConf
 import org.rogach.scallop._
 import scala.util.Try
+import org.apache.spark.sql.SparkSession
 
 class ConfQ6(args: Seq[String]) extends ScallopConf(args) {
   mainOptions = Seq(input, date)
@@ -48,6 +49,8 @@ object Q6 extends Tokenizer
 //      val date = sc.broadcast(args.date())
     val date = args.date()
     
+     if(args.text())
+     {
     val lineitems = sc.textFile(args.input() + "/lineitem.tbl")
     lineitems.
     filter(line => {
@@ -83,6 +86,47 @@ object Q6 extends Tokenizer
 //       count(*) as count_order
       println((l_returnflag, l_linestatus, sum_qty, sum_base_price, sum_disc_price, sum_charge, avg_qty, avg_price, avg_disc, count))
     })
+     }
+     
+     else
+     {
+       val sparkSession = SparkSession.builder.getOrCreate
+       val lineitemDF = sparkSession.read.parquet(args.input() + "/lineitem")
+      val lineitemRDD = lineitemDF.rdd
+    filter(line => {
+      line.split('|')(10) contains date
+    })
+    .map(line => {
+      val retFlag = line.getString(8)
+      val lineStatus = line.getString(9)
+      val l_quantity = line.getDouble(4)
+      val l_extendedprice = line.getDouble(5)
+      val l_discount = line.getDouble(6)
+      val l_tax = line.getDouble(7)
+      
+      ((retFlag, lineStatus), (l_quantity, l_extendedprice, l_extendedprice*(1-l_discount), l_extendedprice*(1-l_discount)*(1+l_tax), l_discount, 1))
+      
+    })
+    .reduceByKey((a,b) => {
+      (a._1 + b._1, a._2 + b._2, a._3 + b._3, a._4 + b._4, a._5 + b._5, a._6 + b._6)
+    })
+    .collect()
+    .foreach(a => {
+      val count = a._2._6
+      val l_returnflag = a._1._1
+      val l_linestatus = a._1._2
+      val sum_qty = a._2._1
+      val sum_base_price = a._2._2
+      val sum_disc_price = a._2._3
+      val sum_charge = a._2._4
+      val avg_qty = sum_qty / count
+      val avg_price = sum_base_price / count
+      val avg_disc = a._2._5 / count
+//       count(*) as count_order
+      println((l_returnflag, l_linestatus, sum_qty, sum_base_price, sum_disc_price, sum_charge, avg_qty, avg_price, avg_disc, count))
+    })
+       
+     }
    }
 }
       
