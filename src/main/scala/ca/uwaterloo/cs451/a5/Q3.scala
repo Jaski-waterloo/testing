@@ -49,7 +49,7 @@ object Q3 extends Tokenizer
 //      val date = sc.broadcast(args.date())
     val date = args.date()
   
-     if(args.date())
+     if(args.text())
      {
     val part = sc.textFile(args.input() + "/part.tbl")
       .map(line => {
@@ -102,7 +102,7 @@ object Q3 extends Tokenizer
     val bPartMap = sc.broadcast(partRDD.collectAsMap())
     val bSuppMap = sc.broadcast(supplierRDD.collectAsMap())
 
-    val lineitemDF = sparkSession(args.input() + "/lineitem.tbl")
+    val lineitemDF = sparkSession.read.parquet(args.input() + "/lineitem.tbl")
     val lineitemsRDD = lineitemsDF.rdd
       .filter(line => {
         line.getString(10) contains date
