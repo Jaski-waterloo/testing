@@ -93,8 +93,8 @@ object Q6 extends Tokenizer
        val sparkSession = SparkSession.builder.getOrCreate
        val lineitemDF = sparkSession.read.parquet(args.input() + "/lineitem")
       val lineitemRDD = lineitemDF.rdd
-    filter(line => {
-      line.split('|')(10) contains date
+    .filter(line => {
+      line.getString(10) contains date
     })
     .map(line => {
       val retFlag = line.getString(8)
