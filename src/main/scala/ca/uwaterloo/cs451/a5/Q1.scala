@@ -10,7 +10,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.SparkConf
 import org.rogach.scallop._
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.rdd
+import org.apache.spark.rdd.RDD
 
 class Conf(args: Seq[String]) extends ScallopConf(args) {
   mainOptions = Seq(input, date)
