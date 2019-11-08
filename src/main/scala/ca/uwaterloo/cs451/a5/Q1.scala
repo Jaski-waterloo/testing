@@ -44,18 +44,18 @@ object Q1 extends Tokenizer {
     val conf = new SparkConf().setAppName("Q1")
     val sc = new SparkContext(conf)
      
-    var textFile: RDD[org.apache.spark.rdd.MapPartitionsRDD] = sc.emptyRDD[org.apache.spark.rdd.MapPartitionsRDD]
+    var textFile: RDD[String] = sc.emptyRDD[String]
      if(args.text())
      {
-     val textFile = sc.textFile(args.input() + "/lineitem.tbl")
-       println("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
-     print(textFile.getClass())
+     val File = sc.textFile(args.input() + "/lineitem.tbl")
+       textFile ++ File
      }
      else
      {
         val sparkSession = SparkSession.builder.getOrCreate
       val lineitemDF = sparkSession.read.parquet(args.input() + "/lineitem")
-      textFile = lineitemDF.rdd
+      val File = lineitemDF.rdd
+       textFile ++ File
      }
      
      val count = sc.accumulator(0, "accumulator");
