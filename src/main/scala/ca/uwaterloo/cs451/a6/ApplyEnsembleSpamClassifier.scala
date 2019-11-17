@@ -59,18 +59,18 @@ object ApplyEnsembleSpamClassifier {
 		val bBritney = sc.broadcast(Britney.collectAsMap())
 		
 
-		def spamminess(features: Array[Int], model: scala.collection.Map[Int,Double]) : Double = {
+		def spamminess(features: Array[Int], weights: scala.collection.Map[Int, Double]) : Double = {
 			var score = 0d
-			features.foreach(f => if (model.contains(f)) score += model(f))
+			features.foreach(f => if (weights.contains(f)) score += weights(f))
 			score
 		}
 
 		val tested = textFile.map(line => {
 			val tokens = line.split(" ")
 			val features = tokens.drop(2).map(_.toInt)
-			val Xscore = spamminess(features, bX.value)
-			val Yscore = spamminess(features, bY.value)
-			val Britneyscore = spamminess(features, bBritney.value)
+			val Xscore = spamminess(features, wX.value)
+			val Yscore = spamminess(features, wY.value)
+			val Britneyscore = spamminess(features, wBritney.value)
 			var score = 0d
 			
 			if(args.method() == "average")
