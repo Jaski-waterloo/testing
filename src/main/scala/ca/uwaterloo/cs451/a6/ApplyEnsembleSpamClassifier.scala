@@ -24,7 +24,7 @@ object ApplyEnsembleSpamClassifier {
 
 		log.info("Input: " + args.input())
 		log.info("Output: " + args.output())
-		log.info("Model: " + args.model())
+		log.info("Method: " + args.method())
 
 		val conf = new SparkConf().setAppName("Apply Ensemble Spam Classifier")
 		val sc = new SparkContext(conf)
@@ -59,7 +59,7 @@ object ApplyEnsembleSpamClassifier {
 
 		def spamminess(features: Array[Int], model: scala.collection.mutable.Map[Int,Double]) : Double = {
 			var score = 0d
-			features.foreach(f => if (model.value.contains(f)) score += model.value(f))
+			features.foreach(f => if (model.contains(f)) score += model(f))
 			score
 		}
 
