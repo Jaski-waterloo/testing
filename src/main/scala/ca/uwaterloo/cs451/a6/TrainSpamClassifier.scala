@@ -55,8 +55,8 @@ object TrainSpamClassifier {
         val trained = textFile.map(line => {
                 val tokens = line.split(" ")
                 val docid = tokens(0)
-                var isSpam = 0 d
-                if (tokens(1) == "spam") isSpam = 1 d
+                var isSpam = 0d
+                if(tokens(1) == "spam") isSpam = 1d
                 val features = tokens.drop(2).map(_.toInt)
                     (0, (docid, isSpam, features))
             })
