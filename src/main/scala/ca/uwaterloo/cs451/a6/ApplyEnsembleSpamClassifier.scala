@@ -65,21 +65,20 @@ object ApplyEnsembleSpamClassifier {
 			score
 		}
 
+		method = args.method()
 		val tested = textFile.map(line => {
 			val tokens = line.split(" ")
 			val features = tokens.drop(2).map(_.toInt)
 			val Xscore = spamminess(features, bX.value)
 			val Yscore = spamminess(features, bY.value)
 			val Britneyscore = spamminess(features, bBritney.value)
-			var score = 0d
+			var score = -1d
 			
-			if (args.method() == "average") {
+			if (method == "average") {
 				score = (Xscore + Yscore + Britneyscore) / 3
 			} else {
-				var Xvote = if (Xscore > 0) 1d else -1d
-				var Yvote = if (Yscore > 0) 1d else -1d
-				var Britneyvote = if (Britneyscore > 0) 1d else -1d
-				score = Xvote + Yvote + Britneyvote
+				if(Xscore > 0d && (Yscore > 0d || Britneyscore > 0d)) score = 1d
+				if(Yscore > 0d && Britneyscore > 0d) score = 1d
 			}
 			var isSpam = "ham"
 			if (score > 0) isSpam = "spam"
