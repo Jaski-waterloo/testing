@@ -10,65 +10,66 @@ import org.rogach.scallop._
 import scala.math.exp
 
 class ConfTrain(args: Seq[String]) extends ScallopConf(args) {
-  mainOptions = Seq(input, model)
-  val input = opt[String](descr = "input path", required = true)
-  val model = opt[String](descr = "model path", required = true)
-  verify()
+    mainOptions = Seq(input, model)
+    val input = opt[String](descr = "input path", required = true)
+    val model = opt[String](descr = "model path", required = true)
+    verify()
 }
 
 object TrainSpamClassifier {
-	val log = Logger.getLogger(getClass().getName())
+    val log = Logger.getLogger(getClass().getName())
 
-	def main(argv: Array[String]) {
-		val args = new ConfTrain(argv)
+    def main(argv: Array[String]) {
+        val args = new ConfTrain(argv)
 
-		log.info("Input: " + args.input())
-		log.info("Model: " + args.model())
+        log.info("Input: " + args.input())
+        log.info("Model: " + args.model())
 
-		val conf = new SparkConf().setAppName("Train Spam Classifier")
-		val sc = new SparkContext(conf)
+        val conf = new SparkConf().setAppName("Train Spam Classifier")
+        val sc = new SparkContext(conf)
 
-		val outputDir = new Path(args.model())
-		FileSystem.get(sc.hadoopConfiguration).delete(outputDir, true)
+        val outputDir = new Path(args.model())
+        FileSystem.get(sc.hadoopConfiguration).delete(outputDir, true)
 
-		var textFile = sc.textFile(args.input())
+        var textFile = sc.textFile(args.input())
 
-		val w = scala.collection.mutable.Map[Int, Double]()
+        val w = scala.collection.mutable.Map[Int, Double]()
 
-		def spamminess(features: Array[Int]) : Double = {
-			var score = 0d
-			features.foreach(f => if (w.contains(f)) score += w(f))
-			score
-		}
+        def spamminess(features: Array[Int]): Double = {
+            var score = 0 d
+            features.foreach(f =>
+                if (w.contains(f)) score += w(f))
+            score
+        }
 
-		val delta = 0.002
+        val delta = 0.002
 
-		val trained = textFile.map(line =>{
-			val tokens = line.split(" ")
-			val docid = tokens(0)
-      var isSpam = 0d
-      if(tokens(1) == "spam") isSpam = 1d
-			val features = tokens.drop(2).map(_.toInt)
-			(0, (docid, isSpam, features))
-		})
-		.groupByKey(1)
-		.flatMap(p => {
-			p._2.foreach(item => {
-				val features = item._3
-				val isSpam = item._2
-				val score = spamminess(features)
-				val prob = 1.0 / (1 + exp(-score))
-				features.foreach(f => {
-					if (w.contains(f)) {
-						w(f) += (isSpam - prob) * delta
-					} else {
-						w(f) = (isSpam - prob) * delta
-					}
-				})
-			})
-			w
-		})
+        val trained = textFile.map(line => {
+                val tokens = line.split(" ")
+                val docid = tokens(0)
+                var isSpam = 0 d
+                if (tokens(1) == "spam") isSpam = 1 d
+                val features = tokens.drop(2).map(_.toInt)
+                    (0, (docid, isSpam, features))
+            })
+            .groupByKey(1)
+            .flatMap(p => {
+                p._2.foreach(item => {
+                    val features = item._3
+                    val isSpam = item._2
+                    val score = spamminess(features)
+                    val prob = 1.0 / (1 + exp(-score))
+                    features.foreach(f => {
+                        if (w.contains(f)) {
+                            w(f) += (isSpam - prob) * delta
+                        } else {
+                            w(f) = (isSpam - prob) * delta
+                        }
+                    })
+                })
+                w
+            })
 
-		trained.saveAsTextFile(args.model())
-	}
+        trained.saveAsTextFile(args.model())
+    }
 }
