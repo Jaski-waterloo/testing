@@ -73,7 +73,7 @@ object ApplyEnsembleSpamClassifier {
 			val Britneyscore = spamminess(features, bBritney.value)
 			var score = 0d
 			
-			if (method == "average") {
+			if (args.method() == "average") {
 				score = (Xscore + Yscore + Britneyscore) / 3
 			} else {
 				var Xvote = if (Xscore > 0) 1d else -1d
