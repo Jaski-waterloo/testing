@@ -13,6 +13,7 @@ class ConfTrain(args: Seq[String]) extends ScallopConf(args) {
     mainOptions = Seq(input, model)
     val input = opt[String](descr = "input path", required = true)
     val model = opt[String](descr = "model path", required = true)
+    val shuffle = opt[Boolean](descr = "shuffle", required = false)
     verify()
 }
 
@@ -43,6 +44,13 @@ object TrainSpamClassifier {
         }
 
         val delta = 0.002
+        
+        if (args.shuffle()) {
+			textFile = textFile
+				.map(line => (scala.util.Random.nextInt(), line))
+				.sortByKey()
+				.map(p => p._2)
+        }
 
         val trained = textFile.map(line => {
                 val tokens = line.split(" ")
