@@ -13,6 +13,7 @@ class Conf3(args: Seq[String]) extends ScallopConf(args) {
   val input = opt[String](descr = "input path", required = true)
   val output = opt[String](descr = "output path", required = true)
   val method = opt[String](descr = "method", required = true)
+  val model = opt[String](descr = "model", required = true)
   verify()
 }
 
@@ -25,6 +26,7 @@ object ApplyEnsembleSpamClassifier {
 		log.info("Input: " + args.input())
 		log.info("Output: " + args.output())
 		log.info("Method: " + args.method())
+		log.info("Model: " + args.model())
 
 		val conf = new SparkConf().setAppName("Apply Ensemble Spam Classifier")
 		val sc = new SparkContext(conf)
@@ -34,19 +36,19 @@ object ApplyEnsembleSpamClassifier {
 
 		val textFile = sc.textFile(args.input())
 		
-		val X = sc.textFile("cs451-bigdatateach-a6-model-fusion/part-00000")
+		val X = sc.textFile(args.model() + "/part-00000")
 		.map(line => {
 			val tokens = line.substring(1, line.length()-1).split(',')
 			(tokens(0).toInt, tokens(1).toDouble)
 		})
 		
-		val Y = sc.textFile("cs451-bigdatateach-a6-model-fusion/part-00001")
+		val Y = sc.textFile(args.model() + "/part-00001")
 		.map(line => {
 			val tokens = line.substring(1, line.length()-1).split(',')
 			(tokens(0).toInt, tokens(1).toDouble)
 		})
 		
-		val Britney = sc.textFile("cs451-bigdatateach-a6-model-fusion/part-00002")
+		val Britney = sc.textFile(args.model() + "/part-00002")
 		.map(line => {
 			val tokens = line.substring(1, line.length()-1).split(',')
 			(tokens(0).toInt, tokens(1).toDouble)
