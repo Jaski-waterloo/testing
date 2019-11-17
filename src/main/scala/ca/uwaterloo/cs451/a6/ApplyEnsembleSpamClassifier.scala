@@ -9,7 +9,7 @@ import org.apache.spark.SparkConf
 import org.rogach.scallop._
 
 class Conf3(args: Seq[String]) extends ScallopConf(args) {
-  mainOptions = Seq(input, output, model)
+  mainOptions = Seq(input, output, method)
   val input = opt[String](descr = "input path", required = true)
   val output = opt[String](descr = "output path", required = true)
   val method = opt[String](descr = "method", required = true)
@@ -57,7 +57,7 @@ object ApplyEnsembleSpamClassifier {
 		val bBritney = sc.broadcast(Britney.collectAsMap())
 		
 
-		def spamminess(features: Array[Int], model: scala.collection.mutable.Map[Int,Double]) : Double = {
+		def spamminess(features: Array[Int], model: scala.collection.Map[Int,Double]) : Double = {
 			var score = 0d
 			features.foreach(f => if (model.contains(f)) score += model(f))
 			score
