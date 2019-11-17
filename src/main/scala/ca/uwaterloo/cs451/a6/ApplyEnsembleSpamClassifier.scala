@@ -1,62 +1,92 @@
-// package ca.uwaterloo.cs451.a6
+package ca.uwaterloo.cs451.a6
 
-// import io.bespin.scala.util.Tokenizer
+import io.bespin.scala.util.Tokenizer
 
-// import org.apache.log4j._
-// import org.apache.hadoop.fs._
-// import org.apache.spark.SparkContext
-// import org.apache.spark.SparkConf
-// import org.rogach.scallop._
+import org.apache.log4j._
+import org.apache.hadoop.fs._
+import org.apache.spark.SparkContext
+import org.apache.spark.SparkConf
+import org.rogach.scallop._
 
-// class Conf3(args: Seq[String]) extends ScallopConf(args) {
-//   mainOptions = Seq(input, output, model)
-//   val input = opt[String](descr = "input path", required = true)
-//   val output = opt[String](descr = "output path", required = true)
-//   val method = opt[String](descr = "method", required = true)
-//   verify()
-// }
+class Conf3(args: Seq[String]) extends ScallopConf(args) {
+  mainOptions = Seq(input, output, model)
+  val input = opt[String](descr = "input path", required = true)
+  val output = opt[String](descr = "output path", required = true)
+  val method = opt[String](descr = "method", required = true)
+  verify()
+}
 
-// object ApplyEnsembleSpamClassifier {
-// 	val log = Logger.getLogger(getClass().getName())
+object ApplyEnsembleSpamClassifier {
+	val log = Logger.getLogger(getClass().getName())
 
-// 	def main(argv: Array[String]) {
-// 		val args = new Conf3(argv)
+	def main(argv: Array[String]) {
+		val args = new Conf3(argv)
 
-// 		log.info("Input: " + args.input())
-// 		log.info("Output: " + args.output())
-// 		log.info("Model: " + args.model())
+		log.info("Input: " + args.input())
+		log.info("Output: " + args.output())
+		log.info("Model: " + args.model())
 
-// 		val conf = new SparkConf().setAppName("Apply Ensemble Spam Classifier")
-// 		val sc = new SparkContext(conf)
+		val conf = new SparkConf().setAppName("Apply Ensemble Spam Classifier")
+		val sc = new SparkContext(conf)
 
-// 		val outputDir = new Path(args.output())
-// 		FileSystem.get(sc.hadoopConfiguration).delete(outputDir, true)
+		val outputDir = new Path(args.output())
+		FileSystem.get(sc.hadoopConfiguration).delete(outputDir, true)
 
-// 		val textFile = sc.textFile(args.input())
+		val textFile = sc.textFile(args.input())
 		
-// 		val model = sc.textFile(args.model() + "/part-00000")
-// 		.map(line => {
-// 			val tokens = line.substring(1, line.length()-1).split(',')
-// 			(tokens(0).toInt, tokens(1).toDouble)
-// 		})
+		val X = sc.textFile(cs451-bigdatateach-a6-model-fusion/part-00000)
+		.map(line => {
+			val tokens = line.substring(1, line.length()-1).split(',')
+			(tokens(0).toInt, tokens(1).toDouble)
+		})
+		
+		val Y = sc.textFile(cs451-bigdatateach-a6-model-fusion/part-00001)
+		.map(line => {
+			val tokens = line.substring(1, line.length()-1).split(',')
+			(tokens(0).toInt, tokens(1).toDouble)
+		})
+		
+		val Britney = sc.textFile(cs451-bigdatateach-a6-model-fusion/part-00002)
+		.map(line => {
+			val tokens = line.substring(1, line.length()-1).split(',')
+			(tokens(0).toInt, tokens(1).toDouble)
+		})
 
-// 		val bModel = sc.broadcast(model.collectAsMap())
+		val bX = sc.broadcast(X.collectAsMap())
+		val bY = sc.broadcast(Y.collectAsMap())
+		val bBritney = sc.broadcast(Britney.collectAsMap())
+		
 
-// 		def spamminess(features: Array[Int]) : Double = {
-// 			var score = 0d
-// 			features.foreach(f => if (bModel.value.contains(f)) score += bModel.value(f))
-// 			score
-// 		}
+		def spamminess(features: Array[Int], model: scala.collection.mutable.Map[Int,Double]) : Double = {
+			var score = 0d
+			features.foreach(f => if (model.value.contains(f)) score += model.value(f))
+			score
+		}
 
-// 		val tested = textFile.map(line => {
-// 			val tokens = line.split(" ")
-// 			val features = tokens.drop(2).map(_.toInt)
-// 			val score = spamminess(features)
-// 			var isSpam = "ham"
-// 			if (score > 0) isSpam = "spam"
-// 			(tokens(0), tokens(1), score, isSpam)
-// 		})
+		val tested = textFile.map(line => {
+			val tokens = line.split(" ")
+			val features = tokens.drop(2).map(_.toInt)
+			val Xscore = spamminess(features, bX.value)
+			val Yscore = spamminess(features, bY.value)
+			val Britneyscore = spamminess(features, bBritney.value)
+			var score = 0d
+			
+			if(args.method() == "average")
+			{
+				score = Xscore + Yscore + Britneyscore
+				score = score / 3
+			}
+			else
+			{
+				score = -1d
+				if(Xscore > 0d && (Yscore > 0d || Britneyscore > 0d)) score = 1d
+				if(Yscore > 0d && Britneyscore > 0d) score = 1d
+			}
+			var isSpam = "ham"
+			if (score > 0) isSpam = "spam"
+			(tokens(0), tokens(1), score, isSpam)
+		})
 
-// 		tested.saveAsTextFile(args.output())
-// 	}
-// }
+		tested.saveAsTextFile(args.output())
+	}
+}
