@@ -65,7 +65,7 @@ object ApplyEnsembleSpamClassifier {
 			score
 		}
 
-		method = args.method()
+		val method = args.method()
 		val tested = textFile.map(line => {
 			val tokens = line.split(" ")
 			val features = tokens.drop(2).map(_.toInt)
