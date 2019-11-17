@@ -37,7 +37,7 @@ object TrainSpamClassifier {
         val w = scala.collection.mutable.Map[Int, Double]()
 
         def spamminess(features: Array[Int]): Double = {
-            var score = 0 d
+            var score = 0d
             features.foreach(f =>
                 if (w.contains(f)) score += w(f))
             score
