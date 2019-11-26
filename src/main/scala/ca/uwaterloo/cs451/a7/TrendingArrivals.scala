@@ -171,3 +171,4 @@ object TrendingArrivals {
       throw new IllegalArgumentException(s"$directoryName is not a valid directory containing part files!")
     }
   }
+}
