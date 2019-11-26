@@ -51,7 +51,7 @@ object RegionEventCount {
     val goldman1 = List(-74.0141012, -74.013777, -74.0141027, -74.0144185)
     val citigroup2 = List(40.7217236, 40.721493, 40.720053, 40.720267)
    
-    val goldman2 = List(40.7152191), 40.7152275), 40.7138745), 40.7140753)
+    val goldman2 = List(40.7152191, 40.7152275, 40.7138745, 40.7140753)
     val citigroup1 = List(-74.011869, -74.009867, -74.010140, -74.012083)
 
     val wc = stream.map(_.split(","))
