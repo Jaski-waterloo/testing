@@ -1,19 +1,3 @@
-/**
-  * Bespin: reference implementations of "big data" algorithms
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  * http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  */
-
 package ca.uwaterloo.cs451.a7
 
 import java.io.File
@@ -26,11 +10,12 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.streaming.{ManualClockWrapper, Minutes, StreamingContext}
 import org.apache.spark.streaming.scheduler.{StreamingListener, StreamingListenerBatchCompleted}
 import org.apache.spark.util.LongAccumulator
+import scala.collection.mutable.ListBuffer
 import org.rogach.scallop._
 
 import scala.collection.mutable
 
-class EventCountConf2(args: Seq[String]) extends ScallopConf(args) {
+class RegionEventCountConf(args: Seq[String]) extends ScallopConf(args) {
   mainOptions = Seq(input, checkpoint, output)
   val input = opt[String](descr = "input path", required = true)
   val checkpoint = opt[String](descr = "checkpoint path", required = true)
@@ -42,7 +27,7 @@ object RegionEventCount {
   val log = Logger.getLogger(getClass().getName())
 
   def main(argv: Array[String]): Unit = {
-    val args = new EventCountConf(argv)
+    val args = new RegionEventCountConf(argv)
 
     log.info("Input: " + args.input())
 
@@ -62,9 +47,25 @@ object RegionEventCount {
     val rdds = buildMockStream(ssc.sparkContext, args.input())
     val inputData: mutable.Queue[RDD[String]] = mutable.Queue()
     val stream = ssc.queueStream(inputData)
+    
+    val goldman1 = List(-74.0141012, -74.013777, -74.0141027, -74.0144185)
+    val citigroup2 = List(40.7217236, 40.721493, 40.720053, 40.720267)
+   
+    val goldman2 = List(40.7152191), 40.7152275), 40.7138745), 40.7140753)
+    val citigroup1 = List(-74.011869, -74.009867, -74.010140, -74.012083)
 
     val wc = stream.map(_.split(","))
-      .map(tuple => ("all", 1))
+      .map(line => if (line(0)== "green") (List(line(8).toDouble, line(9).toDouble),1) else (List(line(10).toDouble, line(11).toDouble),1))
+      .filter( line => ((line._1(0).toDouble in citigroup1)     //citigroup
+                       && (line._1(1).toDouble in citigroup2)) ||
+                       ((line._1(0).toDouble in goldman1)
+                       && (line._1(1).toDouble in goldman2)) //goldman
+      .map(line => {
+        if ((line._1(0).toDouble > -74.012083 && line._1(0).toDouble < -74.009867)      //citigroup`
+            && (line._1(1).toDouble > 40.720053 && line._1(1).toDouble < 40.7217236 ))
+           ("citigroup",1)
+        else ("goldman",1)
+        })
       .reduceByKeyAndWindow(
         (x: Int, y: Int) => x + y, (x: Int, y: Int) => x - y, Minutes(60), Minutes(60))
       .persist()
