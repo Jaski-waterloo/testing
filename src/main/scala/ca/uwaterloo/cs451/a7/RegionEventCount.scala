@@ -48,21 +48,18 @@ object RegionEventCount {
     val inputData: mutable.Queue[RDD[String]] = mutable.Queue()
     val stream = ssc.queueStream(inputData)
     
-    val goldman1 = List(-74.0141012, -74.013777, -74.0141027, -74.0144185)
-    val citigroup2 = List(40.7217236, 40.721493, 40.720053, 40.720267)
-   
-    val goldman2 = List(40.7152191, 40.7152275, 40.7138745, 40.7140753)
-    val citigroup1 = List(-74.011869, -74.009867, -74.010140, -74.012083)
+    val goldman = List((-74.0141012, 40.7152191), (-74.013777, 40.7152275), (-74.0141027, 40.7138745), (-74.0144185, 40.7140753))
+    val citigroup = List((-74.011869, 40.7217236), (-74.009867, 40.721493), (-74.010140,40.720053), (-74.012083, 40.720267))
 
     val wc = stream.map(_.split(","))
       .map(line => if (line(0)== "green") (List(line(8).toDouble, line(9).toDouble),1) else (List(line(10).toDouble, line(11).toDouble),1))
-      .filter( line => ((citigroup1.contains(line._1(0).toDouble))     //citigroup
-                       && (citigroup2.contains(line._1(1).toDouble))) ||
-                       ((goldman1.contains(line._1(0).toDouble))
-                       && (goldman2.contains(line._1(1).toDouble)))) //goldman
+      .filter( line => ((line._1(0).toDouble > -74.012083 && line._1(0).toDouble < -74.009867)
+                       && (line._1(1).toDouble > 40.720053 && line._1(1).toDouble < 40.7217236 )) ||
+                       ((line._1(0).toDouble > -74.0144185 && line._1(0).toDouble < -74.013777)
+                       && (line._1(1).toDouble > 40.7138745 && line._1(1).toDouble < 40.7152275 )))
       .map(line => {
-        if ((citigroup1.contains(line._1(0).toDouble))     //citigroup`
-            && (citigroup2.contains(line._1(1).toDouble)))
+        if ((line._1(0).toDouble > -74.012083 && line._1(0).toDouble < -74.009867)
+            && (line._1(1).toDouble > 40.720053 && line._1(1).toDouble < 40.7217236 ))
            ("citigroup",1)
         else ("goldman",1)
         })
