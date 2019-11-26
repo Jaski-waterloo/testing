@@ -56,13 +56,13 @@ object RegionEventCount {
 
     val wc = stream.map(_.split(","))
       .map(line => if (line(0)== "green") (List(line(8).toDouble, line(9).toDouble),1) else (List(line(10).toDouble, line(11).toDouble),1))
-      .filter( line => ((line._1(0).toDouble in citigroup1)     //citigroup
-                       && (line._1(1).toDouble in citigroup2)) ||
-                       ((line._1(0).toDouble in goldman1)
-                       && (line._1(1).toDouble in goldman2))) //goldman
+      .filter( line => ((citigroup1.contains line._1(0).toDouble)     //citigroup
+                       && (citigroup2.contains line._1(1).toDouble)) ||
+                       ((goldman1.contains line._1(0).toDouble)
+                       && (goldman2.contains line._1(1).toDouble))) //goldman
       .map(line => {
-        if ((line._1(0).toDouble > -74.012083 && line._1(0).toDouble < -74.009867)      //citigroup`
-            && (line._1(1).toDouble > 40.720053 && line._1(1).toDouble < 40.7217236 ))
+        if ((citigroup1.contains line._1(0).toDouble)      //citigroup`
+            && (citigroup2.contains line._1(1).toDouble))
            ("citigroup",1)
         else ("goldman",1)
         })
