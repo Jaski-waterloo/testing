@@ -39,7 +39,7 @@ object TrendingArrivals {
       }
       var current = value.getOrElse(0).toInt
       var MybatchTime = batchTime.milliseconds
-      if ((current >= 10) && (current >= 2*previous)){
+      if ((current >= 10) && (current >= 2*prev)){
         if (key == "goldman")
           println(s"Number of arrivals to Goldman Sachs has doubled from $prev to $current at $MybatchTime!")
         else
@@ -122,7 +122,7 @@ object TrendingArrivals {
     val snapRdd = wc.stateSnapshots()
 
     snapRdd.foreachRDD( (rdd, time) => {
-                             var updatedRDD = rdd.map(line => (line._1,(line._2.current,line._2.time_stamp,line._2.previous)))
+                             var updatedRDD = rdd.map(line => (line._1,(line._2.current,line._2.time_stamp,line._2.prev)))
                              updatedRDD.saveAsTextFile(output_d+"/part-"+"%08d".format(time.milliseconds))
                        })
     
