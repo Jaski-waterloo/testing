@@ -26,26 +26,26 @@ class ArrivalConf(args: Seq[String]) extends ScallopConf(args) {
   verify()
 }
 
-case class temptupleClass(current: Int, time_stamp: String, previous: Int) extends Serializable
+case class temptupleClass(current: Int, time_stamp: String, prev: Int) extends Serializable
 
 object TrendingArrivals {
   val log = Logger.getLogger(getClass().getName())
   
   
   def stateSpecFunc(batchTime: Time, key: String, value: Option[Int], state: State[temptupleClass]) : Option[(String, temptupleClass)] = {
-      var previous = 0
+      var prev = 0
       if (state.exists()) {
-        previous = state.get().current
+        prev = state.get().current
       }
       var current = value.getOrElse(0).toInt
-      var batchTime_ = batchTime.milliseconds
+      var MybatchTime = batchTime.milliseconds
       if ((current >= 10) && (current >= 2*previous)){
         if (key == "goldman")
-          println(s"Number of arrivals to Goldman Sachs has doubled from $previous to $current at $batchTime_!")
+          println(s"Number of arrivals to Goldman Sachs has doubled from $prev to $current at $MybatchTime!")
         else
-          println(s"Number of arrivals to Citigroup has doubled from $previous to $current at $batchTime_!")
+          println(s"Number of arrivals to Citigroup has doubled from $prev to $current at $MybatchTime!")
       }
-      var temp = temptupleClass(current = current, time_stamp = "%08d".format(batchTime_), previous = previous)
+      var temp = temptupleClass(current = current, time_stamp = "%08d".format(MybatchTime), prev = prev)
       state.update(temp)
       Some((key,temp))
   }
