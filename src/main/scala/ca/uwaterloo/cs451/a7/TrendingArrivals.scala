@@ -118,15 +118,15 @@ object TrendingArrivals {
 
     
     //wc.saveAsTextFiles(args.output())
-    var output_d = args.output()
-    val snapRdd = wc.stateSnapshots()
+    var Myoutput = args.output()
+    val MyRdd = wc.stateSnapshots()
 
-    snapRdd.foreachRDD( (rdd, time) => {
-                             var updatedRDD = rdd.map(line => (line._1,(line._2.current,line._2.time_stamp,line._2.prev)))
-                             updatedRDD.saveAsTextFile(output_d+"/part-"+"%08d".format(time.milliseconds))
+    MyRdd.foreachRDD( (rdd, time) => {
+                             var updatedRdd = rdd.map(line => (line._1,(line._2.current,line._2.time_stamp,line._2.prev)))
+                             updatedRDD.saveAsTextFile(Myoutput+"/part-"+"%08d".format(time.milliseconds))
                        })
     
-    snapRdd.foreachRDD(rdd => {
+    MyRdd.foreachRDD(rdd => {
       numCompletedRDDs.add(1L)
     })
     ssc.checkpoint(args.checkpoint())
