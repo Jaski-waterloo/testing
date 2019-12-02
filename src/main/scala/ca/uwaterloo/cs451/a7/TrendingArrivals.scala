@@ -123,7 +123,7 @@ object TrendingArrivals {
 
     MyRdd.foreachRDD( (rdd, time) => {
                              var updatedRdd = rdd.map(line => (line._1,(line._2.current,line._2.time_stamp,line._2.prev)))
-                             updatedRDD.saveAsTextFile(Myoutput+"/part-"+"%08d".format(time.milliseconds))
+                             updatedRdd.saveAsTextFile(Myoutput+"/part-"+"%08d".format(time.milliseconds))
                        })
     
     MyRdd.foreachRDD(rdd => {
